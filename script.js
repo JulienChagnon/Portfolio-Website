@@ -18,7 +18,7 @@ window.addEventListener('load', () => {
   const header  = document.querySelector('header.header-flex');
   const offsetTop = header.offsetHeight + 10;
   const unlockThreshold = 260;
-  let currentY = offsetTop;    // ← start exactly under the header
+  let currentY = offsetTop;   
 
   function animate() {
     const scrollY = window.scrollY;
@@ -34,40 +34,18 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('openVideoBtn').addEventListener('click', function() {
-    window.open('APSC101Demo.mp4', '_blank');
+    window.open('Media/APSC101Demo.mp4', '_blank');
 });
 
 document.getElementById('openVideoBtn2').addEventListener('click', function() {
-    window.open('APSC103Demo.mp4', '_blank');
+    window.open('Media/APSC103Demo.mp4', '_blank');
 });
 
 document.getElementById('openVideoBtn3').addEventListener('click', function() {
-    window.open('ELEC292Demo.mp4', '_blank');
+    window.open('Media/ELEC292Demo.mp4', '_blank');
 });
 
-const openBtn  = document.getElementById('openVideoBtn');
-const closeBtn = document.getElementById('closeVideoBtn');
-const modal    = document.getElementById('videoModal');
-const video    = document.getElementById('myVideo');
 
-openBtn.addEventListener('click', () => {
-  modal.style.display = 'flex';
-  video.currentTime = 0;
-  video.play();
-});
-
-closeBtn.addEventListener('click', () => {
-  video.pause();
-  modal.style.display = 'none';
-});
-
-// Optional: click outside video to close
-modal.addEventListener('click', e => {
-  if (e.target === modal) {
-    video.pause();
-    modal.style.display = 'none';
-  }
-});
 
 
 
