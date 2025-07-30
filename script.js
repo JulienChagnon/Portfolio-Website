@@ -1,5 +1,5 @@
 
-// 1) Toggle “See More” / “See Less” on the extra jobs
+// Toggle “See More” / “See Less” on the extra jobs
 const btn = document.getElementById('toggleJobs');
 const more = document.querySelector('.more-jobs');
 btn.addEventListener('click', () => {
@@ -9,10 +9,10 @@ btn.addEventListener('click', () => {
     : 'See More';
 });
 
-// 2) Set the footer year dynamically
+// Set the footer year dynamically
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// 3) Sidebar follow‑scroll animation
+// Sidebar follow‑scroll animation
 window.addEventListener('load', () => {
   const sidebar = document.getElementById('sidebar');
   const header  = document.querySelector('header.header-flex');

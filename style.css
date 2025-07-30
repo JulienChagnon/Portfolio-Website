@@ -99,7 +99,7 @@ nav a:hover {text-decoration:underline;}
   margin-bottom: 0.5rem;
 }
 
-/* Section images (non-floated) */
+/* Section images */
 .section-img {
   max-width: 300px;
   height: auto;
@@ -113,7 +113,7 @@ nav a:hover {text-decoration:underline;}
   margin-bottom: 0.2rem;
 }
 
-/* Hide sidebar on medium screens */
+/* Hide sidebar on smaller windows */
 @media (max-width: 1350px) {
   #sidebar {
     display: none;
