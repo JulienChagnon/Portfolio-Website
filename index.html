@@ -212,7 +212,7 @@
         Explore my projects, showcasing my skills in software development and hardware design. Be sure to check out the detailed reports and videos for each project!
       </p>
 
-      <!-- Project: Running and Jumping Detection -->
+      <!-- Running and Jumping Detection -->
       <div class="project-box">
         <div class="project-header">
           <h3>Running and Jumping Detection using Machine Learning - Python</h3>
@@ -229,7 +229,6 @@
             <p style="margin-bottom: 0.7em;">
               As part of a Data Science group project, our 3-student team developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit‑learn) to import CSV files from an accelerometer app, clean and smooth the time series with forward‑fill and moving‑average filters, extract a suite of 40 statistical features per 5‑second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application.
             </p>
-            <!-- Floated image and description of contributions -->
             <div class="content-float float-left">
               <img src="Media/ELEC292.jpg" alt="Running and Jumping Detection with Machine Learning" class="float-bigimg">
               <p style="margin-bottom: 0.7em;">
@@ -242,7 +241,113 @@
           </div>
         </div>
       </div>
-      <!-- ... other project boxes omitted for brevity ... -->
+
+      <!-- Project: Fluid and Powder Dispensing Device -->
+      <br>
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Fluid and Powder Dispensing Device - Arduino/C++</h3>
+        </div>
+        <button id="openVideoBtn" class="btn-video">▶ Watch Video</button>
+        <a href="Media/APSC101_FinalReport.pdf" target="_blank" rel="noopener noreferrer" class="btn-report">
+          📄 Final Report
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="Media/APSC101.jpg" alt="" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+              As part of a term‑long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions. This interdisciplinary project involved mechanical design, electronics integration, and embedded systems programming to create a functional prototype within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones including initial concept, detailed design review, and prototype validation. 
+            </p>
+            <p style="margin-bottom: 0.7em;"></p>
+              My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo‑powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code utilized arrays to store and iterate over preset dosing instructions for five test tubes dispensing between 1 g and 2 g of powder per tube and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real‑time interrupt checks for safety overrides. 
+            </p>
+            </div>
+            <div class="content-float float-left">
+            <img src="Media/APSC101_SDW.jpg" alt="" class="float-img">
+            <p>
+            Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D‑printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. I also authored major portions of the final report, including the Final Design, References, and Arduino Code documentation, articulating the engineering process behind design decisions. <br>
+            This project strengthened my skills in embedded systems, sensor integration, Arduino programming, and mechanical prototyping, while reinforcing my ability to communicate technical concepts clearly within a collaborative team environment. In real‑world terms, such an automated dispenser could be deployed in pharmaceutical laboratories to mix concentrated drug formulations such as naloxone hydrochloride (Narcan) solutions for clinical research entirely autonomously, reducing contamination risk and improving reproducibility.
+            </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project: 911 Operator Training Device -->
+      <br>
+      <div class="project-box">
+        <div class="project-header">
+          <h3>911 Operator Training Device - Arduino/C++</h3>
+        </div>
+        <button id="openVideoBtn2" class="btn-video">▶ Watch Video</button>
+        <a href="Media/APSC103_FinalReport.pdf" target="_blank" rel="noopener noreferrer" class="btn-report">
+            📄 Final Report
+        </a>
+        <a href="Media/APSC103_code.pdf" target="_blank" rel="noopener noreferrer" class="btn-code">
+            <p>&lt;/&gt;</p> See Code
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="Media/APSC103.jpg" alt="911 Operator Training Device" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+            As part of a client‑based design project, our team partnered with the Toronto Police Service to modernize the Perfex operator‑training device, a 911 telephone operator testing platform built around manual time checks and paper-based modules that is becoming outdated. We translated all five original test stations (short‑story recall, reading‑aloud, copying critical information, simulated telephone dispatch, and map indexing) into a cohesive web interface seamlessly integrated with a custom Arduino‑powered taskbox housed in a portable briefcase with the goal of increasing test accuracy and repeatability. 
+            </p>
+            </div>
+            <p>
+            Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping each push‑button, slider, and rotary encoder to mirror the look and feel of the legacy device’s five stations. I developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action down to the millisecond. This allowed me to implement a real‑time scoring system that automatically calculated user performance by comparing the accuracy of button presses, slider positions, or dial settings against target values and by measuring reaction times. These automated metrics enabled objective, repeatable assessments that closely aligned with the client goals of increasing test fairness and ease of administration.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Project: Portfolio Website -->
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Portfolio Website - HTML, CSS, JavaScript</h3>
+        </div>
+        <div class="content-row">
+          <div class="content-text">
+            <p style="margin-bottom: 0.7em;">
+            As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain.             
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            In the HTML, elements such as &lt;header&gt;, &lt;nav&gt;, &lt;main&gt;, &lt;section&gt;, and &lt;footer&gt; were used to outline the page hierarchy. One challenge was ensuring that text wrapped well around the left and right floating images. To do so, I pulled each &lt;img&gt; out of the nested &lt;p&gt; tags and wrapped them in dedicated <code>&lt;div class="content-float float-left"&gt;</code> or <code>float-right</code> containers which I defined in CSS.<br>
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            In the CSS, I also created tactile feedback by tweaking hover states on all buttons, softening background shade and lifting buttons by one pixel when cursor is hovering above. Media queries under 768px also disable floats on narrow viewports such as smartphones, stacking content vertically and converting all images into full width for readability, ensuring that on smaller screens text remains uniform rather than wrapping beside images. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!<br>
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            I developed JavaScript logic that powers all dynamic behaviors. To manage lengthy work history entries, I wrote a toggle function bound to the “See More” button that adds or removes a <code>".show"</code> class on the hidden job list and updates the button text accordingly. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each <code>requestAnimationFrame</code> call, using <code>(currentY += (targetY – currentY) * 0.4)</code> to achieve a fluid follow effect that locks once past a scroll threshold. I also deferred <code>script.js</code> at the end of the HTML &lt;body&gt; so the DOM (Document Object Model) was parsed before any event binding, preventing undefined element errors.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Project: Birthday Guessing Game -->
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Birthday Guessing Game - Java</h3>
+        </div>
+        <a href="Media/ELEC279_Code.pdf" target="_blank" rel="noopener noreferrer" class="btn-codeIMP">
+            <p>&lt;/&gt;</p> See Code
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="Media/ELEC279.jpg" alt="911 Operator Training Device" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+            I have numerous small scale Java projects, my most significant being a console‑based Java game in which players guess the birthdates of a variety of “entities” (historical figures, countries, singers, etc.). The project is organized under the “PersonAndDate” package with seven classes: Date.java for parsing and validating dates, an abstract Entity.java defining shared fields (name, born, difficulty) and common methods (scoring, messages, cloning), four subclasses (Person, Country, Singer, Politician) each providing entityType(), clone(), and custom toString(), and GuessMaster.java as the driver that manages up to 100 cloned entities, handles user I/O via Scanner, and selects challenges at random. Across classes, the project comprises over 650 lines of code.
+            </p>
+            </div>
+            <p>
+            Through development I employed key Java techniques such as inheritance and polymorphism to share and override behavior within the entity hierarchy. I applied defensive copying in both the Date and Entity constructors and accessors to preserve encapsulation and protect internal state. I implemented the Cloneable interface and provided explicit copy constructors to enable safe object duplication. I also overrode the equals() and toString() methods to support logical comparison and produce clear, readable output.            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Education section -->
