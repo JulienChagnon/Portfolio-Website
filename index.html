@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julien Chagnon | Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary:#534368;
+      --light:#f8f9fa;
+      --dark:#212529;
+      --accent:#577e84;
+      --link-blue:#3c70bc;
+    }
+
+    * {box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;}
+
+    html {
+      scroll-behavior:smooth;
+    }
+
+    body {
+      background:var(--light);
+      color:var(--dark);
+      line-height:1.6;
+    }
+
+    header {
+      background:var(--primary);
+      color:#fff;
+      padding:2rem 1rem;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+    <aside id="sidebar">
+    <nav>
+    <a href="#About-Me">About Me</a>
+    <a href="#work-history">Work History</a>
+    <a href="#projects">Projects</a>
+    <a href="#education-skills">Education</a>
+    <a href="#certifications">Certifications</a>
+    </nav>
+    </aside>
+
+
+<header class="header-flex">
+    <img src="headshot_Photo.jpeg" alt="Headshot placeholder" class="headshot">
+    <div class="header-info">
+        <h1>Julien Chagnon</h1>
+        <h3>3rd Year Computer Engineering Student at Queen's University</h3>
+        <a href="Julien_Chagnon_Resume.pdf" class="textBox" target="_blank" rel="noopener noreferrer">
+            See Resume
+            <img src="PDFicon.png" alt="PDF icon" class="textBox-icon">
+        </a>
+        <a href="https://www.linkedin.com/in/julien-chagnon-5547aa206/" class="textBox" target="_blank" rel="noopener noreferrer">
+            Follow me on LinkedIn
+            <img src="linkedin.png" alt="LinkedIn logo" class="textBox-icon">
+        </a>
+    </div>
+</header>
+<style>
+    .header-flex {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5rem;
+        text-align: left;
+    }
+    .header-flex .headshot {
+        margin-bottom: 0;
+    }
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+</style>
+
+  <main>
+    <p style="margin-bottom: 1em;">Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University currently entering my 3rd year.<br>
+    </p>
+    <p> 
+        As a personal project during Summer 2025, I taught myself HTML, CSS, and JS and decided to develop this website to showcase my competencies to potential employers. This portfolio website covers my projects, work history, education & skills, and professional certifications.
+        Explore the pages ahead or press the labels on the sidebar to navigate sections. I look forward to connecting!
+    </p>
+    <div style="height: 2.5rem;"></div>
+
+    <section id="About-Me">
+      <h2>About Me</h2>
+      <p style="margin-bottom: 1em;">
+        Through my coursework and independent projects, I have developed extensive programming skills in C, Python, Java, and Assembly, and I am proficient in working within Linux environments. I have also cultivated front-end web development experience using HTML, CSS, and JavaScript through online resources.
+      </p>
+      <p style="margin-bottom: 1em;">
+        My interests extend into hardware systems and circuit design, where I have gained practical experience with VHDL, LTspice, and Arduino platforms. I have applied these skills in hands-on labs and team-based design projects, enhancing my abilities in CAD modeling (SolidWorks), SPICE-based circuit simulation, circuit and software debugging, and collaborative development using Git and GitHub.
+        Through courses like Data Science, I also have experience with database design and management using SQL and HDF5, along with data visualization using Python libraries such as Matplotlib and Seaborn.
+      </p>
+    <div class="content-float float-right">
+        <img src="FRECpicture.jpeg" alt="Me (Left) in my FREC attire" class="float-img">
+        <p>
+        I am also involved in extracurricular activities at Queen’s, including the Ski and Snowboard Club. In second year, I was a member of the Queen’s University First-Year Engineering Committee (FREC), where I helped organize events and initiatives for incoming engineering students. As part of the role, I wore the iconic FREC outfit and dyed my body purple (pictured on the left). This experience built my leadership and teamwork skills as I helped create a welcoming environment for first-years and grew more connected to the Queen’s Engineering community.
+        </p>
+    </div>    
+    <div class="content-float float-left">
+        <img src="BikingPicture.jpeg" alt="Me biking with my brother and dad" class="float-img">
+        <p>
+        Outside of computer engineering, I’m passionate about outdoor sports like Mountain Biking, Skiing, and Kiteboarding, which are activities I enjoy regularly in and around my hometown of Ottawa with my family. The photo on the right shows me with my dad and brother at Mont Tremblant bike resort in Québec. 
+        These activities have always been a big part of my life, spending time outdoors has helped me maintain a balance between academic work and personal well-being. 
+        </p>
+    </div>     
+
+    
+    </section>
+
+    <section id="work-history">
+      <h2>Work History</h2>
+      <p>Explore my professional experiences, highlighting my growth and adaptability.</p>
+
+    <figure class="timeline" style="margin-left:0; margin-right:auto;">
+        <ul>
+          <li>
+            <div class="icon">
+              <img src="OttawaLogo.jpg" alt="Ottawa City Logo">
+            </div>
+            <div class="content">
+              <time>May – August 2025</time>
+              <h3>Traffic Services Intern, City of Ottawa</h3>
+              <p>As a Traffic Services Intern, I applied data analysis techniques to interpret pedestrian and vehicle survey data to enhance roadway safety across Ottawa. I utilized GIS tools to map and analyze traffic patterns for investigations and implemented automated form collection workflows using Microsoft Power Automate to streamline data processes.</p>
+            </div>
+          </li>
+          <li>
+            <div class="icon">
+              <img src="OttawaLogo.jpg" alt="City of Ottawa Logo">
+            </div>
+            <div class="content">
+              <time>May – August 2024</time>
+              <h3>Graffiti Management Assistant, City of Ottawa</h3>
+              <p>In this role, I managed a city-wide graffiti database, tracking service requests and task completion for cleanup operations. I actively participated in graffiti removal using specialized equipment such as pressure washers and heaters, while adhering to strict safety protocols for handling corrosive chemicals and maintaining gear.</p>
+            </div>
+          </li>
+          <div class="more-jobs">
+          <li>
+            <div class="icon">
+            <img src="MBKlogo.png" alt="Mountain Bike Kids Logo" style="background:black; border-radius:50%;">
+            </div>
+            <div class="content">
+              <time>June – August 2022</time>
+              <h3>Camp Counsellor, Mountain Bike Kids</h3>
+              <p>I supervised and engaged with campers aged 8 to 14, leading mountain biking outings and day trips while ensuring safety and enjoyment. I also maintained communication with parents to address camper needs and resolve concerns, fostering a positive and inclusive camp environment.</p>
+            </div>
+          </li>
+          <li>
+            <div class="icon">
+            <img src="PedalHeadsLogo.jpg" alt="Pedalheads Logo">
+            </div>
+            <div class="content">
+              <time>June – August 2021</time>
+              <h3>Trail Instructor, PedalHeads</h3>
+              <p>I managed groups of campers aged 4 to 8 in trail riding programs, ensuring safety and engagement throughout each session. I designed and delivered age-appropriate activities to support bicycle skill development, helping young riders build confidence and coordination in a fun and supportive environment.</p>
+            </div>
+          </li>
+          </div>
+        </ul>
+      </figure>
+      <button id="toggleJobs" class="see-more">See More</button>
+    </section>
+
+
+
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <p>Explore my projects, showcasing my skills in software development and hardware design. Be sure to check out the detailed reports and videos for each project! <br><br></p>
+      
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Running and Jumping Detection using Machine Learning - Python</h3>
+        </div>
+        <button id="openVideoBtn3" class="btn-video">▶ Watch Video</button>
+        <a href="ELEC292_FinalReport.pdf" target="_blank" rel="noopener noreferrer" class="btn-report">
+            📄 Final Report
+        </a>
+        <a href="ELEC292_Code.pdf" target="_blank" rel="noopener noreferrer" class="btn-code">
+            <p>&lt;/&gt;</p> See Code
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <p style="margin-bottom: 0.7em;">
+            As part of a Data Science group project, our 3-student team developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit‑learn) to import CSV files an accelerometer app, clean and smooth the time series with forward‑fill and moving‑average filters, extract a suite of 40 statistical features per 5‑second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application. 
+            </p>
+            <div class="content-float float-left">
+            <img src="ELEC292.jpg" alt="Running and Jumping Detection with Machine Learning" class="float-bigimg">
+            <p style="margin-bottom: 0.7em;">
+            My contributions encompassed model training and GUI for data visualization. I helped design and train the logistic regression classifier by preprocessing labeled accelerometer data, evaluating model performance through metrics like accuracy, precision, and recall, also analyzing confusion matrices to identify common misclassifications between walking and jumping. On the GUI side, I built the user interface using Tkinter and implemented the segment_and_extract function to dynamically partition input CSV data into time-based windows. I integrated the trained logistic regression model and normalization scaler (using joblib) into the classify_csv function, enabling real-time predictions on user data. Classification results were visualized using matplotlib, with colour coded overlays indicating detected activity types and a scrollable output displaying timestamped labels. 
+            </p>
+            </div>
+            <p>
+            We used Git throughout the development process to collaborate on code and manage version control. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self-contained, user-friendly activity-tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <br>
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Fluid and Powder Dispensing Device - Arduino/C++</h3>
+        </div>
+        <button id="openVideoBtn" class="btn-video">▶ Watch Video</button>
+        <a href="APSC101_FinalReport.pdf" target="_blank" rel="noopener noreferrer" class="btn-report">
+          📄 Final Report
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="APSC101.jpg" alt="" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+              As part of a term‑long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions. This interdisciplinary project involved mechanical design, electronics integration, and embedded systems programming to create a functional prototype within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones including initial concept, detailed design review, and prototype validation. 
+            </p>
+            <p style="margin-bottom: 0.7em;"></p>
+              My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo‑powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code utilized arrays to store and iterate over preset dosing instructions for five test tubes dispensing between 1 g and 2 g of powder per tube and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real‑time interrupt checks for safety overrides. 
+            </p>
+            </div>
+            <div class="content-float float-left">
+            <img src="APSC101_SDW.jpg" alt="" class="float-img">
+            <p>
+            Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D‑printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. I also authored major portions of the final report, including the Final Design, References, and Arduino Code documentation, articulating the engineering process behind design decisions. <br>
+            This project strengthened my skills in embedded systems, sensor integration, Arduino programming, and mechanical prototyping, while reinforcing my ability to communicate technical concepts clearly within a collaborative team environment. In real‑world terms, such an automated dispenser could be deployed in pharmaceutical laboratories to mix concentrated drug formulations such as naloxone hydrochloride (Narcan) solutions for clinical research entirely autonomously, reducing contamination risk and improving reproducibility.
+            </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <br>
+      <div class="project-box">
+        <div class="project-header">
+          <h3>911 Operator Training Device - Arduino/C++</h3>
+        </div>
+        <button id="openVideoBtn2" class="btn-video">▶ Watch Video</button>
+        <a href="APSC103_FinalReport.pdf" target="_blank" rel="noopener noreferrer" class="btn-report">
+            📄 Final Report
+        </a>
+        <a href="APSC103_code.pdf" target="_blank" rel="noopener noreferrer" class="btn-code">
+            <p>&lt;/&gt;</p> See Code
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="APSC103.jpg" alt="911 Operator Training Device" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+            As part of a client‑based design project, our team partnered with the Toronto Police Service to modernize the Perfex operator‑training device, a 911 telephone operator testing platform built around manual time checks and paper-based modules that is becoming outdated. We translated all five original test stations (short‑story recall, reading‑aloud, copying critical information, simulated telephone dispatch, and map indexing) into a cohesive web interface seamlessly integrated with a custom Arduino‑powered taskbox housed in a portable briefcase with the goal of increasing test accuracy and repeatability. 
+            </p>
+            </div>
+            <p>
+            Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping each push‑button, slider, and rotary encoder to mirror the look and feel of the legacy device’s five stations. I developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action down to the millisecond. This allowed me to implement a real‑time scoring system that automatically calculated user performance by comparing the accuracy of button presses, slider positions, or dial settings against target values and by measuring reaction times. These automated metrics enabled objective, repeatable assessments that closely aligned with the client goals of increasing test fairness and ease of administration.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Portfolio Website - HTML, CSS, JavaScript</h3>
+        </div>
+        <div class="content-row">
+          <div class="content-text">
+            <p style="margin-bottom: 0.7em;">
+            As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format.            
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            In the HTML, elements such as &lt;header&gt;, &lt;nav&gt;, &lt;main&gt;, &lt;section&gt;, and &lt;footer&gt; were used to outline the page hierarchy. One challenge was ensuring that text wrapped well around the left and right floating images. To do so, I pulled each &lt;img&gt; out of the nested &lt;p&gt; tags and wrapped them in dedicated <code>&lt;div class="content-float float-left"&gt;</code> or <code>float-right</code> containers which I defined in CSS.<br>
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            In the CSS, I also created tactile feedback by tweaking hover states on all buttons, softening background shade and lifting buttons by one pixel when cursor is hovering above. Media queries under 768px also disable floats on narrow viewports such as smartphones, stacking content vertically and converting all images into full width for readability, ensuring that on smaller screens text remains uniform rather than wrapping beside images. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!<br>
+            </p>
+            <p style="margin-bottom: 0.7em;">
+            I developed JavaScript logic that powers all dynamic behaviors. To manage lengthy work history entries, I wrote a toggle function bound to the “See More” button that adds or removes a <code>".show"</code> class on the hidden job list and updates the button text accordingly. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each <code>requestAnimationFrame</code> call, using <code>(currentY += (targetY – currentY) * 0.4)</code> to achieve a fluid follow effect that locks once past a scroll threshold. I also deferred <code>script.js</code> at the end of the HTML &lt;body&gt; so the DOM (Document Object Model) was parsed before any event binding, preventing undefined element errors.
+            </p>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="project-box">
+        <div class="project-header">
+          <h3>Birthday Guessing Game - Java</h3>
+        </div>
+        <a href="ELEC279_Code.pdf" target="_blank" rel="noopener noreferrer" class="btn-codeIMP">
+            <p>&lt;/&gt;</p> See Code
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+            <img src="ELEC279.jpg" alt="911 Operator Training Device" class="float-img">
+            <p style="margin-bottom: 0.7em;">
+            I have numerous small scale Java projects, my most significant being a console‑based Java game in which players guess the birthdates of a variety of “entities” (historical figures, countries, singers, etc.). The project is organized under the “PersonAndDate” package with seven classes: Date.java for parsing and validating dates, an abstract Entity.java defining shared fields (name, born, difficulty) and common methods (scoring, messages, cloning), four subclasses (Person, Country, Singer, Politician) each providing entityType(), clone(), and custom toString(), and GuessMaster.java as the driver that manages up to 100 cloned entities, handles user I/O via Scanner, and selects challenges at random. Across classes, the project comprises over 650 lines of code.
+            </p>
+            </div>
+            <p>
+            Through development I employed key Java techniques such as inheritance and polymorphism to share and override behavior within the entity hierarchy. I applied defensive copying in both the Date and Entity constructors and accessors to preserve encapsulation and protect internal state. I implemented the Cloneable interface and provided explicit copy constructors to enable safe object duplication. I also overrode the equals() and toString() methods to support logical comparison and produce clear, readable output.            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="education-skills">
+    <h2>Education</h2>
+    <p class="content-text">
+      <strong>Bachelor of Applied Science in Computer Engineering</strong>, Queen’s University in Kingston (2023–2027) <br> Cumulative GPA of 3.57
+    </p>
+  </section>
+
+  <section id="certifications">
+    <h2>Certifications</h2>
+    <p><strong>Ontario G Class Driver’s License</strong> – Clean Record</p>
+    <p><strong>Standard First Aid/CPR-C and AED Certification</strong> – Valid through 2026 | Obtained 2024</p>
+    <p><strong>AODA Accessibility Training</strong> – Completed 2021</p>
+  </section>
+
+  <footer>
+    &copy; <span id="year"></span> Julien Chagnon. All rights reserved.
+  </footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>
