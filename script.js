@@ -86,14 +86,3 @@ langButton.addEventListener('click', () => {
 });
 
 
-window.addEventListener("DOMContentLoaded", () => {
-  const chromeIcon = document.getElementById("chrome-icon");
-  const lang = document.documentElement.lang;
-
-  if (lang === "fr") {
-    chromeIcon.src = "Media/JC_logoFR.png";
-  } else {
-    chromeIcon.src = "Media/JC_logo.png";
-  }
-});
-
