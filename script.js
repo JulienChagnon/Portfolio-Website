@@ -15,7 +15,7 @@ btn.addEventListener('click', () => {
 document.getElementById('year').textContent = new Date().getFullYear();
 
 // Sidebar follow‑scroll animation
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
   const sidebar = document.getElementById('sidebar');
   const header  = document.querySelector('header.header-flex');
   const offsetTop = header.offsetHeight + 10;
