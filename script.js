@@ -14,24 +14,48 @@ btn.addEventListener('click', () => {
 // Set the footer year dynamically
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// Sidebar follow‑scroll animation
-window.addEventListener('load', () => {
+// Sidebar follow‑scroll animation (init early + prevent flash)
+document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
   const header  = document.querySelector('header.header-flex');
-  const offsetTop = header.offsetHeight + 10;
+  if (!sidebar || !header) return;
+
   const unlockThreshold = 260;
-  let currentY = offsetTop;   
+  let offsetTop = 0;
+  let currentY = 0;
 
   sidebar.style.position = 'absolute';
-  sidebar.style.top = `${offsetTop}px`;
+  // Hide until we compute the correct position to avoid a flash
+  if (!sidebar.style.visibility) sidebar.style.visibility = 'hidden';
+
+  const recompute = () => {
+    const headerHeight = header.getBoundingClientRect().height || header.offsetHeight || 0;
+    offsetTop = headerHeight + 10;
+    if (currentY === 0) currentY = offsetTop;
+    sidebar.style.top = `${currentY}px`;
+  };
+
+  // Initial compute
+  recompute();
+
+  // Reveal after first compute in next frame
+  requestAnimationFrame(() => {
+    sidebar.style.visibility = 'visible';
+  });
+
+  // Keep in sync with header size changes (image load, responsive)
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => recompute());
+    ro.observe(header);
+  } else {
+    window.addEventListener('resize', recompute);
+    window.addEventListener('load', recompute);
+  }
 
   function animate() {
-    const scrollY = window.scrollY;
-    const targetY = scrollY < unlockThreshold
-      ? offsetTop
-      : scrollY + 100;
-
-    currentY += (targetY - currentY) * 0.4; 
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const targetY = scrollY < unlockThreshold ? offsetTop : scrollY + 100;
+    currentY += (targetY - currentY) * 0.4;
     sidebar.style.top = `${currentY}px`;
     requestAnimationFrame(animate);
   }
