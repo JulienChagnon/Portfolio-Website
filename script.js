@@ -32,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentY = 0;
 
   sidebar.style.position = 'absolute';
-  // Hide until we compute the correct position to avoid a flash
-  if (!sidebar.style.visibility) sidebar.style.visibility = 'hidden';
 
   const recompute = () => {
     const headerHeight = header.getBoundingClientRect().height || header.offsetHeight || 0;
@@ -44,11 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial compute
   recompute();
-
-  // Reveal after first compute in next frame
-  requestAnimationFrame(() => {
-    sidebar.style.visibility = 'visible';
-  });
 
   // Keep in sync with header size changes (image load, responsive)
   if (typeof ResizeObserver !== 'undefined') {
@@ -114,5 +107,4 @@ if (langButton) {
     updateLanguage(!isCurrentlyFr);
   });
 }
-
 
