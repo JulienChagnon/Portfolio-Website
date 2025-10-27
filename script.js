@@ -1,18 +1,25 @@
 
-// --- See More / See Less Button on Job History --- 
-const btn       = document.getElementById('toggleJobs');
-const moreJobs  = document.querySelector('.more-jobs');
-const labelSpan = btn.querySelector('.lang-text');
-btn.addEventListener('click', () => {
-  const isOpen = moreJobs.classList.toggle('show');
-  const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
-  const key  = isOpen ? 'hide' : 'show';
-  const attr = `data-${lang}-${key}`;
-  labelSpan.textContent = btn.getAttribute(attr);
-});
+//See More Button on Job History
+(() => {
+  const btn = document.getElementById('toggleJobs');
+  const moreJobs = document.querySelector('.more-jobs');
+  if (!btn || !moreJobs) return; // gracefully skip if not present
+  const labelSpan = btn.querySelector('.lang-text') || btn;
+  btn.addEventListener('click', () => {
+    const isOpen = moreJobs.classList.toggle('show');
+    const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
+    const key  = isOpen ? 'hide' : 'show';
+    const attr = `data-${lang}-${key}`;
+    const newLabel = btn.getAttribute(attr);
+    if (newLabel) labelSpan.textContent = newLabel;
+  });
+})();
 
 // Set the footer year dynamically
-document.getElementById('year').textContent = new Date().getFullYear();
+(() => {
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+})();
 
 // Sidebar follow‑scroll animation (init early + prevent flash)
 document.addEventListener('DOMContentLoaded', () => {
@@ -64,21 +71,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Open video in new tab buttons
-document.getElementById('openVideoBtn').addEventListener('click', function() {
-    window.open('Media/APSC101Demo.mp4', '_blank');
-});
-
-document.getElementById('openVideoBtn2').addEventListener('click', function() {
-    window.open('Media/APSC103Demo.mp4', '_blank');
-});
-
-document.getElementById('openVideoBtn3').addEventListener('click', function() {
-    window.open('Media/ELEC292Demo.mp4', '_blank');
-});
+(() => {
+  const v1 = document.getElementById('openVideoBtn');
+  const v2 = document.getElementById('openVideoBtn2');
+  const v3 = document.getElementById('openVideoBtn3');
+  if (v1) v1.addEventListener('click', () => window.open('Media/APSC101Demo.mp4', '_blank'));
+  if (v2) v2.addEventListener('click', () => window.open('Media/APSC103Demo.mp4', '_blank'));
+  if (v3) v3.addEventListener('click', () => window.open('Media/ELEC292Demo.mp4', '_blank'));
+})();
 
 
 
-// language + theme switch
+//language + theme switch
 const langButton = document.getElementById('langButton');
 const body = document.body;
 const texts = document.querySelectorAll('.lang-text');
@@ -104,9 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
   updateLanguage(isFr);
 });
 
-langButton.addEventListener('click', () => {
-  const isCurrentlyFr = body.classList.contains('fr');
-  updateLanguage(!isCurrentlyFr);
-});
+if (langButton) {
+  langButton.addEventListener('click', () => {
+    const isCurrentlyFr = body.classList.contains('fr');
+    updateLanguage(!isCurrentlyFr);
+  });
+}
 
 
