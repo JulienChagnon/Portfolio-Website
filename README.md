@@ -1,0 +1,3 @@
+This is a responsive bilingual (English/French) personal portfolio website built from scratch. The website is optimized for desktop and mobile displays and includes a dynamic sidebar, and interactive buttons to toggle content as a showcase of javascript experience. 
+
+The purpose of this website is to present a structured digital portfolio that highlights my technical proficiency and professional experience. It was developed as a personal project to strengthen web development skills and create a self hosted online resume.
