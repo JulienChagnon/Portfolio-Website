@@ -20,7 +20,7 @@
     }
 
     body.fr {
-      --primary:   #355e84;  
+      --primary:   #567ca0;  
       --light:     #F0F0F0;
       --dark:      #1F1F1F;
       --accent:    #6798a1;  
@@ -28,7 +28,6 @@
     }
 
 
-    /* Reset margins, paddings, and apply box-sizing */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -37,7 +36,7 @@
     }
 
     html {
-      scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+      scroll-behavior: smooth;
     }
 
     body {
@@ -49,7 +48,7 @@
     header {
       background: var(--primary);
       color: #fff;
-      padding: 2rem 1rem;
+      padding: 5rem 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -89,45 +88,17 @@
       <span class="lang-text" data-en="Follow me on LinkedIn" data-fr="Suivez-moi sur LinkedIn">Follow me on LinkedIn</span>
       <img src="Media/linkedin.png" alt="LinkedIn logo" class="textBox-icon">
     </a>
-
     <div class="lang-toggle">
-    <button id="langButton" class="lang-button">Français</button>
+      <button id="langButton" class="lang-button">Français</button>
     </div>
   </div>
   </header>
-
-  <!-- Additional header-specific styles -->
-  <style>
-    .header-flex {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      gap: 2.5rem;
-      text-align: left;
-    }
-    .header-flex .headshot {
-      margin-bottom: 0;
-    }
-    .header-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-    }
-  </style>
 
   <main>
   <!-- Introduction text -->
   <p class="lang-text" data-en="Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University currently entering my 3rd year." data-fr="Bonjour ! Je suis Julien Chagnon, étudiant bilingue (français/anglais) en génie informatique à l’Université Queen’s, présentement en 3e année." style="margin-bottom: 1em;">
     Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University currently entering my 3rd year.
   </p>
-  <p class="lang-text" data-en="As a personal project during Summer 2025, I taught myself HTML, CSS, and JS and decided to develop this website to showcase my competencies to potential employers. This portfolio website covers my projects, work history, education & skills, and professional certifications. Explore the pages ahead or press the labels on the sidebar to navigate sections. I look forward to connecting!" data-fr="Dans le cadre d’un projet personnel durant l’été 2025, j'ai appris à coder en HTML, CSS et JavaScript et j’ai rédigé ce site web pour présenter mes compétences aux employeurs potentiels. Ce portfolio couvre mes projets, mon parcours professionnel, mon éducation et mes compétences, ainsi que mes certifications professionnelles. Explorez les pages ou cliquez sur les onglets de la barre latérale pour naviguer.">
-    As a personal project during Summer 2025, I taught myself HTML, CSS, and JS and decided to develop this website to showcase my competencies to potential employers. This portfolio website covers my projects, work history, education & skills, and professional certifications.
-    Explore the pages ahead or press the labels on the sidebar to navigate sections. I look forward to connecting!
-  </p>
-
-  <!-- Spacer -->
-  <div style="height: 2.5rem;"></div>
 
   <!-- About Me section -->
   <section id="About-Me">
@@ -144,8 +115,8 @@
 
     <div class="content-float float-right">
       <img src="Media/FRECpicture.jpeg" alt="Me (Left) in my FREC attire" class="float-img">
-      <p class="lang-text" data-en="I am also involved in extracurricular activities at Queen’s, including the Ski and Snowboard Club. In second year, I was also a member of the Queen’s University First-Year Engineering Committee (FREC), where I helped organize events and initiatives for incoming engineering students. As part of the role, I wore the iconic FREC outfit and dyed my body purple (pictured on the left). This experience built my leadership and teamwork skills as I helped create a welcoming environment for first-years and grew more connected to the Queen’s Engineering community." data-fr="Je participe également à des activités parascolaires à Queen’s, notamment le Ski and Snowboard Club. En deuxième année, j'ai aussi été membre du First-Year Engineering Committee (FREC) de l’Université Queen’s, où j'ai aidé à organiser des événements et initiatives pour les étudiants de première année. Dans ce rôle, je portais la tenue emblématique du FREC et me suis teint le corps en mauve. Cette expérience a renforcé mes compétences en leadership et en travail d’équipe, tout en favorisant un accueil chaleureux pour les nouveaux étudiants et en me connectant davantage à la communauté du génie de Queen’s.">
-        I am also involved in extracurricular activities at Queen’s, including the Ski and Snowboard Club. In second year, I was also a member of the Queen’s University First-Year Engineering Committee (FREC), where I helped organize events and initiatives for incoming engineering students. As part of the role, I wore the iconic FREC outfit and dyed my body purple (pictured on the left). This experience built my leadership and teamwork skills as I helped create a welcoming environment for first-years and grew more connected to the Queen’s Engineering community.
+      <p class="lang-text" data-en="I am also involved in extracurricular activities at Queen’s, including the Ski and Snowboard Club. In second year, I was also a member of the Queen’s University First-Year Engineering Committee (FREC), where I helped organize events and initiatives for incoming engineering students as a means to get involved within the Queen's Engineering community. As part of the role, I wore the iconic FREC outfit and dyed my body purple." data-fr="Je participe également à des activités parascolaires à Queen’s, notamment le Ski and Snowboard Club. En deuxième année, j'ai aussi été membre du First-Year Engineering Committee (FREC) de l’Université Queen’s, où j'ai aidé à organiser des événements et initiatives pour les étudiants de première année. Dans ce rôle, je portais la tenue emblématique du FREC et me suis teint le corps en mauve. Cette expérience a renforcé mes compétences en leadership et en travail d’équipe, tout en favorisant un accueil chaleureux pour les nouveaux étudiants et en me connectant davantage à la communauté du génie de Queen’s.">
+        I am also involved in extracurricular activities at Queen’s, including the Ski and Snowboard Club. In second year, I was also a member of the Queen’s University First-Year Engineering Committee (FREC), where I helped organize events and initiatives for incoming engineering students as a means to get involved within the Queen's Engineering community. As part of the role, I wore the iconic FREC outfit and dyed my body purple.
       </p>
     </div>
 
@@ -312,9 +283,9 @@
             </div>
             <p>
               <span class="lang-text"
-                    data-en="We used Git throughout the development process to collaborate on code and manage version control. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self-contained, user-friendly activity-tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report."
-                    data-fr="Nous avons utilisé Git tout au long du processus de développement pour collaborer sur le code et gérer le contrôle de version. L’interface graphique résultante offrait une visualisation en temps réel intuitive des résultats de classification, répondant à notre objectif de créer un outil de suivi d’activité autonome et convivial. Une présentation complète de l’implémentation et de l’interface utilisateur est disponible dans la vidéo de démonstration et le rapport final.">
-                We used Git throughout the development process to collaborate on code and manage version control. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self-contained, user-friendly activity-tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report.
+                    data-en="We used Git throughout the development process to collaborate on code. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self-contained, user-friendly activity-tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report."
+                    data-fr="Nous avons utilisé Git tout au long du processus de développement pour collaborer sur le code. L’interface graphique résultante offrait une visualisation en temps réel intuitive des résultats de classification, répondant à notre objectif de créer un outil de suivi d’activité autonome et convivial. Une présentation complète de l’implémentation et de l’interface utilisateur est disponible dans la vidéo de démonstration et le rapport final.">
+                We used Git throughout the development process to collaborate on code. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self-contained, user-friendly activity-tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report.
             </p>
           </div>
         </div>
@@ -508,15 +479,14 @@
             </p>
             <p style="margin-bottom: 0.7em;">
               <span class="lang-text"
-                    data-en="I developed JavaScript logic that powers all dynamic behaviors. I included a French version of the website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content to ensure full bilingual support. To manage lengthy work history entries, I wrote a toggle function bound to the “See More” button that adds or removes a .show class on the hidden job list and updates the button text accordingly. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each requestAnimationFrame call, using (currentY += (targetY – currentY) * 0.4) to achieve a fluid follow effect that locks once past a scroll threshold."
-                    data-fr="J’ai implémenté la logique JavaScript qui alimente tous les comportements dynamiques. J’ai inclus une version française du site Web en basculant la classe lang sur l’élément &lt;body&gt; et en remplaçant dynamiquement tout le contenu visible afin d’assurer une prise en charge bilingue complète.Pour gérer les longues entrées de l’historique professionnel, j’ai écrit une fonction toggle liée au bouton « Voir plus » qui ajoute ou supprime la classe .show à la liste cachée d’emplois et met à jour le texte du bouton. Pour l’animation de la barre latérale, j’ai récupéré la hauteur de l’en-tête puis animé la position top de la barre à chaque appel requestAnimationFrame, en utilisant (currentY += (targetY – currentY) * 0.4) pour un effet fluide qui se verrouille après un certain seuil de défilement.">
-                I developed JavaScript logic that powers all dynamic behaviors. I included a French version of the website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content to ensure full bilingual support. To manage lengthy work history entries, I wrote a toggle function bound to the “See More” button that adds or removes a .show class on the hidden job list and updates the button text accordingly. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each requestAnimationFrame call, using (currentY += (targetY – currentY) * 0.4) to achieve a fluid follow effect that locks once past a scroll threshold.
+                    data-en="I developed JavaScript logic that powers all dynamic behaviors. I included a French version of the website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content. Other element include the custom scroll bar and binary rain animation, which present dynamic behaviour based on scroll position. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each requestAnimationFrame call, using (currentY += (targetY – currentY) * 0.4)."
+                    data-fr="J’ai développé la logique JavaScript qui alimente tous les comportements dynamiques du site. J’ai intégré une version française en basculant la classe &lt;em&gt;lang&lt;/em&gt; sur l’élément &lt;body&gt; et en remplaçant dynamiquement tout le contenu visible. D’autres éléments incluent la barre de défilement personnalisée et l’animation de pluie binaire, qui réagissent dynamiquement à la position de défilement. Pour l’animation de la barre latérale, j’ai capturé la hauteur de l’en-tête puis animé la position verticale de la barre latérale à chaque appel de &lt;em&gt;requestAnimationFrame&lt;/em&gt;, en utilisant la formule (currentY += (targetY – currentY) * 0.4).">
+                I developed JavaScript logic that powers all dynamic behaviors. I included a French version of the website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content. Other element include the custom scroll bar and binary rain animation, which present dynamic behaviour based on scroll position. For the sidebar animation, I captured the header’s height and then animated the sidebar’s top position on each requestAnimationFrame call, using (currentY += (targetY – currentY) * 0.4).
               </span>
             </p>
           </div>
         </div>
       </div>
-
       <br>
 
       <!-- Project: Birthday Guessing Game -->
@@ -665,9 +635,9 @@
           </span>
         </strong> – 
         <span class="lang-text"
-              data-en="Completed 2021"
-              data-fr="Terminée en 2021">
-          Completed 2021
+              data-en="Completed 2025"
+              data-fr="Terminée en 2025">
+          Completed 2025
         </span>
       </p>
     </section>
