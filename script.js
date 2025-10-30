@@ -15,57 +15,59 @@
   });
 })();
 
-// Set the footer year dynamically
+//Set the footer year dynamically
 (() => {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 })();
 
-// Sidebar scroll animation 
+// Sidebar
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
   const header  = document.querySelector('header.header-flex');
   if (!sidebar || !header) return;
 
-  let unlockThreshold = 0;
-  let offsetTop = 0;
-  let currentY = 0;
+  const FIXED_TOP    = 100; // px from viewport top after unlock
+  const UNDER_MARGIN = 10;  
 
-  sidebar.style.position = 'absolute';
-  sidebar.style.visibility = 'hidden';
-  sidebar.style.opacity = '0';
+  // Ensure there is absolutely no animated lag
+  sidebar.style.transition = 'none';
+  sidebar.style.transform  = 'none';
+  sidebar.style.position   = 'fixed';
+  sidebar.style.visibility = 'hidden'; // avoid flash until first compute
+  sidebar.style.opacity    = '0';
 
-  const recompute = () => {
-    const headerHeight = header.getBoundingClientRect().height || header.offsetHeight || 0;
-    offsetTop = headerHeight + 10;
-    unlockThreshold = Math.max(0, offsetTop - 100);
-    if (currentY === 0) currentY = offsetTop;
-    sidebar.style.top = `${currentY}px`;
+  const update = () => {
+    const headerBottom = header.getBoundingClientRect().bottom;
+    const desiredTop = Math.max(FIXED_TOP, Math.round(headerBottom + UNDER_MARGIN));
+
+    if (sidebar.__lastTop !== desiredTop) {
+      sidebar.style.top = desiredTop + 'px';
+      sidebar.__lastTop = desiredTop;
+    }
+
+    // Reveal after first layout-correct position is applied
+    if (sidebar.style.visibility !== 'visible') {
+      sidebar.style.visibility = 'visible';
+      sidebar.style.opacity = '1';
+    }
   };
 
-  //Initial compute
-  recompute();
-  sidebar.style.visibility = 'visible';
-  sidebar.style.opacity = '1';
+  const tick = () => {
+    update();
+    requestAnimationFrame(tick);
+  };
+  tick();
 
-  //Keep in sync with header size changes 
+  //react to header size changes
   if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(() => recompute());
-    ro.observe(header);
+    new ResizeObserver(() => update()).observe(header);
   } else {
-    window.addEventListener('resize', recompute);
-    window.addEventListener('load', recompute);
+    window.addEventListener('resize', update);
+    window.addEventListener('load', update);
   }
-
-  function animate() {
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const targetY = scrollY < unlockThreshold ? offsetTop : scrollY + 100;
-    currentY += (targetY - currentY) * 0.4;
-    sidebar.style.top = `${currentY}px`;
-    requestAnimationFrame(animate);
-  }
-  animate();
 });
+
 
 
 //Open vids in new tab buttons
@@ -324,7 +326,7 @@ if (langButton) {
     const changeInterval = 280; // ms between digit changes (increase for slower)
     let scrollClassTimer;
 
-    // Only toggles the subtle header style while actively scrolling
+    //Only toggles the subtle header style while actively scrolling
     function onUserScroll() {
       header.classList.add('header-rain-active');
       clearTimeout(scrollClassTimer);
@@ -343,12 +345,11 @@ if (langButton) {
       const dy = nowY - lastY;
       lastY = nowY;
 
-      // Reversible: accumulate signed motion, slow overall
+      // Reversible
       accum += dy / 30; 
       const sign = accum === 0 ? 0 : (accum > 0 ? 1 : -1);
       let moveSteps = Math.floor(Math.min(4, Math.abs(accum)));
       if (moveSteps > 0) {
-        //Apply movement in direction of scroll
         for (let c = 0; c < cols; c++) {
           let head = heads[c] + (sign < 0 ? moveSteps : -moveSteps); // up when scrolling down, down when scrolling up
           head %= rows; if (head < 0) head += rows;
@@ -359,14 +360,13 @@ if (langButton) {
 
       // Clear and draw every frame so digits change even when idle
       ctx.clearRect(0, 0, w, h);
-      const ramp = Math.max(0, Math.min(1, nowY / 220)); // invisible at top; reveals from bottom
+      const ramp = Math.max(0, Math.min(1, nowY / 220)); 
       const visibleTopY = Math.floor((1 - ramp) * h);
       if (ramp === 0) {
         requestAnimationFrame(tick);
         return;
       }
 
-      // Make digits bigger
       ctx.font = Math.floor(step * 1.3) + 'px monospace';
       ctx.textBaseline = 'top';
       ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
@@ -428,5 +428,154 @@ if (langButton) {
     document.addEventListener('DOMContentLoaded', initHeaderRain);
   } else {
     initHeaderRain();
+  }
+})();
+
+// Sidebar binary rain overlay
+(() => {
+  function initSidebarRain() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    if (sidebar.querySelector('#sidebarRainCanvas')) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'sidebarRainCanvas';
+    sidebar.insertBefore(canvas, sidebar.firstChild || null);
+
+    const ctx = canvas.getContext('2d');
+    let w = 0;
+    let h = 0;
+    let step = 18;
+    let cols = 0;
+    let rows = 0;
+    let heads = [];
+    let glyphPhase = 0;
+    let lastGlyphChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const glyphInterval = 360;
+    let lastScrollY = window.scrollY || window.pageYOffset || 0;
+
+    function cssVar(name, fallback) {
+      const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return val || fallback;
+    }
+
+    function hash32(x) {
+      x |= 0;
+      x = (x ^ 61) ^ (x >>> 16);
+      x = x + (x << 3);
+      x = x ^ (x >>> 4);
+      x = Math.imul(x, 0x27d4eb2d);
+      x = x ^ (x >>> 15);
+      return x >>> 0;
+    }
+
+    function resize() {
+      const rect = sidebar.getBoundingClientRect();
+      const dpr = typeof window.devicePixelRatio === 'number' ? window.devicePixelRatio : 1;
+      w = Math.max(1, Math.floor(rect.width));
+      h = Math.max(1, Math.floor(rect.height));
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      cols = Math.max(3, Math.floor(w / 14));
+      step = w / cols;
+      rows = Math.max(4, Math.ceil(h / step) + 2);
+
+      const previous = heads;
+      heads = new Array(cols);
+      for (let i = 0; i < cols; i++) {
+        const carry = previous && previous[i] !== undefined ? previous[i] : Math.floor(Math.random() * rows);
+        heads[i] = ((carry % rows) + rows) % rows;
+      }
+    }
+
+    function tick() {
+      if (!cols || !rows) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      const nowScrollY = window.scrollY || window.pageYOffset || 0;
+      const dy = nowScrollY - lastScrollY;
+      lastScrollY = nowScrollY;
+
+      const absDy = Math.abs(dy);
+      const direction = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
+      const moveSteps = Math.min(6, Math.floor(absDy / 12));
+      if (moveSteps > 0 && direction !== 0) {
+        for (let c = 0; c < cols; c++) {
+          let head = heads[c] + (direction > 0 ? -moveSteps : moveSteps);
+          head %= rows;
+          if (head < 0) head += rows;
+          heads[c] = head;
+        }
+      }
+
+      const activation = Math.max(0, Math.min(1, nowScrollY / 160));
+
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      if (now - lastGlyphChange >= glyphInterval) {
+        glyphPhase = (glyphPhase + 1) | 0;
+        lastGlyphChange = now;
+      }
+
+      ctx.clearRect(0, 0, w, h);
+      if (activation <= 0) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      ctx.font = Math.floor(step * 0.9) + 'px monospace';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = cssVar('--sidebar-rain-color', 'rgba(0,255,140,0.55)');
+      ctx.shadowColor = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.25)');
+      ctx.shadowBlur = Math.round(step * 0.25);
+
+      const minVisibleRow = Math.max(0, Math.floor((1 - activation) * rows));
+
+      for (let c = 0; c < cols; c++) {
+        const head = heads[c];
+        const chainLen = 6 + (c % 5);
+        for (let i = 0; i < chainLen; i++) {
+          const row = (head + i) % rows;
+          if (row < minVisibleRow) continue;
+          const y = row * step;
+          if (y > h) continue;
+
+          const seed = ((c + 1) * 73856093) ^ ((row + 1) * 19349663) ^ ((glyphPhase + 1) * 83492791);
+          const ch = (hash32(seed) & 1) ? '1' : '0';
+          const x = c * step + step * 0.2;
+          const baseAlpha = i === 0 ? 0.9 : Math.max(0.25, 0.8 - i * 0.08);
+          const fade = Math.max(0.6, 1 - (y / Math.max(1, h)) * 0.22);
+          const drawAlpha = baseAlpha * fade * activation;
+          if (drawAlpha <= 0.02) continue;
+          ctx.globalAlpha = drawAlpha;
+          ctx.fillText(ch, x, y);
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(tick);
+    }
+
+    resize();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => resize());
+      ro.observe(sidebar);
+    } else {
+      window.addEventListener('resize', resize);
+      window.addEventListener('load', resize);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebarRain);
+  } else {
+    initSidebarRain();
   }
 })();
