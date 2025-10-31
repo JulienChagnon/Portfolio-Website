@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!sidebar || !header) return;
 
   const FIXED_TOP    = 100; // px from viewport top after unlock
-  const UNDER_MARGIN = 10;  
+  const UNDER_MARGIN = 10;
 
   // Ensure there is absolutely no animated lag
   sidebar.style.transition = 'none';
@@ -89,7 +89,9 @@ const texts = document.querySelectorAll('.lang-text');
 
 function updateLanguage(isFr) {
   body.classList.toggle('fr', isFr);
-  langButton.textContent = isFr ? 'English' : 'Français';
+  if (langButton) {
+    langButton.textContent = isFr ? 'English' : 'Français';
+  }
 
   texts.forEach(el => {
     el.textContent = isFr
@@ -98,10 +100,23 @@ function updateLanguage(isFr) {
   });
 
   const params = new URLSearchParams(window.location.search);
-  params.set('lang', isFr ? 'fr' : 'en');
+  const langCode = isFr ? 'fr' : 'en';
+  params.set('lang', langCode);
   history.replaceState(null, '', `?${params.toString()}`);
+
+  try {
+    window.dispatchEvent(new CustomEvent('portfolio:languagechange', { detail: { lang: langCode } }));
+  } catch (err) {
+    try {
+      const legacy = document.createEvent('CustomEvent');
+      legacy.initCustomEvent('portfolio:languagechange', false, false, { lang: langCode });
+      window.dispatchEvent(legacy);
+    } catch (_) {}
+  }
+
   try { window.dispatchEvent(new Event('scroll')); } catch (_) {}
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
@@ -190,7 +205,7 @@ if (langButton) {
 
   function computeMetrics() {
     const rect = overlay.getBoundingClientRect();
-    trackTop = rect.top; 
+    trackTop = rect.top;
     trackHeight = Math.max(0, rect.height || (window.innerHeight - 16));
     const scrollHeight = docEl.scrollHeight;
     const viewport = window.innerHeight;
@@ -279,8 +294,100 @@ if (langButton) {
   document.addEventListener('DOMContentLoaded', () => { ensureAttached(); updateOverlay(); });
 })();
 
-// Header Digital Rain 
 (() => {
+  const header = document.querySelector('header.header-flex');
+  if (!header) return;
+  let indicator = header.querySelector('.header-scroll-indicator');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.className = 'header-scroll-indicator';
+    indicator.innerHTML = '<span>&#x2193;</span>';
+    header.appendChild(indicator);
+  }
+
+  indicator.removeAttribute('aria-hidden');
+  indicator.setAttribute('role', 'button');
+  indicator.setAttribute('tabindex', '0');
+
+  const LABELS = {
+    en: 'Scroll to main content',
+    fr: 'Faire defiler vers le contenu principal'
+  };
+
+  const applyLabel = (lang) => {
+    const nextLang = LABELS[lang] ? lang : 'en';
+    const label = LABELS[nextLang];
+    indicator.setAttribute('aria-label', label);
+    indicator.setAttribute('title', label);
+  };
+
+  const resolveLang = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
+  applyLabel(resolveLang());
+  window.addEventListener('portfolio:languagechange', (event) => {
+    const lang = event && event.detail && event.detail.lang ? event.detail.lang : resolveLang();
+    applyLabel(lang);
+  });
+
+  const findScrollTarget = () => {
+    const firstContent = header.nextElementSibling;
+    if (firstContent) return firstContent;
+    const main = document.querySelector('main');
+    if (main) return main;
+    return document.body;
+  };
+
+  const SCROLL_OFFSET_PX = 120;
+
+  const scrollToContent = () => {
+    const target = findScrollTarget();
+    if (!target) return;
+    const prefersReducedMotion = (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+    const baseTop = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0);
+    const desiredTop = Math.max(0, baseTop - SCROLL_OFFSET_PX);
+    if (typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: desiredTop, behavior });
+    } else {
+      window.scroll(0, desiredTop);
+    }
+  };
+
+  const handleActivate = (event) => {
+    if (!event) {
+      scrollToContent();
+      return;
+    }
+
+    if (event.type === 'click') {
+      event.preventDefault();
+      scrollToContent();
+      return;
+    }
+
+    if (event.type === 'keydown') {
+      const key = event.key;
+      if (key === 'Enter' || key === ' ') {
+        event.preventDefault();
+        scrollToContent();
+      }
+    }
+  };
+
+  indicator.addEventListener('click', handleActivate);
+  indicator.addEventListener('keydown', handleActivate);
+
+  const update = () => {
+    const hidden = (window.scrollY || window.pageYOffset || 0) > 5;
+    indicator.classList.toggle('hidden', hidden);
+  };
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+})();
+
+// Header Digital Rain
+
+(() => {
+
   function initHeaderRain() {
     const header = document.querySelector('header');
     if (!header) return;
@@ -291,7 +398,7 @@ if (langButton) {
     const ctx = canvas.getContext('2d');
 
     let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    let w = 0, h = 0, step = 14 * dpr, cols = 0, rows = 0;
+    let w = 0, h = 0, step = 14 * dpr, stepX = 14 * dpr, cols = 0, rows = 0;
     let heads = [];
 
     function size() {
@@ -304,7 +411,8 @@ if (langButton) {
       canvas.style.height = ch + 'px';
       w = canvas.width; h = canvas.height;
       step = Math.max(8, Math.round((cw > 600 ? 10 : 9) * dpr));
-      cols = Math.max(1, Math.floor(w / step));
+      stepX = Math.max(6, Math.round(step * 0.8));
+      cols = Math.max(1, Math.floor(w / stepX));
       rows = Math.max(1, Math.floor(h / step));
       heads = new Array(cols).fill(0).map(() => Math.floor(Math.random() * rows));
     }
@@ -327,6 +435,7 @@ if (langButton) {
     let scrollClassTimer;
 
     //Only toggles the subtle header style while actively scrolling
+
     function onUserScroll() {
       header.classList.add('header-rain-active');
       clearTimeout(scrollClassTimer);
@@ -345,10 +454,10 @@ if (langButton) {
       const dy = nowY - lastY;
       lastY = nowY;
 
-      // Reversible
-      accum += dy / 30; 
+      // Speed of rain chains while scrolling.
+      accum += dy / 25;
       const sign = accum === 0 ? 0 : (accum > 0 ? 1 : -1);
-      let moveSteps = Math.floor(Math.min(4, Math.abs(accum)));
+      let moveSteps = Math.floor(Math.min(1, Math.abs(accum)));
       if (moveSteps > 0) {
         for (let c = 0; c < cols; c++) {
           let head = heads[c] + (sign < 0 ? moveSteps : -moveSteps); // up when scrolling down, down when scrolling up
@@ -358,9 +467,9 @@ if (langButton) {
         accum -= sign * moveSteps;
       }
 
-      // Clear and draw every frame so digits change even when idle
+      //Clear and draw every frame so digits change even when idle
       ctx.clearRect(0, 0, w, h);
-      const ramp = Math.max(0, Math.min(1, nowY / 220)); 
+      const ramp = Math.max(0, Math.min(1, nowY / 600));
       const visibleTopY = Math.floor((1 - ramp) * h);
       if (ramp === 0) {
         requestAnimationFrame(tick);
@@ -385,18 +494,18 @@ if (langButton) {
       const jitterPx  = Math.round(2.5 * step);
 
       for (let c = 0; c < cols; c++) {
-        const chainLen = 10 + (c % 9); 
+        const chainLen = 10 + (c % 9);
         const head = heads[c];
         const jitterSeed = hash32((c + 1) * 2654435761);
         const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx; // [-jitterPx, +jitterPx]
         const colTop = visibleTopY + jitter;
         for (let i = 0; i < chainLen; i++) {
-          const r = (head + i) % rows; 
+          const r = (head + i) % rows;
           const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (glyphPhase * 83492791);
           const ch = (hash32(seed) & 1) ? '1' : '0';
-          const x = c * step + Math.floor(step * 0.1);
+          const x = c * stepX + Math.floor(stepX * 0.1);
           const y = r * step;
-          if (y < colTop - bleedPx) continue; 
+          if (y < colTop - bleedPx) continue;
 
           const baseAlpha = i === 0 ? 0.95 : Math.max(0.25, 0.9 - i * 0.1);
           const delta = y - colTop;
@@ -405,7 +514,7 @@ if (langButton) {
             const norm = 1 - (-delta / bleedPx); // 0..1 as it approaches boundary
             colAlpha = 0.15 + 0.40 * norm;
           } else if (delta < featherPx) {
-            const norm2 = delta / featherPx; 
+            const norm2 = delta / featherPx;
             colAlpha = 0.25 + 0.75 * norm2;
           } else {
             colAlpha = 1;
@@ -432,7 +541,9 @@ if (langButton) {
 })();
 
 // Sidebar binary rain overlay
+
 (() => {
+
   function initSidebarRain() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
@@ -514,7 +625,7 @@ if (langButton) {
         }
       }
 
-      const activation = Math.max(0, Math.min(1, nowScrollY / 160));
+      const activation = 1;
 
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       if (now - lastGlyphChange >= glyphInterval) {
@@ -523,10 +634,6 @@ if (langButton) {
       }
 
       ctx.clearRect(0, 0, w, h);
-      if (activation <= 0) {
-        requestAnimationFrame(tick);
-        return;
-      }
 
       ctx.font = Math.floor(step * 0.9) + 'px monospace';
       ctx.textBaseline = 'top';
@@ -563,6 +670,7 @@ if (langButton) {
 
     resize();
     if (typeof ResizeObserver !== 'undefined') {
+
       const ro = new ResizeObserver(() => resize());
       ro.observe(sidebar);
     } else {
@@ -577,5 +685,324 @@ if (langButton) {
     document.addEventListener('DOMContentLoaded', initSidebarRain);
   } else {
     initSidebarRain();
+  }
+})();
+
+
+// Header Terminal (non-interactive visual only, looping with scrollback)
+
+(() => {
+  const TERMINAL_SETS = {
+    en: {
+      prompt: "julien@profile:~$ ",
+      commands: [
+        {
+          cmd: 'echo "Welcome to my portfolio!"',
+          out: ['Welcome to my portfolio!'],
+        },
+        {
+          cmd: 'ls -la',
+          out: [
+            'total 5',
+            '-rw-r--r-- 1 julien julien  850 Oct 30 15:10 about-me.html',
+            '-rw-r--r-- 1 julien julien  980 Oct 30 15:12 work-history.html',
+            '-rw-r--r-- 1 julien julien 1024 Oct 30 15:14 projects.html',
+            '-rw-r--r-- 1 julien julien  740 Oct 30 15:16 education.html',
+            '-rw-r--r-- 1 julien julien  620 Oct 30 15:18 certifications.html'
+          ],
+          beforeDelay: 700,
+          outputDelay: 300
+        },
+        {
+          cmd: 'git status',
+          out: ['Looking for 12-16 month co-op opportunities in Computer Engineering.'],
+          beforeDelay: 3500,
+        },
+        {
+          cmd: 'git log --oneline',
+          out: [
+            'd4c9f87 (HEAD -> main) 05/2025-08/2025  Traffic Services Intern',
+            'c2a3b19                05/2024-08/2024  Graffiti Management Assistant',
+            'c0b8e0f12              06/2022-08/2022  Camp Counsellor',
+            '9f33a04                09/2023-Present  Computer Engineering Student @ Queen\'s',
+            '7e1cda2                02/2005-Present  Started the journey'
+          ],
+          beforeDelay: 1500,
+          outputDelay: 300
+        },
+        {
+          cmd: 'neofetch',
+          out: ['JulienOS v3.57', 'Uptime: 20 years', 'Kernel: Determination 5.0','Desktop: Bilingual Edition'],
+          beforeDelay: 2500,
+          outputDelay: 500,
+        },
+        {
+          cmd: 'make coffee',
+          out: ['Compiling caffeine...', 'build successful.'],
+          beforeDelay: 1200,
+          outputDelay: [2000, 600],
+          afterDelay: 900
+        },
+        {
+          cmd: 'diff yesterday today',
+          out: ['+ more experience', '+ more motivation'],
+          outputDelay: 500,
+        }
+      ]
+    },
+    fr: {
+      prompt: "julien@profil:~$ ",
+      commands: [
+        {
+          cmd: 'echo "Bienvenue à mon portfolio !"',
+          out: ['Bienvenue à mon portfolio !'],
+          beforeDelay: 300,
+        },
+        {
+          cmd: 'ls -la',
+          out: [
+            'total 5',
+            '-rw-r--r-- 1 julien julien  850 oct 30 15:10 a-propos.html',
+            '-rw-r--r-- 1 julien julien  980 oct 30 15:12 historique-de-travail.html',
+            '-rw-r--r-- 1 julien julien 1024 oct 30 15:14 projets.html',
+            '-rw-r--r-- 1 julien julien  740 oct 30 15:16 Éducation.html',
+            '-rw-r--r-- 1 julien julien  620 oct 30 15:18 certifications.html'
+          ],
+          beforeDelay: 450,
+          outputDelay: 1000
+        },
+        {
+          cmd: 'git status',
+          out: ['À la recherche d\'un stage coop de 12 à 16 mois en génie informatique.'],
+          afterDelay: 1000
+        },
+        {
+          cmd: 'git log --oneline',
+          out: [
+            'd4c9f87 (HEAD -> main) 05/2025-08/2025  Stagiaire, services de circulation',
+            'c2a3b19                05/2024-08/2024  Assistant à la gestion des graffitis',
+            'c0b8e0f12              06/2022-08/2022  Moniteur de camp',
+            '9f33a04                09/2023-Présent  Étudiant en génie informatique à Queen\'s',
+            '7e1cda2                02/2005-Présent  Début du parcours'
+          ],
+          beforeDelay: 1000,
+          
+        },
+        {
+          cmd: 'neofetch',
+          out: ['JulienOS v3.57', 'Uptime: 20 ans', 'Kernel: Détermination 5.0','Desktop: Édition bilingue'],
+          beforeDelay: 2500,
+          outputDelay: 500,
+        },
+        {
+          cmd: 'make café',
+          out: ['Compilation de caffeine...', 'construction réussie.'],
+          beforeDelay: 1200,
+          outputDelay: [2000, 600],
+        },
+        {
+          cmd: 'diff hier aujourd\'hui',
+          out: ['+ plus d\'expérience', '+ plus de motivation'],
+          outputDelay: 500,
+        },
+      ]
+    }
+  };
+  const MAX_LINES = 15;
+  const TYPE_CHARS_PER_TICK = 1;
+  const TYPE_TICK_MS = 80;
+  const PAUSE_AFTER_CMD_MS = 500;
+  const PAUSE_BETWEEN_OUTPUT_MS = 90;
+  const PAUSE_BETWEEN_COMMANDS_MS = 2500;
+
+  const currentLanguage = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
+
+  const getConfig = (lang) => TERMINAL_SETS[lang] || TERMINAL_SETS.en;
+
+  function initHeaderTerminal() {
+    const header = document.querySelector('header.header-flex') || document.querySelector('header');
+    if (!header) return;
+
+    let term = header.querySelector('#headerTerminal');
+    if (!term) {
+      term = document.createElement('div');
+      term.id = 'headerTerminal';
+      term.setAttribute('aria-hidden', 'true');
+      header.appendChild(term);
+    }
+
+    let activeLang = currentLanguage();
+    let activeConfig = getConfig(activeLang);
+    let index = 0;
+    let shouldRestart = false;
+    let firstCycle = true;
+
+    const enforceScrollback = () => {
+      while (term.childElementCount > MAX_LINES) {
+        term.removeChild(term.firstElementChild);
+      }
+    };
+
+    const appendLine = (el) => {
+      if (shouldRestart) return;
+      enforceScrollback();
+      term.appendChild(el);
+      enforceScrollback();
+    };
+
+    const newPromptLine = () => {
+      const line = document.createElement('div');
+      line.className = 'term-line term-prompt';
+      const prompt = document.createElement('span');
+      prompt.className = 'prompt';
+      prompt.textContent = activeConfig.prompt;
+      const typed = document.createElement('span');
+      typed.className = 'typed';
+      const caret = document.createElement('span');
+      caret.className = 'term-caret';
+      line.append(prompt, typed, caret);
+      appendLine(line);
+      return { line, typed, caret };
+    };
+
+    const releaseCaret = (promptLine) => {
+      const caret = promptLine && promptLine.querySelector('.term-caret');
+      if (caret) caret.remove();
+    };
+
+    const printOutputLine = async (text, delayOverride) => {
+      if (shouldRestart) return;
+      const line = document.createElement('div');
+      line.className = 'term-line term-output';
+      line.textContent = text;
+      appendLine(line);
+      if (shouldRestart) return;
+      const delay = delayOverride != null ? delayOverride : PAUSE_BETWEEN_OUTPUT_MS;
+      if (delay > 0) {
+        await sleep(delay);
+      }
+    };
+
+    const typeText = (node, text) => new Promise(resolve => {
+      const chars = [...text];
+      let i = 0;
+
+      const step = () => {
+        if (shouldRestart) {
+          node.textContent = '';
+          resolve();
+          return;
+        }
+        const chunk = chars.slice(i, i + TYPE_CHARS_PER_TICK).join('');
+        node.textContent += chunk;
+        i += TYPE_CHARS_PER_TICK;
+        if (i < chars.length) {
+          setTimeout(step, TYPE_TICK_MS);
+        } else {
+          resolve();
+        }
+      };
+      step();
+    });
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    const requestRestart = () => {
+      shouldRestart = true;
+      firstCycle = true;
+      index = 0;
+      term.innerHTML = '';
+    };
+
+    const applyLanguage = (lang) => {
+      const nextLang = TERMINAL_SETS[lang] ? lang : 'en';
+      if (nextLang === activeLang) return;
+      activeLang = nextLang;
+      activeConfig = getConfig(activeLang);
+      requestRestart();
+    };
+
+    const handleLanguageChange = (event) => {
+      const lang = event && event.detail && event.detail.lang ? event.detail.lang : currentLanguage();
+      applyLanguage(lang);
+    };
+
+    window.addEventListener('portfolio:languagechange', handleLanguageChange);
+
+    (async () => {
+      while (true) {
+        if (shouldRestart) {
+          shouldRestart = false;
+          continue;
+        }
+
+        const commands = activeConfig.commands;
+        if (!commands.length) {
+          await sleep(PAUSE_BETWEEN_COMMANDS_MS);
+          continue;
+        }
+
+        const entry = commands[index % commands.length];
+        const promptLine = newPromptLine();
+        const beforeDelay = firstCycle ? 0 : (entry.beforeDelay != null ? entry.beforeDelay : PAUSE_BETWEEN_COMMANDS_MS);
+        firstCycle = false;
+        if (beforeDelay > 0) {
+          await sleep(beforeDelay);
+        }
+
+        if (shouldRestart || !promptLine) {
+          shouldRestart = false;
+          firstCycle = true;
+          continue;
+        }
+
+        await typeText(promptLine.typed, entry.cmd);
+        if (shouldRestart) {
+          shouldRestart = false;
+          firstCycle = true;
+          continue;
+        }
+
+        const afterDelay = entry.afterDelay != null ? entry.afterDelay : PAUSE_AFTER_CMD_MS;
+        if (afterDelay > 0) {
+          await sleep(afterDelay);
+        }
+        if (shouldRestart) {
+          shouldRestart = false;
+          firstCycle = true;
+          continue;
+        }
+
+        releaseCaret(promptLine.line);
+
+        const outLines = entry.out || [];
+        for (let i = 0; i < outLines.length; i++) {
+          if (shouldRestart) break;
+          const lineText = outLines[i];
+          let delayOverride;
+          if (Array.isArray(entry.outputDelay)) {
+            const idx = i < entry.outputDelay.length ? i : entry.outputDelay.length - 1;
+            delayOverride = entry.outputDelay[idx];
+          } else {
+            delayOverride = entry.outputDelay;
+          }
+          await printOutputLine(lineText, delayOverride);
+        }
+
+        if (shouldRestart) {
+          shouldRestart = false;
+          firstCycle = true;
+          continue;
+        }
+
+        index = (index + 1) % commands.length;
+      }
+    })();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderTerminal, { once: true });
+  } else {
+    initHeaderTerminal();
   }
 })();
