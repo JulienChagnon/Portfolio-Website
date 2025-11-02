@@ -41,9 +41,17 @@ header.hero {
   gap: 0.7rem;
 }
 
+.header-info h1 {
+  font-size: clamp(2.2rem, 1.65vw + 1.65rem, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+
 /* Tagline wrapping: allow in FR, keep single line in EN */
 .header-info h3 {
+  font-size: clamp(1rem, 0.85vw + 0.7rem, 1.4rem);
   white-space: normal;
+  max-width: 540px;
 }
 body:not(.fr) .header-info h3 {
   white-space: nowrap;
@@ -377,17 +385,6 @@ h1 {
   outline-offset: 4px;
 }
 
-@media (max-width: 768px) {
-  /* Stack the about highlight boxes on small screens */
-  .about-highlight-grid {
-    grid-template-columns: 1fr;
-  }
-  .about-highlight-card {
-    min-height: 260px;
-  }
-
-}
-
 /* Text container within flex layout */
 .content-text {
   flex: 1;
@@ -395,14 +392,43 @@ h1 {
   margin-bottom: 0.2rem;
 }
 
-/* Hide sidebar and terminal on smaller windows */
+/* Hide sidebar and keep terminal responsive on smaller windows */
 @media (max-width: 1450px) {
   #sidebar {
     display: none;
   }
 
   #headerTerminal {
-    display: none;
+    max-width: min(520px, 80vw);
+    font-size: clamp(11px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .header-flex {
+    gap: 4rem;
+  }
+
+  .header-flex .headshot {
+    width: 190px;
+    margin-top: clamp(6rem, 10vh, 8rem);
+  }
+
+  .header-flex .header-info {
+    margin-top: clamp(6rem, 10vh, 8rem);
+  }
+
+  .header-info h3 {
+    max-width: 420px;
+  }
+
+  body:not(.fr) .header-info h3 {
+    white-space: normal;
+  }
+
+  #headerTerminal {
+    max-width: min(48vw, 430px);
+    font-size: clamp(8px);
   }
 }
 
@@ -757,36 +783,56 @@ body.fr #sidebar nav a {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+  /* Stack the about highlight boxes on small screens */
+  .about-highlight-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-highlight-card {
+    min-height: 260px;
+  }
+
   main {
     padding: 0 1.3rem; 
   }
   main p {
     max-width: 100%; 
   }
-  .header-flex {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 0.5rem 0.5rem;
-    gap: 1rem; /* reduce space after headshot on mobile */
-    word-break: break-word;
 
+  header.header-flex {
+    padding-top: clamp(3rem, 6vw, 4rem);
+    padding-left: clamp(1rem, 5vw, 1.8rem);
+    padding-right: clamp(1rem, 5vw, 1.8rem);
   }
 
-  h1 {
+  .header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 1.1rem; /* reduce space after headshot on mobile */
+    word-break: break-word;
+    width: 100%;
+  }
+
+  .header-info {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .header-info h1 {
     font-size: 2.5rem;         
     line-height: 1.2;
-    margin: 0.5rem 0;
+    margin: 0.5rem 0 0.25rem;
     max-width: 100%;
     white-space: normal;
     word-wrap: break-word;
-    text-align: center; /* center on mobile */
+    text-align: left;
   }
-  h3 {
+  .header-info h3 {
     font-size: 1rem;
-    line-height: 1.3;
-    max-width: 300px;
-    margin: 0 auto;
+    line-height: 1.35;
+    max-width: 320px;
+    margin: 0;
+    text-align: left;
   }
   
   .headshot {
@@ -798,10 +844,32 @@ body.fr #sidebar nav a {
     margin-left: 0 !important;
     margin-top: 0 !important;
   }
+
+  #headerTerminal {
+    position: relative;
+    order: 3;
+    align-self: stretch;
+    top: auto;
+    left: auto;
+    width: min(100%, 520px);
+    max-width: 100%;
+    margin: 1.5rem 0 0;
+    padding: 1rem 1.25rem;
+    font-size: clamp(8px, 2vw, 10px) !important;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  #headerTerminal .term-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
  
   header a.textBox {
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     font-size: 80%;
   }
   .float-left .float-img,
@@ -949,7 +1017,4 @@ header.header-rain-active .header-flex > *:not(.header-scroll-indicator) {
   z-index: 0;        
   pointer-events: none;  
 }
-
-
-
 

@@ -432,6 +432,7 @@ if (langButton) {
     let glyphPhase = 0;
     let lastChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const changeInterval = 280; // ms between digit changes (increase for slower)
+    const REVEAL_SCROLL_RANGE = 1100;
     let scrollClassTimer;
 
     //Only toggles the subtle header style while actively scrolling
@@ -469,7 +470,7 @@ if (langButton) {
 
       //Clear and draw every frame so digits change even when idle
       ctx.clearRect(0, 0, w, h);
-      const ramp = Math.max(0, Math.min(1, nowY / 600));
+      const ramp = Math.max(0, Math.min(1, nowY / REVEAL_SCROLL_RANGE));
       const visibleTopY = Math.floor((1 - ramp) * h);
       if (ramp === 0) {
         requestAnimationFrame(tick);
@@ -732,8 +733,8 @@ if (langButton) {
         },
         {
           cmd: 'neofetch',
-          out: ['JulienOS v3.57', 'Uptime: 20 years', 'Kernel: Determination 5.0','Desktop: Bilingual Edition'],
-          beforeDelay: 2500,
+          out: ['JulienOS v3.57', 'Uptime: 20 years','Desktop: English & French'],
+          beforeDelay: 3500,
           outputDelay: 500,
         },
         {
@@ -756,25 +757,24 @@ if (langButton) {
         {
           cmd: 'echo "Bienvenue à mon portfolio !"',
           out: ['Bienvenue à mon portfolio !'],
-          beforeDelay: 300,
         },
         {
           cmd: 'ls -la',
           out: [
             'total 5',
-            '-rw-r--r-- 1 julien julien  850 oct 30 15:10 a-propos.html',
+            '-rw-r--r-- 1 julien julien  850 oct 30 15:10 à-propos.html',
             '-rw-r--r-- 1 julien julien  980 oct 30 15:12 historique-de-travail.html',
             '-rw-r--r-- 1 julien julien 1024 oct 30 15:14 projets.html',
-            '-rw-r--r-- 1 julien julien  740 oct 30 15:16 Éducation.html',
+            '-rw-r--r-- 1 julien julien  740 oct 30 15:16 éducation.html',
             '-rw-r--r-- 1 julien julien  620 oct 30 15:18 certifications.html'
           ],
-          beforeDelay: 450,
-          outputDelay: 1000
+          beforeDelay: 700,
+          outputDelay: 300
         },
         {
           cmd: 'git status',
           out: ['À la recherche d\'un stage coop de 12 à 16 mois en génie informatique.'],
-          afterDelay: 1000
+          afterDelay: 3500
         },
         {
           cmd: 'git log --oneline',
@@ -785,13 +785,13 @@ if (langButton) {
             '9f33a04                09/2023-Présent  Étudiant en génie informatique à Queen\'s',
             '7e1cda2                02/2005-Présent  Début du parcours'
           ],
-          beforeDelay: 1000,
-          
+          beforeDelay: 1500,
+          outputDelay: 300
         },
         {
           cmd: 'neofetch',
-          out: ['JulienOS v3.57', 'Uptime: 20 ans', 'Kernel: Détermination 5.0','Desktop: Édition bilingue'],
-          beforeDelay: 2500,
+          out: ['JulienOS v3.57', 'Uptime: 20 ans', 'Desktop: Français & Anglais'],
+          beforeDelay: 3500,
           outputDelay: 500,
         },
         {
@@ -799,6 +799,7 @@ if (langButton) {
           out: ['Compilation de caffeine...', 'construction réussie.'],
           beforeDelay: 1200,
           outputDelay: [2000, 600],
+          afterDelay: 900
         },
         {
           cmd: 'diff hier aujourd\'hui',
@@ -810,7 +811,7 @@ if (langButton) {
   };
   const MAX_LINES = 15;
   const TYPE_CHARS_PER_TICK = 1;
-  const TYPE_TICK_MS = 80;
+  const TYPE_TICK_MS = 100;
   const PAUSE_AFTER_CMD_MS = 500;
   const PAUSE_BETWEEN_OUTPUT_MS = 90;
   const PAUSE_BETWEEN_COMMANDS_MS = 2500;
