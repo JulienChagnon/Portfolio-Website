@@ -82,15 +82,192 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+//Sidebar projects dropdown
+(() => {
+  const slugify = (text) => {
+    if (!text) return '';
+    let normalized = text;
+    try {
+      normalized = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    } catch (_) {}
+    return normalized
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const PROJECT_LINK_LABELS = {
+    en: [
+      'Running and Jumping Detection (Python ML)',
+      'Dynamic Time Allocating Calendar (Qt/C++)',
+      'Fluid and Powder Dispensing Device (Arduino)',
+      '911 Operator Training Device (Web + Arduino)',
+      'Portfolio Website (HTML/CSS/JS)',
+      'Birthday Guessing Game (Java)',
+    ],
+    fr: [
+      'Détection de course et saut (Python)',
+      'Calendrier dynamique (C++/Qt)',
+      'Distributeur fluide et poudre (Arduino)',
+      'Simulateur d\'opérateur 911 (Web + Arduino)',
+      'Site portfolio (HTML/CSS/JS)',
+      'Jeu deviner anniversaire (Java)',
+    ],
+  };
+
+  const labelFor = (lang, index, fallback = '') => {
+    const list = PROJECT_LINK_LABELS[lang];
+    if (!Array.isArray(list)) return fallback;
+    const value = list[index];
+    if (typeof value !== 'string') return fallback;
+    const trimmed = value.trim();
+    return trimmed || fallback;
+  };
+
+  const applyToggleLabel = (toggle) => {
+    if (!toggle) return;
+    const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
+    const attr = lang === 'fr' ? 'data-fr-label' : 'data-en-label';
+    let label = toggle.getAttribute(attr) || toggle.getAttribute('aria-label') || '';
+    if (label) {
+      toggle.setAttribute('aria-label', label);
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('projectsToggle');
+    const dropdown = document.getElementById('projectsDropdown');
+    const list = document.getElementById('projectsList');
+    const sidebar = document.getElementById('sidebar');
+    const projectsSection = document.getElementById('projects');
+    if (!toggle || !dropdown || !list || !sidebar || !projectsSection) return;
+
+    const arrowSpan = toggle.querySelector('[aria-hidden]');
+
+    const setArrow = () => {
+      if (arrowSpan) arrowSpan.textContent = '▼';
+    };
+
+    const setOpen = (open) => {
+      const expanded = !!open;
+      dropdown.hidden = !expanded;
+      dropdown.classList.toggle('open', expanded);
+      toggle.classList.toggle('open', expanded);
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      sidebar.classList.toggle('sidebar-expanded', expanded);
+      setArrow();
+    };
+
+    const isOpen = () => dropdown.classList.contains('open');
+
+    const ensureAnchor = (box, title, index) => {
+      let existing = box.getAttribute('id');
+      if (existing) return existing;
+      const baseSlug = slugify(title) || `project-${index + 1}`;
+      let candidate = baseSlug;
+      let suffix = 1;
+      while (document.getElementById(candidate)) {
+        suffix += 1;
+        candidate = `${baseSlug}-${suffix}`;
+      }
+      box.id = candidate;
+      return candidate;
+    };
+
+    const buildList = () => {
+      const boxes = projectsSection.querySelectorAll('.project-box');
+      list.innerHTML = '';
+      boxes.forEach((box, index) => {
+        const titleNode = box.querySelector('.project-header .lang-text');
+        if (!titleNode) return;
+        const englishBase = labelFor('en', index, (titleNode.getAttribute('data-en') || titleNode.textContent || '').trim());
+        if (!englishBase) return;
+        const langKey = document.body.classList.contains('fr') ? 'fr' : 'en';
+        const displayTitle = labelFor(
+          langKey,
+          index,
+          langKey === 'fr'
+            ? (titleNode.getAttribute('data-fr') || englishBase)
+            : englishBase
+        ).trim();
+        const anchor = ensureAnchor(box, englishBase, index);
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#${anchor}`;
+        link.textContent = displayTitle;
+        link.addEventListener('click', () => {
+          setOpen(false);
+        });
+        li.appendChild(link);
+        list.appendChild(li);
+      });
+    };
+
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      const nextState = !isOpen();
+      setOpen(nextState);
+      if (nextState) {
+        const firstLink = list.querySelector('a');
+        if (firstLink) {
+          firstLink.focus();
+        }
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!isOpen()) return;
+      if (sidebar.contains(event.target)) {
+        if (dropdown.contains(event.target) || toggle.contains(event.target)) return;
+      } else {
+        setOpen(false);
+        return;
+      }
+      setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isOpen()) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    const handleLanguageChange = () => {
+      buildList();
+      applyToggleLabel(toggle);
+      setArrow();
+    };
+
+    buildList();
+    applyToggleLabel(toggle);
+    setOpen(false);
+
+    window.addEventListener('portfolio:languagechange', handleLanguageChange);
+  });
+})();
+
+
+
 //language + theme switch
 const langButton = document.getElementById('langButton');
 const body = document.body;
 const texts = document.querySelectorAll('.lang-text');
+const resumeLink = document.getElementById('resumeLink');
 
 function updateLanguage(isFr) {
+  const langCode = isFr ? 'fr' : 'en';
   body.classList.toggle('fr', isFr);
   if (langButton) {
     langButton.textContent = isFr ? 'English' : 'Français';
+  }
+
+  if (resumeLink) {
+    const targetHref = resumeLink.getAttribute(isFr ? 'data-fr-href' : 'data-en-href');
+    if (targetHref) {
+      resumeLink.setAttribute('href', targetHref);
+    }
+    resumeLink.setAttribute('hreflang', langCode);
   }
 
   texts.forEach(el => {
@@ -100,7 +277,6 @@ function updateLanguage(isFr) {
   });
 
   const params = new URLSearchParams(window.location.search);
-  const langCode = isFr ? 'fr' : 'en';
   params.set('lang', langCode);
   history.replaceState(null, '', `?${params.toString()}`);
 
@@ -457,6 +633,8 @@ if (langButton) {
 
       // Speed of rain chains while scrolling.
       accum += dy / 25;
+      // Clamp accumulator to prevent excessive buildup
+      accum = Math.max(-3, Math.min(3, accum));
       const sign = accum === 0 ? 0 : (accum > 0 ? 1 : -1);
       let moveSteps = Math.floor(Math.min(1, Math.abs(accum)));
       if (moveSteps > 0) {
@@ -702,6 +880,10 @@ if (langButton) {
           out: ['Welcome to my portfolio!'],
         },
         {
+          cmd: 'git status',
+          out: ['Looking for 12-16 month co-op opportunities in Computer Engineering.'],
+        },
+        {
           cmd: 'ls -la',
           out: [
             'total 5',
@@ -711,13 +893,8 @@ if (langButton) {
             '-rw-r--r-- 1 julien julien  740 Oct 30 15:16 education.html',
             '-rw-r--r-- 1 julien julien  620 Oct 30 15:18 certifications.html'
           ],
-          beforeDelay: 700,
+          beforeDelay: 2500,
           outputDelay: 300
-        },
-        {
-          cmd: 'git status',
-          out: ['Looking for 12-16 month co-op opportunities in Computer Engineering.'],
-          beforeDelay: 3500,
         },
         {
           cmd: 'git log --oneline',
@@ -728,7 +905,7 @@ if (langButton) {
             '9f33a04                09/2023-Present  Computer Engineering Student @ Queen\'s',
             '7e1cda2                02/2005-Present  Started the journey'
           ],
-          beforeDelay: 1500,
+          beforeDelay: 3500,
           outputDelay: 300
         },
         {
@@ -759,6 +936,10 @@ if (langButton) {
           out: ['Bienvenue à mon portfolio !'],
         },
         {
+          cmd: 'git status',
+          out: ['À la recherche d\'un stage coop de 12 à 16 mois en génie informatique.'],
+        },
+        {
           cmd: 'ls -la',
           out: [
             'total 5',
@@ -768,13 +949,8 @@ if (langButton) {
             '-rw-r--r-- 1 julien julien  740 oct 30 15:16 éducation.html',
             '-rw-r--r-- 1 julien julien  620 oct 30 15:18 certifications.html'
           ],
-          beforeDelay: 700,
+          beforeDelay: 2500,
           outputDelay: 300
-        },
-        {
-          cmd: 'git status',
-          out: ['À la recherche d\'un stage coop de 12 à 16 mois en génie informatique.'],
-          afterDelay: 3500
         },
         {
           cmd: 'git log --oneline',
@@ -785,7 +961,7 @@ if (langButton) {
             '9f33a04                09/2023-Présent  Étudiant en génie informatique à Queen\'s',
             '7e1cda2                02/2005-Présent  Début du parcours'
           ],
-          beforeDelay: 1500,
+          beforeDelay: 3500,
           outputDelay: 300
         },
         {

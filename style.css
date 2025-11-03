@@ -621,7 +621,7 @@ footer {
   /* Prevent flash-of-unpositioned sidebar before JS positions it */
   visibility: hidden;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, width 0.2s ease;
 }
 
 #sidebar nav {
@@ -638,8 +638,105 @@ footer {
   transition: opacity 0.2s;
 }
 
+.sidebar-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-item > a {
+  flex: none;
+  display: inline-block;
+  margin-bottom: 0;
+  padding-right: 0.2rem;
+}
+
+.sidebar-toggle {
+  appearance: none;
+  background: none;
+  border: none;
+  color: #dfd4f1;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid rgba(223, 212, 241, 0.6);
+  outline-offset: 2px;
+}
+
+.sidebar-dropdown {
+  display: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(223, 212, 241, 0.25);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.25rem 0 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-dropdown.open {
+  display: block;
+}
+
+.sidebar-dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-dropdown a {
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 0.35rem 0.25rem;
+  border-radius: 4px;
+  font-weight: normal;
+  font-size: 0.68rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-dropdown a:hover,
+.sidebar-dropdown a:focus-visible {
+  background: rgba(223, 212, 241, 0.2);
+  color: #ffffff;
+}
+
+#sidebar.sidebar-expanded {
+  width: 240px;
+  transition: width 0.2s ease;
+}
+
+body.fr #sidebar {
+  width: 205px;
+}
+
+body.fr #sidebar.sidebar-expanded {
+  width: 265px;
+}
+
 body.fr #sidebar nav a {
   color: #cce4ff;
+}
+
+body.fr .sidebar-toggle {
+  color: #cce4ff;
+}
+
+body.fr .sidebar-toggle:focus-visible {
+  outline: 2px solid rgba(204, 228, 255, 0.6);
+}
+
+body.fr .sidebar-toggle.open {
+}
+
+body.fr .sidebar-dropdown a:hover,
+body.fr .sidebar-dropdown a:focus-visible {
+  background: rgba(204, 228, 255, 0.2);
 }
 #sidebar nav a:hover {
   opacity: 0.8;
@@ -1017,4 +1114,3 @@ header.header-rain-active .header-flex > *:not(.header-scroll-indicator) {
   z-index: 0;        
   pointer-events: none;  
 }
-

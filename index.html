@@ -62,7 +62,24 @@
     <nav>
       <a class="lang-text" data-en="About Me" data-fr="À propos de moi" href="#About-Me">About Me</a>
       <a class="lang-text" data-en="Work History" data-fr="Historique  de Travail" href="#work-history">Work History</a>
-      <a class="lang-text" data-en="Projects" data-fr="Projets" href="#projects">Projects</a>
+      <div class="sidebar-item sidebar-projects">
+        <a class="lang-text" data-en="Projects" data-fr="Projets" href="#projects">Projects</a>
+        <button
+          id="projectsToggle"
+          class="sidebar-toggle"
+          type="button"
+          aria-controls="projectsDropdown"
+          aria-expanded="false"
+          aria-label="Show project links"
+          aria-haspopup="true"
+          data-en-label="Show project links"
+          data-fr-label="Afficher les projets">
+          <span aria-hidden="true">&#9660;</span>
+        </button>
+      </div>
+      <div id="projectsDropdown" class="sidebar-dropdown" hidden>
+        <ul id="projectsList"></ul>
+      </div>
       <a class="lang-text" data-en="Education" data-fr="Éducation" href="#education-skills">Education</a>
       <a class="lang-text" data-en="Certifications" data-fr="Certifications" href="#certifications">Certifications</a>
     </nav>
@@ -79,7 +96,7 @@
         3rd Year Computer Engineering Student at Queen's University
     </h3>
 
-    <a class="textBox" href="Media/Julien_Chagnon_Resume.pdf" target="_blank" rel="noopener noreferrer">
+    <a id="resumeLink" class="textBox" href="Media/Julien_Chagnon_Resume.pdf" data-en-href="Media/Julien_Chagnon_Resume.pdf" data-fr-href="Media/Julien_Chagnon_R%C3%A9sum%C3%A9.pdf" target="_blank" rel="noopener noreferrer">
       <span class="lang-text" data-en="See Resume" data-fr="Voir mon CV">See Resume</span>
       <img src="Media/PDFicon.png" alt="PDF icon" class="textBox-icon">
     </a>
@@ -306,8 +323,82 @@
           </div>
         </div>
       </div>
+      <br>
+
+      <!-- Dynamic Time Allocating Calendar -->
+      <div class="project-box">
+        <div class="project-header">
+          <h3>
+            <span class="lang-text"
+                  data-en="Dynamic Time Allocating Calendar – C++ / Qt Framework (In Progress)"
+                  data-fr="Calendrier à allocation dynamique du temps – C++ / Qt Framework (En cours)">
+              Dynamic Time Allocating Calendar – C++ / Qt Framework (In Progress)
+            </span>
+          </h3>
+        </div>
+        <a href="Media/ELEC_376_Sprint_Report_2_Group_3.pdf"
+          target="_blank" rel="noopener noreferrer"
+          class="btn-report">
+          📄 
+          <span class="lang-text"
+                data-en="Sprint Report"
+                data-fr="Rapport de Sprint">
+            Sprint Report
+          </span>
+        </a>
+
+        <a href="Media/Elec376_F25_group3-main.zip"
+          target="_blank" rel="noopener noreferrer"
+          class="btn-code">
+          <p>&lt;/&gt;</p>
+          <span class="lang-text"
+                data-en="Download Repo zip"
+                data-fr="Télécharger le zip du dépôt">
+            Download Repo zip
+          </span>
+        </a>
+
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+          <img src="Media/ELEC376.png"
+            alt="Dynamic Time Allocating Calendar"
+            class="float-bigimg">
+            <p style="margin-bottom: 0.7em;">
+              <span class="lang-text"
+                      data-en="As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered tasks, projects, and personal events. Unlike static scheduling tools, this system dynamically redistributes study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload across the week."
+                      data-fr="Dans le cadre d’un projet de développement logiciel Agile réalisé sur un semestre, notre équipe a conçu et implémenté un calendrier à allocation dynamique du temps qui adapte intelligemment l’horaire hebdomadaire d’un étudiant en temps réel. Développée en C++ avec le framework Qt, l’application importe les horaires universitaires directement depuis le système SOLUS de l’Université Queen’s via des fichiers .ics et les combine avec les tâches, projets et événements personnels saisis par l’utilisateur. Contrairement aux outils de planification statiques, ce système redistribue dynamiquement les périodes d’étude à mesure que de nouvelles échéances sont ajoutées ou que les priorités changent, en utilisant un algorithme pondéré d’allocation du temps pour équilibrer la charge de travail sur la semaine.">
+                  As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered tasks, projects, and personal events. Unlike static scheduling tools, this system dynamically redistributes study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload across the week.
+              </span>
+              </p>
+        </div>
+            <p style="margin-bottom: 0.7em;">
+              <span class="lang-text"
+                    data-en="The project followed the Agile Scrum methodology, with development structured around two-week sprints. Each sprint began with backlog refinement and planning led by the Scrum Master, where user stories and priorities were discussed to maintain clear objectives. Daily communication and weekly stand-ups ensured consistent progress, while the Product Owner maintained alignment with the overall project vision. Using GitLab, each feature was managed through milestones, issues, and merge requests to ensure traceability and version control across team members."
+                    data-fr="Le projet a suivi la méthodologie Agile Scrum, avec un développement organisé en sprints de deux semaines. Chaque sprint débutait par une séance de planification et d’affinage du backlog dirigée par le Scrum Master, où les user stories et priorités étaient discutées afin de maintenir des objectifs clairs. Une communication quotidienne et des réunions hebdomadaires assuraient une progression constante, tandis que le Product Owner garantissait l’alignement du produit avec la vision d’ensemble. Grâce à GitLab, chaque fonctionnalité a été gérée à l’aide de jalons, d’issues et de merge requests pour assurer la traçabilité et le contrôle de version entre les membres de l’équipe.">
+                The project followed the Agile Scrum methodology, with development structured around two-week sprints. Each sprint began with backlog refinement and planning led by the Scrum Master, where user stories and priorities were discussed to maintain clear objectives. Daily communication and weekly stand-ups ensured consistent progress, while the Product Owner maintained alignment with the overall project vision. Using GitLab, each feature was managed through milestones, issues, and merge requests to ensure traceability and version control across team members.
+              </span>
+            </p>
+            <p style="margin-bottom: 0.7em;">
+              <span class="lang-text"
+                    data-en="Over multiple sprints, the calendar evolved from a simple .ics importer into a fully interactive scheduling system. Early iterations focused on parsing and visualizing class data, while later sprints introduced manual task creation, editing, and deletion. The final development phase integrated the automated scheduling engine that recalculates available time blocks and assigns study sessions based on urgency, due date, and estimated effort. The result is an adaptive planner that updates instantly when new tasks are entered, providing students with a clear and continuously optimized study schedule."
+                    data-fr="Au fil des sprints, le calendrier a évolué d’un simple importateur .ics vers un système de planification entièrement interactif. Les premières itérations se concentraient sur l’analyse et l’affichage des données de cours, tandis que les sprints suivants ont introduit la création, la modification et la suppression manuelles de tâches. La phase finale de développement a intégré le moteur de planification automatisé qui recalcule les plages horaires disponibles et attribue des périodes d’étude selon l’urgence, la date d’échéance et l’effort estimé. Le résultat est un planificateur adaptatif qui se met instantanément à jour lorsque de nouvelles tâches sont saisies, offrant aux étudiants un horaire d’étude clair et continuellement optimisé.">
+                Over multiple sprints, the calendar evolved from a simple .ics importer into a fully interactive scheduling system. Early iterations focused on parsing and visualizing class data, while later sprints introduced manual task creation, editing, and deletion. The final development phase integrated the automated scheduling engine that recalculates available time blocks and assigns study sessions based on urgency, due date, and estimated effort. The result is an adaptive planner that updates instantly when new tasks are entered, providing students with a clear and continuously optimized study schedule.
+              </span>
+            </p>
+            <p>
+              <span class="lang-text"
+                    data-en="The completed application demonstrated the effectiveness of Agile development and collaborative iteration. Through consistent sprint reviews, retrospectives, and cross-platform testing, the team delivered a polished and user-friendly solution. The dynamic time allocating calendar stands as a robust example of how structured teamwork, modular C++ programming, and thoughtful UI design can produce a smart, student-oriented scheduling tool."
+                    data-fr="L’application finale a démontré l’efficacité du développement Agile et de l’itération collaborative. Grâce à des révisions de sprint régulières, des rétrospectives et des tests multi-plateformes, l’équipe a livré une solution soignée et conviviale. Le calendrier à allocation dynamique du temps constitue un exemple solide de la façon dont le travail d’équipe structuré, la programmation modulaire en C++ et une conception d’interface réfléchie peuvent produire un outil de planification intelligent, axé sur les besoins des étudiants.">
+                The completed application demonstrated the effectiveness of Agile development and collaborative iteration. Through consistent sprint reviews, retrospectives, and cross-platform testing, the team delivered a polished and user-friendly solution. The dynamic time allocating calendar stands as a robust example of how structured teamwork, modular C++ programming, and thoughtful UI design can produce a smart, student-oriented scheduling tool.
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
 
       <br>
+      
 
       <!-- Fluid and Powder Dispensing Device -->
       <div class="project-box">
