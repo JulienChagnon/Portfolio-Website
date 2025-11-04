@@ -867,14 +867,14 @@ if (langButton) {
     help: {
       output: [
         'Available commands:',
-        '  about     - Learn more about me',
-        '  skills    - View technical skills',
-        '  projects  - List recent projects',
-        '  status    - Show my status',
-        '  contact   - My contact information',
-        '  ls        - List files',
-        '  help      - Show this help message',
-        '  clear     - Clear the terminal',
+        '  about\t\t- Learn more about me',
+        '  skills\t- View technical skills',
+        '  projects\t- List recent projects',
+        '  status\t- Show my status',
+        '  contact\t- My contact information',
+        '  ls\t\t- List files',
+        '  help\t\t- Show this help message',
+        '  clear\t\t- Clear the terminal',
       ]
     },
     about: {
@@ -927,14 +927,14 @@ if (langButton) {
     help: {
       output: [
         'Commandes disponibles :',
-        '  about     - En savoir plus sur moi',
-        '  competences - Voir mes compétences techniques',
-        '  projets  - Lister mes projets récents',
-        '  status    - Afficher mon statut',
-        '  contact   - Mes coordonnées',
-        '  ls        - Lister les fichiers',
-        '  help      - Afficher ce message d’aide',
-        '  clear     - Effacer le terminal',
+        '  about\t\t- En savoir plus sur moi',
+        '  competences\t- Voir mes compétences techniques',
+        '  projets\t- Lister mes projets récents',
+        '  status\t- Afficher mon statut',
+        '  contact\t- Mes coordonnées',
+        '  ls\t\t- Lister les fichiers',
+        '  help\t\t- Afficher ce message d\'aide',
+        '  clear\t\t- Effacer le terminal',
       ]
     },
     about: {

@@ -72,7 +72,7 @@ header.header-flex {
   word-wrap: break-word;
 }
 
-#headerTerminal .term-line       { white-space: normal; word-wrap: break-word; margin-bottom: 2px; }
+#headerTerminal .term-line       { white-space: pre-wrap; word-wrap: break-word; margin-bottom: 2px; }
 #headerTerminal .prompt          { color: #34d26d; font-weight: bold; white-space: nowrap; }
 #headerTerminal .typed           { color: var(--primary); font-weight: bold; }
 body:not(.fr) #headerTerminal .typed { color: #d5bcff; }
@@ -990,6 +990,10 @@ body.fr .sidebar-dropdown a:focus-visible {
     display: block;               
     width: 75%;                   
     margin: 0 auto 1rem;             
+  }
+
+  .hover-card-text {
+  font-size: 15px; 
   }
 
   .project-box .btn-report,
