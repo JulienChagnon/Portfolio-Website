@@ -142,12 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectsSection = document.getElementById('projects');
     if (!toggle || !dropdown || !list || !sidebar || !projectsSection) return;
 
-    const arrowSpan = toggle.querySelector('[aria-hidden]');
-
-    const setArrow = () => {
-      if (arrowSpan) arrowSpan.textContent = '▼';
-    };
-
     const setOpen = (open) => {
       const expanded = !!open;
       dropdown.hidden = !expanded;
@@ -155,7 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
       toggle.classList.toggle('open', expanded);
       toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
       sidebar.classList.toggle('sidebar-expanded', expanded);
-      setArrow();
+      // Update arrow direction
+      toggle.textContent = expanded ? '🠅' : '🠇';
     };
 
     const isOpen = () => dropdown.classList.contains('open');
@@ -195,9 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const link = document.createElement('a');
         link.href = `#${anchor}`;
         link.textContent = displayTitle;
-        link.addEventListener('click', () => {
-          setOpen(false);
-        });
         li.appendChild(link);
         list.appendChild(li);
       });
@@ -236,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleLanguageChange = () => {
       buildList();
       applyToggleLabel(toggle);
-      setArrow();
     };
 
     buildList();
@@ -868,133 +859,155 @@ if (langButton) {
 })();
 
 
-// Header Terminal (non-interactive visual only, looping with scrollback)
+// Header Interactive Terminal
+// Tab autocompletes commands, arrow keys recall history
 
 (() => {
-  const TERMINAL_SETS = {
-    en: {
-      prompt: "julien@profile:~$ ",
-      commands: [
-        {
-          cmd: 'echo "Welcome to my portfolio!"',
-          out: ['Welcome to my portfolio!'],
-        },
-        {
-          cmd: 'git status',
-          out: ['Looking for 12-16 month co-op opportunities in Computer Engineering.'],
-        },
-        {
-          cmd: 'ls -la',
-          out: [
-            'total 5',
-            '-rw-r--r-- 1 julien julien  850 Oct 30 15:10 about-me.html',
-            '-rw-r--r-- 1 julien julien  980 Oct 30 15:12 work-history.html',
-            '-rw-r--r-- 1 julien julien 1024 Oct 30 15:14 projects.html',
-            '-rw-r--r-- 1 julien julien  740 Oct 30 15:16 education.html',
-            '-rw-r--r-- 1 julien julien  620 Oct 30 15:18 certifications.html'
-          ],
-          beforeDelay: 2500,
-          outputDelay: 300
-        },
-        {
-          cmd: 'git log --oneline',
-          out: [
-            'd4c9f87 (HEAD -> main) 05/2025-08/2025  Traffic Services Intern',
-            'c2a3b19                05/2024-08/2024  Graffiti Management Assistant',
-            'c0b8e0f12              06/2022-08/2022  Camp Counsellor',
-            '9f33a04                09/2023-Present  Computer Engineering Student @ Queen\'s',
-            '7e1cda2                02/2005-Present  Started the journey'
-          ],
-          beforeDelay: 3500,
-          outputDelay: 300
-        },
-        {
-          cmd: 'neofetch',
-          out: ['JulienOS v3.57', 'Uptime: 20 years','Desktop: English & French'],
-          beforeDelay: 3500,
-          outputDelay: 500,
-        },
-        {
-          cmd: 'make coffee',
-          out: ['Compiling caffeine...', 'build successful.'],
-          beforeDelay: 1200,
-          outputDelay: [2000, 600],
-          afterDelay: 900
-        },
-        {
-          cmd: 'diff yesterday today',
-          out: ['+ more experience', '+ more motivation'],
-          outputDelay: 500,
-        }
+  const COMMANDS_EN = {
+    help: {
+      output: [
+        'Available commands:',
+        '  about     - Learn more about me',
+        '  skills    - View technical skills',
+        '  projects  - List recent projects',
+        '  status    - Show my status',
+        '  contact   - My contact information',
+        '  ls        - List files',
+        '  help      - Show this help message',
+        '  clear     - Clear the terminal',
       ]
     },
-    fr: {
-      prompt: "julien@profil:~$ ",
-      commands: [
-        {
-          cmd: 'echo "Bienvenue à mon portfolio !"',
-          out: ['Bienvenue à mon portfolio !'],
-        },
-        {
-          cmd: 'git status',
-          out: ['À la recherche d\'un stage coop de 12 à 16 mois en génie informatique.'],
-        },
-        {
-          cmd: 'ls -la',
-          out: [
-            'total 5',
-            '-rw-r--r-- 1 julien julien  850 oct 30 15:10 à-propos.html',
-            '-rw-r--r-- 1 julien julien  980 oct 30 15:12 historique-de-travail.html',
-            '-rw-r--r-- 1 julien julien 1024 oct 30 15:14 projets.html',
-            '-rw-r--r-- 1 julien julien  740 oct 30 15:16 éducation.html',
-            '-rw-r--r-- 1 julien julien  620 oct 30 15:18 certifications.html'
-          ],
-          beforeDelay: 2500,
-          outputDelay: 300
-        },
-        {
-          cmd: 'git log --oneline',
-          out: [
-            'd4c9f87 (HEAD -> main) 05/2025-08/2025  Stagiaire, services de circulation',
-            'c2a3b19                05/2024-08/2024  Assistant à la gestion des graffitis',
-            'c0b8e0f12              06/2022-08/2022  Moniteur de camp',
-            '9f33a04                09/2023-Présent  Étudiant en génie informatique à Queen\'s',
-            '7e1cda2                02/2005-Présent  Début du parcours'
-          ],
-          beforeDelay: 3500,
-          outputDelay: 300
-        },
-        {
-          cmd: 'neofetch',
-          out: ['JulienOS v3.57', 'Uptime: 20 ans', 'Desktop: Français & Anglais'],
-          beforeDelay: 3500,
-          outputDelay: 500,
-        },
-        {
-          cmd: 'make café',
-          out: ['Compilation de caffeine...', 'construction réussie.'],
-          beforeDelay: 1200,
-          outputDelay: [2000, 600],
-          afterDelay: 900
-        },
-        {
-          cmd: 'diff hier aujourd\'hui',
-          out: ['+ plus d\'expérience', '+ plus de motivation'],
-          outputDelay: 500,
-        },
+    about: {
+      output: [
+        '3rd Year Computer Engineering Student at Queen\'s University',
+        'Bilingual: English & French'
+      ]
+    },
+    skills: {
+      output: [
+        'Languages: Python, C, C++, Java, JavaScript, Assembly, VHDL',
+        'Tools: Git, Arduino, Qt, LTspice, SolidWorks',
+        'Databases: SQL, HDF5',
+        'Web: HTML, CSS'
+      ]
+    },
+    projects: {
+      output: [
+        '1. Running & Jumping Detection (Python ML)',
+        '2. Dynamic Time Allocating Calendar (C++/Qt)',
+        '3. Fluid Dispensing Device (Arduino)',
+        '4. 911 Operator Training Device (Web + Arduino)',
+        '5. Portfolio Website (HTML/CSS/JS)'
+      ]
+    },
+    contact: {
+      output: [
+        'Email: julienchagnon9@gmail.com',
+        'LinkedIn: linkedin.com/in/julienjchagnon',
+        'GitHub: github.com/JulienChagnon'
+      ]
+    },
+    ls: {
+      output: [
+        'about-me.html',
+        'work-history.html',
+        'projects.html',
+        'education.html',
+        'certifications.html'
+      ]
+    },
+    status: {
+      output: [
+        'Looking for 12-16 month co-op opportunities in Computer Engineering',
       ]
     }
   };
-  const MAX_LINES = 15;
-  const TYPE_CHARS_PER_TICK = 1;
-  const TYPE_TICK_MS = 100;
-  const PAUSE_AFTER_CMD_MS = 500;
-  const PAUSE_BETWEEN_OUTPUT_MS = 90;
-  const PAUSE_BETWEEN_COMMANDS_MS = 2500;
+
+  const COMMANDS_FR = {
+    help: {
+      output: [
+        'Commandes disponibles :',
+        '  about     - En savoir plus sur moi',
+        '  competences - Voir mes compétences techniques',
+        '  projets  - Lister mes projets récents',
+        '  status    - Afficher mon statut',
+        '  contact   - Mes coordonnées',
+        '  ls        - Lister les fichiers',
+        '  help      - Afficher ce message d’aide',
+        '  clear     - Effacer le terminal',
+      ]
+    },
+    about: {
+      output: [
+        'Étudiant de 3e année en Génie informatique à l’Université Queen’s à Kingston, Ontario',
+        'Bilingue : français et anglais'
+      ]
+    },
+    competences: {
+      output: [
+        'Langages : Python, C, C++, Java, JavaScript, Assembleur, VHDL',
+        'Outils : Git, Arduino, Qt, LTspice, SolidWorks',
+        'Bases de données : SQL, HDF5',
+        'Web : HTML, CSS'
+      ]
+    },
+    projets: {
+      output: [
+        '1. Détection de course et de saut (Python)',
+        '2. Calendrier à allocation dynamique du temps (C++/Qt)',
+        '3. Dispositif de distribution de liquide (Arduino)',
+        '4. Appareil de formation pour opérateur 911 (Web + Arduino)',
+        '5. Site Web de portfolio (HTML/CSS/JS)'
+      ]
+    },
+    contact: {
+      output: [
+        'Courriel : julienchagnon9@gmail.com',
+        'LinkedIn : linkedin.com/in/julienjchagnon',
+        'GitHub : github.com/JulienChagnon'
+      ]
+    },
+    ls: {
+      output: [
+        'à-propos.html',
+        'historique-travail.html',
+        'projets.html',
+        'éducation.html',
+        'certifications.html'
+      ]
+    },
+    status: {
+      output: [
+        'À la recherche de stages coop de 12 à 16 mois en génie informatique',
+      ]
+    }
+};
+
 
   const currentLanguage = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
+  const getPrompt = (lang) => lang === 'fr' ? 'julien@profil:~$ ' : 'julien@profile:~$ ';
+  const getCommands = (lang) => lang === 'fr' ? COMMANDS_FR : COMMANDS_EN;
+  const commandNamesFor = (lang) => {
+    const names = Object.keys(getCommands(lang));
+    if (!names.includes('clear')) {
+      names.push('clear');
+    }
+    names.sort();
+    return names;
+  };
 
-  const getConfig = (lang) => TERMINAL_SETS[lang] || TERMINAL_SETS.en;
+  const longestCommonPrefix = (values) => {
+    if (!values || values.length === 0) return '';
+    let prefix = values[0];
+    for (let i = 1; i < values.length; i++) {
+      const value = values[i];
+      while (!value.startsWith(prefix) && prefix) {
+        prefix = prefix.slice(0, -1);
+      }
+      if (!prefix) break;
+    }
+    return prefix;
+  };
 
   function initHeaderTerminal() {
     const header = document.querySelector('header.header-flex') || document.querySelector('header');
@@ -1004,177 +1017,254 @@ if (langButton) {
     if (!term) {
       term = document.createElement('div');
       term.id = 'headerTerminal';
-      term.setAttribute('aria-hidden', 'true');
+      term.setAttribute('role', 'application');
+      term.setAttribute('aria-label', 'Interactive terminal');
       header.appendChild(term);
     }
 
     let activeLang = currentLanguage();
-    let activeConfig = getConfig(activeLang);
-    let index = 0;
-    let shouldRestart = false;
-    let firstCycle = true;
+    let history = [];
+    let historyIndex = -1;
+    const MAX_LINES = 25;
 
-    const enforceScrollback = () => {
-      while (term.childElementCount > MAX_LINES) {
-        term.removeChild(term.firstElementChild);
+    const enforceMaxLines = () => {
+      const lines = term.querySelectorAll('.term-line:not(.term-input-line):not(.term-hint)');
+      while (lines.length > MAX_LINES) {
+        lines[0].remove();
+        const updatedLines = term.querySelectorAll('.term-line:not(.term-input-line):not(.term-hint)');
+        if (updatedLines.length <= MAX_LINES) break;
       }
     };
 
-    const appendLine = (el) => {
-      if (shouldRestart) return;
-      enforceScrollback();
-      term.appendChild(el);
-      enforceScrollback();
+    const addPermanentHint = () => {
+      const hint = document.createElement('div');
+      hint.className = 'term-line term-hint';
+      hint.textContent = activeLang === 'fr'
+        ? "# Tapez 'help' pour voir les commandes disponibles"
+        : "# Type 'help' to see available commands";
+      term.insertBefore(hint, term.firstChild);
     };
 
-    const newPromptLine = () => {
+    const clearTerminal = () => {
+      term.innerHTML = '';
+      addPermanentHint();
+      createInputLine();
+    };
+
+    const printOutput = async (lines) => {
+      for (const line of lines) {
+        const div = document.createElement('div');
+        div.className = 'term-line term-output';
+        div.textContent = line;
+        term.insertBefore(div, term.lastElementChild);
+        enforceMaxLines();
+        await new Promise(resolve => setTimeout(resolve, 15));
+      }
+    };
+
+    const printPrompt = (command) => {
       const line = document.createElement('div');
       line.className = 'term-line term-prompt';
+
       const prompt = document.createElement('span');
       prompt.className = 'prompt';
-      prompt.textContent = activeConfig.prompt;
+      prompt.textContent = getPrompt(activeLang);
+
       const typed = document.createElement('span');
       typed.className = 'typed';
-      const caret = document.createElement('span');
-      caret.className = 'term-caret';
-      line.append(prompt, typed, caret);
-      appendLine(line);
-      return { line, typed, caret };
+      typed.textContent = command;
+
+      line.appendChild(prompt);
+      line.appendChild(typed);
+      term.insertBefore(line, term.lastElementChild);
+      enforceMaxLines();
     };
 
-    const releaseCaret = (promptLine) => {
-      const caret = promptLine && promptLine.querySelector('.term-caret');
-      if (caret) caret.remove();
-    };
+    const executeCommand = async (input) => {
+      const cmd = input.trim().toLowerCase();
+      const commands = getCommands(activeLang);
 
-    const printOutputLine = async (text, delayOverride) => {
-      if (shouldRestart) return;
-      const line = document.createElement('div');
-      line.className = 'term-line term-output';
-      line.textContent = text;
-      appendLine(line);
-      if (shouldRestart) return;
-      const delay = delayOverride != null ? delayOverride : PAUSE_BETWEEN_OUTPUT_MS;
-      if (delay > 0) {
-        await sleep(delay);
+      // Only add non-empty commands to history
+      if (cmd !== '') {
+        history.push(input);
+      }
+      historyIndex = history.length;
+
+      printPrompt(input);
+
+      if (cmd === '') return; // Allow empty lines
+
+      if (cmd === 'clear') {
+        clearTerminal();
+        return;
+      }
+
+      if (commands[cmd]) {
+        await printOutput(commands[cmd].output);
+      } else {
+        const notFound = activeLang === 'fr'
+          ? `Commande non trouvée : ${cmd}. Tapez 'help' pour voir les commandes disponibles.`
+          : `Command not found: ${cmd}. Type 'help' to see available commands.`;
+        await printOutput([notFound]);
       }
     };
 
-    const typeText = (node, text) => new Promise(resolve => {
-      const chars = [...text];
-      let i = 0;
+    const createInputLine = () => {
+      const line = document.createElement('div');
+      line.className = 'term-line term-input-line';
 
-      const step = () => {
-        if (shouldRestart) {
-          node.textContent = '';
-          resolve();
+      const prompt = document.createElement('span');
+      prompt.className = 'prompt';
+      prompt.textContent = getPrompt(activeLang);
+
+      const inputContainer = document.createElement('span');
+      inputContainer.className = 'term-input-container';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'term-input';
+      input.setAttribute('aria-label', 'Terminal command input');
+      input.setAttribute('size', '1');
+      input.spellcheck = false;
+      input.autocomplete = 'off';
+      input.style.width = '1ch';
+
+      const cursor = document.createElement('span');
+      cursor.className = 'term-cursor-block';
+
+      line.appendChild(prompt);
+      inputContainer.appendChild(input);
+      inputContainer.appendChild(cursor);
+      line.appendChild(inputContainer);
+      term.appendChild(line);
+
+      // Adjust input size as user types (add 1 for cursor space)
+      input.addEventListener('input', () => {
+        const len = input.value.length;
+        const units = Math.max(1, len + 1);
+        input.style.width = units + 'ch';
+        input.setAttribute('size', Math.max(2, len + 1));
+      });
+
+      input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+          const command = input.value;
+          input.disabled = true;
+          cursor.style.display = 'none';
+          await executeCommand(command);
+          input.value = '';
+          input.setAttribute('size', '1');
+          input.style.width = '1ch';
+          input.disabled = false;
+          cursor.style.display = 'inline-block';
+          input.focus();
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          const allCommands = commandNamesFor(activeLang);
+          const rawValue = input.value;
+          const trimmedValue = rawValue.trim().toLowerCase();
+          const matches = trimmedValue
+            ? allCommands.filter(cmd => cmd.startsWith(trimmedValue))
+            : allCommands;
+          if (!matches.length) {
+            return;
+          }
+          let completed = '';
+          if (!trimmedValue) {
+            completed = matches[0];
+          } else if (matches.length === 1) {
+            completed = matches[0];
+          } else {
+            const prefix = longestCommonPrefix(matches);
+            completed = prefix.length > trimmedValue.length ? prefix : matches[0];
+          }
+          input.value = completed;
+          const widthUnits = Math.max(1, completed.length + 1);
+          input.setAttribute('size', Math.max(2, completed.length + 1));
+          input.style.width = widthUnits + 'ch';
+          const caretPos = completed.length;
+          if (typeof input.setSelectionRange === 'function') {
+            input.setSelectionRange(caretPos, caretPos);
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (historyIndex > 0) {
+            historyIndex--;
+            input.value = history[historyIndex];
+            input.setAttribute('size', Math.max(2, input.value.length + 1));
+            input.style.width = Math.max(1, input.value.length + 1) + 'ch';
+            const caret = input.value.length;
+            if (typeof input.setSelectionRange === 'function') {
+              input.setSelectionRange(caret, caret);
+            }
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (historyIndex < history.length - 1) {
+            historyIndex++;
+            input.value = history[historyIndex];
+            input.setAttribute('size', Math.max(2, input.value.length + 1));
+            input.style.width = Math.max(1, input.value.length + 1) + 'ch';
+            const caret = input.value.length;
+            if (typeof input.setSelectionRange === 'function') {
+              input.setSelectionRange(caret, caret);
+            }
+          } else {
+            historyIndex = history.length;
+            input.value = '';
+            input.setAttribute('size', '2');
+            input.style.width = '2ch';
+            if (typeof input.setSelectionRange === 'function') {
+              input.setSelectionRange(0, 0);
+            }
+          }
+        }
+      });
+
+      // Click anywhere on terminal to focus input
+      term.addEventListener('click', (e) => {
+        if (!input.disabled && e.target !== input) {
+          input.focus();
+        }
+      });
+
+      // Capture any keypresses on the page and direct them to terminal
+      document.addEventListener('keydown', (e) => {
+        // Don't capture if user is typing in another input/textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
           return;
         }
-        const chunk = chars.slice(i, i + TYPE_CHARS_PER_TICK).join('');
-        node.textContent += chunk;
-        i += TYPE_CHARS_PER_TICK;
-        if (i < chars.length) {
-          setTimeout(step, TYPE_TICK_MS);
-        } else {
-          resolve();
+        if (input.disabled) {
+          return;
         }
-      };
-      step();
-    });
+        if (e.ctrlKey || e.altKey || e.metaKey || e.key.startsWith('F')) {
+          return;
+        }
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Escape'].includes(e.key) && e.target !== input) {
+          return;
+        }
+        // Focus the terminal input
+        if (document.activeElement !== input) {
+          input.focus();
+        }
+      });
 
-    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-    const requestRestart = () => {
-      shouldRestart = true;
-      firstCycle = true;
-      index = 0;
-      term.innerHTML = '';
+      setTimeout(() => input.focus(), 100);
     };
 
-    const applyLanguage = (lang) => {
-      const nextLang = TERMINAL_SETS[lang] ? lang : 'en';
-      if (nextLang === activeLang) return;
-      activeLang = nextLang;
-      activeConfig = getConfig(activeLang);
-      requestRestart();
-    };
-
-    const handleLanguageChange = (event) => {
+    const handleLanguageChange = async (event) => {
       const lang = event && event.detail && event.detail.lang ? event.detail.lang : currentLanguage();
-      applyLanguage(lang);
+      if (lang !== activeLang) {
+        activeLang = lang;
+        clearTerminal();
+      }
     };
 
     window.addEventListener('portfolio:languagechange', handleLanguageChange);
 
-    (async () => {
-      while (true) {
-        if (shouldRestart) {
-          shouldRestart = false;
-          continue;
-        }
-
-        const commands = activeConfig.commands;
-        if (!commands.length) {
-          await sleep(PAUSE_BETWEEN_COMMANDS_MS);
-          continue;
-        }
-
-        const entry = commands[index % commands.length];
-        const promptLine = newPromptLine();
-        const beforeDelay = firstCycle ? 0 : (entry.beforeDelay != null ? entry.beforeDelay : PAUSE_BETWEEN_COMMANDS_MS);
-        firstCycle = false;
-        if (beforeDelay > 0) {
-          await sleep(beforeDelay);
-        }
-
-        if (shouldRestart || !promptLine) {
-          shouldRestart = false;
-          firstCycle = true;
-          continue;
-        }
-
-        await typeText(promptLine.typed, entry.cmd);
-        if (shouldRestart) {
-          shouldRestart = false;
-          firstCycle = true;
-          continue;
-        }
-
-        const afterDelay = entry.afterDelay != null ? entry.afterDelay : PAUSE_AFTER_CMD_MS;
-        if (afterDelay > 0) {
-          await sleep(afterDelay);
-        }
-        if (shouldRestart) {
-          shouldRestart = false;
-          firstCycle = true;
-          continue;
-        }
-
-        releaseCaret(promptLine.line);
-
-        const outLines = entry.out || [];
-        for (let i = 0; i < outLines.length; i++) {
-          if (shouldRestart) break;
-          const lineText = outLines[i];
-          let delayOverride;
-          if (Array.isArray(entry.outputDelay)) {
-            const idx = i < entry.outputDelay.length ? i : entry.outputDelay.length - 1;
-            delayOverride = entry.outputDelay[idx];
-          } else {
-            delayOverride = entry.outputDelay;
-          }
-          await printOutputLine(lineText, delayOverride);
-        }
-
-        if (shouldRestart) {
-          shouldRestart = false;
-          firstCycle = true;
-          continue;
-        }
-
-        index = (index + 1) % commands.length;
-      }
-    })();
+    // Initialize terminal with permanent hint
+    addPermanentHint();
+    createInputLine();
   }
 
   if (document.readyState === 'loading') {
