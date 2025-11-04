@@ -885,7 +885,7 @@ if (langButton) {
     },
     skills: {
       output: [
-        'Languages: Python, C, C++, Java, JavaScript, Assembly, VHDL',
+        'Languages: Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
         'Tools: Git, Arduino, Qt, LTspice, SolidWorks',
         'Databases: SQL, HDF5',
         'Web: HTML, CSS'
@@ -945,7 +945,7 @@ if (langButton) {
     },
     competences: {
       output: [
-        'Langages : Python, C, C++, Java, JavaScript, Assembleur, VHDL',
+        'Langages : Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
         'Outils : Git, Arduino, Qt, LTspice, SolidWorks',
         'Bases de données : SQL, HDF5',
         'Web : HTML, CSS'
