@@ -170,8 +170,6 @@ body.fr #headerTerminal .term-cursor-block {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  border-radius: 999px;
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.4rem;
   pointer-events: auto;
@@ -559,6 +557,9 @@ body.fr .lang-button {
   background-color: #ffffff;
   color: #333
 }
+body.fr .lang-button:hover {
+  background-color: #dbdbdb;
+}
 
 .lang-button:hover {
   background-color: #dbdbdb;
@@ -832,7 +833,6 @@ body.fr .sidebar-dropdown a:focus-visible {
 }
 .see-more:hover {
   background: #89a0a4;
-  transform: translateY(-1px);
 }
 
 /* Project box and buttons */
@@ -900,7 +900,6 @@ body.fr .sidebar-dropdown a:focus-visible {
 .project-box .btn-video:hover,
 .project-box .btn-code:hover {
   background: #89a0a4;
-  transform: translateY(-1px);
 }
 .project-box .project-header h3 {
   margin: 0 !important;     
@@ -1041,7 +1040,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   .project-box .btn-report:hover,
   .project-box .btn-video:hover,
   .project-box .btn-code:hover {
-    transform: translateY(-1px) scale(0.98);
+    transform: scale(0.98);
   }
 
   .lang-toggle {

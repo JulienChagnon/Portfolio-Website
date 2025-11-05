@@ -21,51 +21,72 @@
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 })();
 
-// Sidebar
+// Sidebar - sticky positioning
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
   const header  = document.querySelector('header.header-flex');
   if (!sidebar || !header) return;
 
-  const FIXED_TOP    = 100; // px from viewport top after unlock
-  const UNDER_MARGIN = 10;
+  const STICK_OFFSET = 100; // px from top when it becomes sticky
 
-  // Ensure there is absolutely no animated lag
-  sidebar.style.transition = 'none';
-  sidebar.style.transform  = 'none';
-  sidebar.style.position   = 'fixed';
-  sidebar.style.visibility = 'hidden'; // avoid flash until first compute
-  sidebar.style.opacity    = '0';
+  // Set up sticky positioning - hide initially to prevent flash
+  sidebar.style.position = 'absolute';
+  sidebar.style.visibility = 'hidden';
+  sidebar.style.opacity = '0';
+  sidebar.style.willChange = 'top';
 
-  const update = () => {
-    const headerBottom = header.getBoundingClientRect().bottom;
-    const desiredTop = Math.max(FIXED_TOP, Math.round(headerBottom + UNDER_MARGIN));
+  let isSticky = false;
+  let lastScrollY = window.scrollY || window.pageYOffset;
+  let initialized = false;
 
-    if (sidebar.__lastTop !== desiredTop) {
-      sidebar.style.top = desiredTop + 'px';
-      sidebar.__lastTop = desiredTop;
+  const updatePosition = () => {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const headerBottom = header.offsetTop + header.offsetHeight;
+    const sidebarTop = headerBottom + 10; // 10px margin under header
+
+    // Calculate when sidebar should stick
+    const stickPoint = sidebarTop - STICK_OFFSET;
+
+    if (scrollY >= stickPoint) {
+      // Stick to viewport
+      if (!isSticky) {
+        // Prevent flash by ensuring smooth transition
+        const currentTop = sidebar.getBoundingClientRect().top;
+        sidebar.style.position = 'fixed';
+        sidebar.style.top = currentTop + 'px';
+        // Force reflow then animate to target position
+        void sidebar.offsetHeight;
+        sidebar.style.transition = 'top 0.1s ease-out';
+        sidebar.style.top = STICK_OFFSET + 'px';
+        isSticky = true;
+      }
+    } else {
+      // Flow with page
+      if (isSticky) {
+        sidebar.style.transition = 'none';
+        sidebar.style.position = 'absolute';
+        sidebar.style.top = sidebarTop + 'px';
+        isSticky = false;
+      } else if (!initialized) {
+        // Initial positioning
+        sidebar.style.top = sidebarTop + 'px';
+      }
     }
 
-    // Reveal after first layout-correct position is applied
-    if (sidebar.style.visibility !== 'visible') {
+    // Show sidebar after first position is set
+    if (!initialized) {
       sidebar.style.visibility = 'visible';
       sidebar.style.opacity = '1';
+      initialized = true;
     }
+
+    lastScrollY = scrollY;
   };
 
-  const tick = () => {
-    update();
-    requestAnimationFrame(tick);
-  };
-  tick();
-
-  //react to header size changes
-  if (typeof ResizeObserver !== 'undefined') {
-    new ResizeObserver(() => update()).observe(header);
-  } else {
-    window.addEventListener('resize', update);
-    window.addEventListener('load', update);
-  }
+  // Use scroll event for immediate updates
+  window.addEventListener('scroll', updatePosition, { passive: true });
+  window.addEventListener('resize', updatePosition);
+  updatePosition(); // Initial position
 });
 
 
@@ -101,9 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'Running and Jumping Detection (Python ML)',
       'Dynamic Time Allocating Calendar (Qt/C++)',
       'Fluid and Powder Dispensing Device (Arduino)',
-      '911 Operator Training Device (Web + Arduino)',
+      '911 Dispatcher Training Device (Web + Arduino)',
       'Portfolio Website (HTML/CSS/JS)',
-      'Birthday Guessing Game (Java)',
     ],
     fr: [
       'Détection de course et saut (Python)',
@@ -111,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
       'Distributeur fluide et poudre (Arduino)',
       'Simulateur d\'opérateur 911 (Web + Arduino)',
       'Site portfolio (HTML/CSS/JS)',
-      'Jeu deviner anniversaire (Java)',
     ],
   };
 
@@ -870,11 +889,14 @@ if (langButton) {
         '  about\t\t- Learn more about me',
         '  skills\t- View technical skills',
         '  projects\t- List recent projects',
+        '  work\t\t- View work experience',
         '  status\t- Show my status',
         '  contact\t- My contact information',
         '  ls\t\t- List files',
+        '  joke\t\t- Random programming joke',
         '  help\t\t- Show this help message',
         '  clear\t\t- Clear the terminal',
+        'Use Tab to autocomplete commands, and up/down keys to navigate command history.'
       ]
     },
     about: {
@@ -896,7 +918,7 @@ if (langButton) {
         '1. Running & Jumping Detection (Python ML)',
         '2. Dynamic Time Allocating Calendar (C++/Qt)',
         '3. Fluid Dispensing Device (Arduino)',
-        '4. 911 Operator Training Device (Web + Arduino)',
+        '4. 911 Dispatcher Training Device (Web + Arduino)',
         '5. Portfolio Website (HTML/CSS/JS)'
       ]
     },
@@ -910,8 +932,8 @@ if (langButton) {
     ls: {
       output: [
         'about-me.html',
-        'work-history.html',
         'projects.html',
+        'work-history.html',
         'education.html',
         'certifications.html'
       ]
@@ -919,6 +941,40 @@ if (langButton) {
     status: {
       output: [
         'Looking for 12-16 month co-op opportunities in Computer Engineering',
+      ]
+    },
+    work: {
+      output: [
+        'Work Experience:',
+        '',
+        'Traffic Services Intern @ City of Ottawa (May - Aug 2025)',
+        '  -Applied data analysis to pedestrian & vehicle survey data',
+        '  -Used GIS tools to map and analyze traffic patterns',
+        '  -Automated form collection with Microsoft Power Automate',
+        '',
+        'Graffiti Management Assistant @ City of Ottawa (May - Aug 2024)',
+        '  -Managed city-wide graffiti database',
+        '  -Tracked service requests and task completion',
+        '  -Operated specialized removal equipment',
+        '',
+        'Camp Counsellor @ Mountain Bike Kids (Jun - Aug 2022)',
+        '  -Supervised campers aged 8-14',
+        '  -Led mountain biking outings and day trips',
+      ]
+    },
+    joke: {
+      output: null,
+      jokes: [
+        'Why do programmers prefer dark mode?\nBecause light attracts bugs!',
+        'How many programmers does it take to change a light bulb?\nNone. It\'s a hardware problem.',
+        'Why do Java developers wear glasses?\nBecause they don\'t C#!',
+        'There are only 10 types of people in the world:\nThose who understand binary, and those who don\'t.',
+        'Why did the computer engineer get stuck in the shower?\nThe shampoo bottle said: "Lather, Rinse, Repeat." It never said when to stop!',
+        'What\'s the object-oriented way to become wealthy?\nInheritance.',
+        'A programmer\'s wife tells him: "Run to the store and pick up a loaf of bread.\nIf they have eggs, get a dozen."\nThe programmer comes home with 12 loaves of bread.',
+        '"Knock, knock."\n"Who\'s there?"\n...\n...\nvery long pause...\n"Java."',
+        'Why did the computer show up late to work?\nIt had a hard drive!',
+        'What do you call 8 hobbits?\nA hobbyte.',
       ]
     }
   };
@@ -930,11 +986,14 @@ if (langButton) {
         '  about\t\t- En savoir plus sur moi',
         '  competences\t- Voir mes compétences techniques',
         '  projets\t- Lister mes projets récents',
+        '  travail\t- Voir mon expérience professionnelle',
         '  status\t- Afficher mon statut',
         '  contact\t- Mes coordonnées',
         '  ls\t\t- Lister les fichiers',
+        '  blague\t- Blague aléatoire de programmation',
         '  help\t\t- Afficher ce message d\'aide',
         '  clear\t\t- Effacer le terminal',
+        'Utilisez Tab pour compléter les commandes, et les flèches haut/bas pour naviguer dans l\'historique des commandes.'
       ]
     },
     about: {
@@ -970,8 +1029,8 @@ if (langButton) {
     ls: {
       output: [
         'à-propos.html',
-        'historique-travail.html',
         'projets.html',
+        'historique-travail.html',
         'éducation.html',
         'certifications.html'
       ]
@@ -979,6 +1038,36 @@ if (langButton) {
     status: {
       output: [
         'À la recherche de stages coop de 12 à 16 mois en génie informatique',
+      ]
+    },
+    travail: {
+      output: [
+        'Expérience professionnelle :',
+        '',
+        'Stagiaire aux Services de la circulation @ Ville d\'Ottawa (mai - août 2025)',
+        '  -Analyse de données piétonnes et routières',
+        '  -Outils SIG pour cartographier les modèles de circulation',
+        '  -Automatisation avec Microsoft Power Automate',
+        '',
+        'Assistant à la Gestion des graffitis @ Ville d\'Ottawa (mai - août 2024)',
+        '  -Gestion de base de données municipale de graffitis',
+        '  -Suivi des demandes de service',
+        '  -Utilisation d\'équipements spécialisés de nettoyage',
+        '',
+        'Animateur de camp @ Mountain Bike Kids (juin - août 2022)',
+        '  -Supervision de campeurs de 8 à 14 ans',
+        '  -Organisation de sorties en vélo de montagne',
+      ]
+    },
+    blague: {
+      output: null,
+      jokes: [
+        'C\'est quoi un développeur obèse ?\nQuelqu\'un qui mange trop de cookies!',
+        'Comment un programmeur répare-t-il une voiture ?\nIl éteint et rallume le contact.',
+        'Combien de développeurs faut-il pour changer une ampoule ?\nAucun, c\'est un problème hardware!',
+        'Qu\'est-ce qu\'un programmeur trouve romantique ?\nUn commit push avec un beau message!',
+        'Pourquoi les programmeurs mettent des lunettes ?\nParce qu\'ils passent leur vie à chercher le point-virgule manquant!',
+        'Pourquoi les développeurs préfèrent le mode sombre ?\nParce que la lumière attire les bugs!',
       ]
     }
 };
@@ -1100,7 +1189,14 @@ if (langButton) {
       }
 
       if (commands[cmd]) {
-        await printOutput(commands[cmd].output);
+        // Special handling for joke command - pick random joke
+        if ((cmd === 'joke' || cmd === 'blague') && commands[cmd].jokes) {
+          const jokes = commands[cmd].jokes;
+          const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+          await printOutput(randomJoke.split('\n'));
+        } else if (commands[cmd].output) {
+          await printOutput(commands[cmd].output);
+        }
       } else {
         const notFound = activeLang === 'fr'
           ? `Commande non trouvée : ${cmd}. Tapez 'help' pour voir les commandes disponibles.`
