@@ -892,7 +892,7 @@ if (langButton) {
         '  work\t\t- View work experience',
         '  status\t- Show my status',
         '  contact\t- My contact information',
-        '  ls\t\t- List files',
+        '  ls\t\t- List sections',
         '  joke\t\t- Random programming joke',
         '  help\t\t- Show this help message',
         '  clear\t\t- Clear the terminal',
@@ -1062,12 +1062,12 @@ if (langButton) {
     blague: {
       output: null,
       jokes: [
-        'C\'est quoi un développeur obèse ?\nQuelqu\'un qui mange trop de cookies!',
-        'Comment un programmeur répare-t-il une voiture ?\nIl éteint et rallume le contact.',
-        'Combien de développeurs faut-il pour changer une ampoule ?\nAucun, c\'est un problème hardware!',
-        'Qu\'est-ce qu\'un programmeur trouve romantique ?\nUn commit push avec un beau message!',
-        'Pourquoi les programmeurs mettent des lunettes ?\nParce qu\'ils passent leur vie à chercher le point-virgule manquant!',
-        'Pourquoi les développeurs préfèrent le mode sombre ?\nParce que la lumière attire les bugs!',
+        'C\'est quoi un développeur obèse?\nQuelqu\'un qui mange trop de cookies!',
+        'Comment un programmeur répare-t-il une voiture?\nIl éteint et rallume le contact.',
+        'Combien de développeurs faut-il pour changer une ampoule?\nAucun, c\'est un problème hardware!',
+        'Qu\'est-ce qu\'un programmeur trouve romantique?\nUn commit push avec un beau message!',
+        'Pourquoi les programmeurs mettent des lunettes?\nParce qu\'ils passent leur vie à chercher le point-virgule manquant!',
+        'Pourquoi les développeurs préfèrent le mode sombre?\nParce que la lumière attire les bugs!',
       ]
     }
 };
