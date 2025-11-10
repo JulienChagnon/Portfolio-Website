@@ -619,7 +619,14 @@ if (langButton) {
     let lastChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const changeInterval = 280; // ms between digit changes (increase for slower)
     const REVEAL_SCROLL_RANGE = 1100;
+    const RAIN_RAMP_EXPONENT = 0.75; // < 1 brightens sooner while still letting top be dark
     let scrollClassTimer;
+    let gradientMomentum = 0;
+    let gradientTarget = 0.5;
+    let gradientMix = 0.5;
+    const GRADIENT_DECAY = 0.9;
+    const GRADIENT_MAX = 50;
+    const GRADIENT_LERP = 0.2;
 
     //Only toggles the subtle header style while actively scrolling
 
@@ -629,6 +636,15 @@ if (langButton) {
       scrollClassTimer = setTimeout(() => header.classList.remove('header-rain-active'), 200);
     }
     window.addEventListener('scroll', onUserScroll, { passive: true });
+
+    function updateGradientTrend(deltaY) {
+      if (!deltaY) return;
+      gradientMomentum = gradientMomentum * GRADIENT_DECAY + deltaY;
+      // Keep the accumulator bounded to avoid overflow in long sessions
+      gradientMomentum = Math.max(-GRADIENT_MAX, Math.min(GRADIENT_MAX, gradientMomentum));
+      gradientTarget = 0.5 + 0.5 * (gradientMomentum / GRADIENT_MAX);
+      gradientTarget = Math.max(0, Math.min(1, gradientTarget));
+    }
 
     function hash32(x){
       x |= 0; x = (x ^ 61) ^ (x >>> 16); x = x + (x << 3);
@@ -640,6 +656,10 @@ if (langButton) {
       const nowY = window.scrollY || window.pageYOffset || 0;
       const dy = nowY - lastY;
       lastY = nowY;
+      updateGradientTrend(dy);
+      gradientMix += (gradientTarget - gradientMix) * GRADIENT_LERP;
+      if (gradientMix < 0) gradientMix = 0;
+      else if (gradientMix > 1) gradientMix = 1;
 
       // Speed of rain chains while scrolling.
       accum += dy / 25;
@@ -658,9 +678,11 @@ if (langButton) {
 
       //Clear and draw every frame so digits change even when idle
       ctx.clearRect(0, 0, w, h);
-      const ramp = Math.max(0, Math.min(1, nowY / REVEAL_SCROLL_RANGE));
+      const scrollFactor = Math.max(0, Math.min(1, nowY / REVEAL_SCROLL_RANGE));
+      const ramp = Math.pow(scrollFactor, RAIN_RAMP_EXPONENT);
       const visibleTopY = Math.floor((1 - ramp) * h);
-      if (ramp === 0) {
+      if (ramp <= 0) {
+        ctx.clearRect(0, 0, w, h);
         requestAnimationFrame(tick);
         return;
       }
@@ -681,6 +703,7 @@ if (langButton) {
       const featherPx = Math.round(6 * step);
       const bleedPx   = Math.round(2 * step);
       const jitterPx  = Math.round(2.5 * step);
+      const effectiveGradient = gradientMix;
 
       for (let c = 0; c < cols; c++) {
         const chainLen = 10 + (c % 9);
@@ -696,7 +719,11 @@ if (langButton) {
           const y = r * step;
           if (y < colTop - bleedPx) continue;
 
-          const baseAlpha = i === 0 ? 0.95 : Math.max(0.25, 0.9 - i * 0.1);
+          const gradientIndex = Math.max(
+            0,
+            effectiveGradient * i + (1 - effectiveGradient) * ((chainLen - 1) - i)
+          );
+          const baseAlpha = gradientIndex <= 0.01 ? 0.95 : Math.max(0.25, 0.9 - gradientIndex * 0.1);
           const delta = y - colTop;
           let colAlpha;
           if (delta < 0) {
@@ -753,6 +780,12 @@ if (langButton) {
     let lastGlyphChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const glyphInterval = 360;
     let lastScrollY = window.scrollY || window.pageYOffset || 0;
+    let gradientMomentum = 0;
+    let gradientTarget = 0.5;
+    let gradientMix = 0.5;
+    const GRADIENT_DECAY = 0.9;
+    const GRADIENT_MAX = 40;
+    const GRADIENT_LERP = 0.2;
 
     function cssVar(name, fallback) {
       const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -792,6 +825,14 @@ if (langButton) {
       }
     }
 
+    function updateGradientTrend(deltaY) {
+      if (!deltaY) return;
+      gradientMomentum = gradientMomentum * GRADIENT_DECAY + deltaY;
+      gradientMomentum = Math.max(-GRADIENT_MAX, Math.min(GRADIENT_MAX, gradientMomentum));
+      gradientTarget = 0.5 + 0.5 * (gradientMomentum / GRADIENT_MAX);
+      gradientTarget = Math.max(0, Math.min(1, gradientTarget));
+    }
+
     function tick() {
       if (!cols || !rows) {
         requestAnimationFrame(tick);
@@ -801,9 +842,14 @@ if (langButton) {
       const nowScrollY = window.scrollY || window.pageYOffset || 0;
       const dy = nowScrollY - lastScrollY;
       lastScrollY = nowScrollY;
+      updateGradientTrend(dy);
+      gradientMix += (gradientTarget - gradientMix) * GRADIENT_LERP;
+      if (gradientMix < 0) gradientMix = 0;
+      else if (gradientMix > 1) gradientMix = 1;
 
       const absDy = Math.abs(dy);
       const direction = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
+      const effectiveGradient = gradientMix;
       const moveSteps = Math.min(6, Math.floor(absDy / 12));
       if (moveSteps > 0 && direction !== 0) {
         for (let c = 0; c < cols; c++) {
@@ -844,7 +890,11 @@ if (langButton) {
           const seed = ((c + 1) * 73856093) ^ ((row + 1) * 19349663) ^ ((glyphPhase + 1) * 83492791);
           const ch = (hash32(seed) & 1) ? '1' : '0';
           const x = c * step + step * 0.2;
-          const baseAlpha = i === 0 ? 0.9 : Math.max(0.25, 0.8 - i * 0.08);
+          const gradientIndex = Math.max(
+            0,
+            effectiveGradient * i + (1 - effectiveGradient) * ((chainLen - 1) - i)
+          );
+          const baseAlpha = gradientIndex <= 0.01 ? 0.9 : Math.max(0.25, 0.8 - gradientIndex * 0.08);
           const fade = Math.max(0.6, 1 - (y / Math.max(1, h)) * 0.22);
           const drawAlpha = baseAlpha * fade * activation;
           if (drawAlpha <= 0.02) continue;

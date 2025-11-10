@@ -29,7 +29,6 @@
   letter-spacing: -0.01em;
   max-width: 600px;
   position: relative;
-  z-index: 3;
 }
 
 .header-info h3 {
@@ -37,7 +36,6 @@
   white-space: nowrap;
   max-width: 650px;
   position: relative;
-  z-index: 3;
 }
 
 .header-info h3 + h3 {
@@ -479,12 +477,13 @@ header a.textBox {
   border-radius:4px;
   text-decoration:none;
   font-weight:bold;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  -webkit-font-smoothing: antialiased;
   margin-top:0.5rem;
   transition:background 0.2s ease-in-out;
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
-  z-index: 3;
 }
 
 header a.textBox:hover {
@@ -1136,6 +1135,19 @@ header {
   position: relative;
   z-index: 1;
   transition: filter 200ms ease;
+}
+
+/* Keep critical header UI elements above the scanline overlay */
+header.header-flex .headshot {
+  z-index: 4;
+}
+
+header.header-flex .lang-toggle {
+  z-index: 5;
+}
+
+header.header-flex .header-info {
+  z-index: 1;
 }
 
 
