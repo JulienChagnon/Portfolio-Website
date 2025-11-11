@@ -17,6 +17,7 @@
       --dark: #212529;
       --accent: #577e84;
       --link-blue: #3c70bc;
+      --light-bg: #ffffff;
     }
 
     body.fr {
@@ -25,6 +26,26 @@
       --dark:      #1F1F1F;
       --accent:    #6798a1;  
       --link-blue: #3c70bc;
+      --light-bg:  #ffffff;
+    }
+
+    body.dark-mode {
+      --primary:   #d8cdf3;
+      --light:     #0c1324;
+      --dark:      #f6f9ff;
+      --accent:    #8badb7;
+      --link-blue: #85b4d2;
+      --light-bg:  #111729;
+      color-scheme: dark;
+    }
+
+    body.fr.dark-mode {
+      --primary:   #a2d9ff;
+      --light:     #0c1324;
+      --dark:      #f6f9ff;
+      --accent:    #8badb7;
+      --link-blue: #a8ddff;
+      --light-bg:  #151d33;
     }
 
 
@@ -100,7 +121,7 @@
         at Queen's University
     </h3>
 
-    <a id="resumeLink" class="textBox" href="Media/Julien_Chagnon_Resume.pdf" data-en-href="Media/Julien_Chagnon_Resume.pdf" data-fr-href="Media/Julien_Chagnon_R%C3%A9sum%C3%A9.pdf" target="_blank" rel="noopener noreferrer">
+    <a id="resumeLink" class="textBox" href="Media/Julien_Chagnon_Resume.pdf" data-en-href="Media/Julien_Chagnon_Resume.pdf" data-fr-href="Media/Julien_Chagnon_R%C3%A9sum%C3%A9.pdf" data-media-type="pdf">
       <span class="lang-text" data-en="See Resume" data-fr="Voir mon CV">See Resume</span>
       <img src="Media/PDFicon.png" alt="PDF icon" class="textBox-icon">
     </a>
@@ -123,7 +144,14 @@
 
   </header>
 
-  <main>
+  <div class="content-rain-wrapper">
+    <canvas
+      id="contentRainLeft"
+      class="content-rain-canvas content-rain-canvas--left"
+      aria-hidden="true">
+    </canvas>
+
+    <main>
   <!-- Introduction text -->
   <p class="lang-text" data-en="Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University currently in my 3rd year." data-fr="Bonjour ! Je me nomme Julien Chagnon. Je suis étudiant bilingue (français/anglais) présentement en troisième année du programme de génie informatique à l’Université Queen’s à Kingston, en Ontario." style="margin-bottom: 1em;">
     Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University currently in my 3rd year.
@@ -186,7 +214,7 @@
       <br>
 
       <!-- Running and Jumping Detection -->
-      <div class="project-box">
+      <div id="project-running-jumping" class="project-box">
         <div class="project-header">
           <h3>
             <span class="lang-text"
@@ -196,7 +224,7 @@
             </span>
           </h3>
         </div>
-        <button id="openVideoBtn3" class="btn-video">
+        <button id="openVideoBtn3" class="btn-video" type="button" data-media-type="video" data-media-src="Media/ELEC292Demo.mp4">
           ▶ 
           <span class="lang-text"
                 data-en="Watch Video"
@@ -205,8 +233,8 @@
           </span>
         </button>
         <a href="Media/ELEC292_FinalReport.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-report">
+          class="btn-report"
+          data-media-type="pdf">
           📄 
           <span class="lang-text"
                 data-en="Final Report"
@@ -215,8 +243,8 @@
           </span>
         </a>
         <a href="Media/ELEC292_Code.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-code">
+          class="btn-code"
+          data-media-type="pdf">
           <p>&lt;/&gt;</p>
           <span class="lang-text"
                 data-en="See Code"
@@ -255,7 +283,7 @@
       <br>
 
       <!-- Dynamic Time Allocating Calendar -->
-      <div class="project-box">
+      <div id="project-dynamic-calendar" class="project-box">
         <div class="project-header">
           <h3>
             <span class="lang-text"
@@ -266,8 +294,8 @@
           </h3>
         </div>
         <a href="Media/ELEC_376_Sprint_Report_2_Group_3.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-report">
+          class="btn-report"
+          data-media-type="pdf">
           📄 
           <span class="lang-text"
                 data-en="Sprint Report"
@@ -316,7 +344,7 @@
       
 
       <!-- Fluid and Powder Dispensing Device -->
-      <div class="project-box">
+      <div id="project-fluid-dispensing" class="project-box">
         <div class="project-header">
           <h3>
             <span class="lang-text"
@@ -326,7 +354,7 @@
             </span>
           </h3>
         </div>
-        <button id="openVideoBtn" class="btn-video">
+        <button id="openVideoBtn" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC101Demo.mp4">
           ▶ 
           <span class="lang-text"
                 data-en="Watch Video"
@@ -335,8 +363,8 @@
           </span>
         </button>
         <a href="Media/APSC101_FinalReport.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-report">
+          class="btn-report"
+          data-media-type="pdf">
           📄 
           <span class="lang-text"
                 data-en="Final Report"
@@ -387,7 +415,7 @@
       <br>
 
       <!-- 911 dispatcher Training Device -->
-      <div class="project-box">
+      <div id="project-911-training" class="project-box">
         <div class="project-header">
           <h3>
             <span class="lang-text"
@@ -397,7 +425,7 @@
             </span>
           </h3>
         </div>
-        <button id="openVideoBtn2" class="btn-video">
+        <button id="openVideoBtn2" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC103Demo.mp4">
           ▶ 
           <span class="lang-text"
                 data-en="Watch Video"
@@ -406,8 +434,8 @@
           </span>
         </button>
         <a href="Media/APSC103_FinalReport.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-report">
+          class="btn-report"
+          data-media-type="pdf">
           📄 
           <span class="lang-text"
                 data-en="Final Report"
@@ -416,8 +444,8 @@
           </span>
         </a>
         <a href="Media/APSC103_code.pdf"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-code">
+          class="btn-code"
+          data-media-type="pdf">
           <p>&lt;/&gt;</p>
           <span class="lang-text"
                 data-en="See Code"
@@ -456,7 +484,7 @@
       <br>
 
       <!-- Project: Portfolio Website -->
-      <div class="project-box">
+      <div id="project-portfolio-website" class="project-box">
         <div class="project-header">
           <h3>
             <span class="lang-text"
@@ -723,8 +751,23 @@
           Completed 2025
         </span>
       </p>
-    </section>
+  </section>
   </main>
+
+    <canvas
+      id="contentRainRight"
+      class="content-rain-canvas content-rain-canvas--right"
+      aria-hidden="true">
+    </canvas>
+  </div>
+
+  <div id="mediaModal" class="media-modal" hidden>
+    <div class="media-modal__backdrop" data-close-modal></div>
+    <div class="media-modal__dialog" role="dialog" aria-modal="true" aria-label="Media viewer">
+      <button type="button" class="media-modal__close" data-close-modal aria-label="Close media viewer">&times;</button>
+      <div id="mediaModalContent" class="media-modal__content" role="document"></div>
+    </div>
+  </div>
 
   <!-- Footer with dynamic year -->
   <footer>

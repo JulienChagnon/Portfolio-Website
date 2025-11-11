@@ -91,16 +91,168 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-//Open vids in new tab buttons
+// Inline media modal (videos + PDFs)
 (() => {
-  const v1 = document.getElementById('openVideoBtn');
-  const v2 = document.getElementById('openVideoBtn2');
-  const v3 = document.getElementById('openVideoBtn3');
-  if (v1) v1.addEventListener('click', () => window.open('Media/APSC101Demo.mp4', '_blank'));
-  if (v2) v2.addEventListener('click', () => window.open('Media/APSC103Demo.mp4', '_blank'));
-  if (v3) v3.addEventListener('click', () => window.open('Media/ELEC292Demo.mp4', '_blank'));
-})();
+  const modal = document.getElementById('mediaModal');
+  const dialog = modal ? modal.querySelector('.media-modal__dialog') : null;
+  const content = document.getElementById('mediaModalContent');
+  if (!modal || !dialog || !content) return;
 
+  let lastTrigger = null;
+
+  const resolveLang = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
+
+  const getTriggerLabel = (trigger) => {
+    if (!trigger) return '';
+    const lang = resolveLang();
+    const labelAttr = trigger.getAttribute(lang === 'fr' ? 'data-fr-label' : 'data-en-label');
+    if (labelAttr) return labelAttr.trim();
+    const langNode = trigger.querySelector('.lang-text');
+    if (langNode) {
+      const attr = lang === 'fr' ? langNode.getAttribute('data-fr') : langNode.getAttribute('data-en');
+      if (attr) return attr.trim();
+      if (langNode.textContent) return langNode.textContent.trim();
+    }
+    if (trigger.title) return trigger.title.trim();
+    return (trigger.textContent || '').trim();
+  };
+
+  const setOpenState = (open) => {
+    modal.hidden = !open;
+    modal.classList.toggle('is-open', open);
+    modal.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.classList.toggle('media-modal-open', open);
+  };
+
+  const clearContent = () => {
+    content.querySelectorAll('video').forEach((video) => {
+      try { video.pause(); } catch (_) {}
+      video.removeAttribute('src');
+      try { video.load(); } catch (_) {}
+    });
+    content.innerHTML = '';
+  };
+
+  const autoPlayIfVideo = (node) => {
+    if (!(node instanceof HTMLVideoElement)) return;
+    node.autoplay = true;
+    const tryPlay = () => {
+      try {
+        const playResult = node.play && node.play();
+        if (playResult && typeof playResult.catch === 'function') {
+          playResult.catch(() => {});
+        }
+      } catch (_) {}
+    };
+    if (node.readyState >= 2) {
+      tryPlay();
+    } else {
+      node.addEventListener('loadeddata', tryPlay, { once: true });
+    }
+  };
+
+  const openModal = (trigger, node) => {
+    lastTrigger = trigger;
+    clearContent();
+    if (node) {
+      content.appendChild(node);
+      autoPlayIfVideo(node);
+    }
+    setOpenState(true);
+    requestAnimationFrame(() => {
+      const focusTarget = content.querySelector('video, iframe, embed') || dialog.querySelector('.media-modal__close');
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        try { focusTarget.focus(); } catch (_) {}
+      }
+    });
+  };
+
+  const closeModal = () => {
+    if (modal.hidden) return;
+    const trigger = lastTrigger;
+    clearContent();
+    lastTrigger = null;
+    setOpenState(false);
+    if (trigger && typeof trigger.focus === 'function') {
+      try { trigger.focus(); } catch (_) {}
+    }
+  };
+
+  modal.addEventListener('click', (event) => {
+    if (event.target.matches('[data-close-modal]')) {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (!dialog.contains(event.target)) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+      closeModal();
+    }
+  });
+
+  const isModifiedClick = (event) => (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+
+  const createVideoNode = (src, label) => {
+    const video = document.createElement('video');
+    video.controls = true;
+    video.controlsList = 'nodownload';
+    video.preload = 'metadata';
+    video.src = src;
+    video.setAttribute('playsinline', '');
+    video.autoplay = true;
+    if (label) {
+      video.setAttribute('aria-label', label);
+    }
+    return video;
+  };
+
+  const ensurePdfZoom = (src, zoom = '85') => {
+    if (!src) return '';
+    const parts = src.split('#');
+    const base = parts.shift();
+    const hash = parts.length ? parts.join('#') : '';
+    const params = new URLSearchParams(hash);
+    params.set('zoom', zoom);
+    const hashString = params.toString();
+    return hashString ? `${base}#${hashString}` : `${base}#zoom=${zoom}`;
+  };
+
+  const createPdfFrame = (src, label) => {
+    const iframe = document.createElement('iframe');
+    iframe.src = ensurePdfZoom(src, '85');
+    iframe.title = label ? `${label} preview` : 'PDF preview';
+    iframe.loading = 'lazy';
+    return iframe;
+  };
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-media-type]');
+    if (!trigger) return;
+    if (isModifiedClick(event)) return;
+    const type = trigger.getAttribute('data-media-type');
+    const src = trigger.getAttribute('data-media-src') || trigger.getAttribute('href');
+    if (!type || !src) return;
+    event.preventDefault();
+    if (type === 'video') {
+      openModal(trigger, createVideoNode(src, getTriggerLabel(trigger)));
+    } else if (type === 'pdf') {
+      openModal(trigger, createPdfFrame(src, getTriggerLabel(trigger)));
+    }
+  });
+
+  setOpenState(false);
+})();
 
 
 //Sidebar projects dropdown
@@ -786,6 +938,7 @@ if (langButton) {
     const GRADIENT_DECAY = 0.9;
     const GRADIENT_MAX = 40;
     const GRADIENT_LERP = 0.2;
+    let pausedForDark = false;
 
     function cssVar(name, fallback) {
       const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -838,6 +991,16 @@ if (langButton) {
         requestAnimationFrame(tick);
         return;
       }
+
+      if (document.body.classList.contains('dark-mode')) {
+        if (!pausedForDark) {
+          ctx.clearRect(0, 0, w, h);
+          pausedForDark = true;
+        }
+        requestAnimationFrame(tick);
+        return;
+      }
+      pausedForDark = false;
 
       const nowScrollY = window.scrollY || window.pageYOffset || 0;
       const dy = nowScrollY - lastScrollY;
@@ -927,34 +1090,328 @@ if (langButton) {
   }
 })();
 
+// Content gutter rain (dark-mode only, mirrors header rain but lighter density)
+
+(() => {
+  function initContentRain() {
+    const wrapper = document.querySelector('.content-rain-wrapper');
+    if (!wrapper) return;
+    const canvases = wrapper.querySelectorAll('.content-rain-canvas');
+    if (!canvases.length) return;
+    const contentArea = wrapper.querySelector('main');
+
+    const hash32 = (x) => {
+      x |= 0;
+      x = (x ^ 61) ^ (x >>> 16);
+      x = x + (x << 3);
+      x = x ^ (x >>> 4);
+      x = Math.imul(x, 0x27d4eb2d);
+      x = x ^ (x >>> 15);
+      return x >>> 0;
+    };
+
+    const cssVar = (name, fallback) => {
+      const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return val || fallback;
+    };
+
+    const createState = (canvas) => {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      return {
+        canvas,
+        ctx,
+        side: canvas.classList.contains('content-rain-canvas--left') ? 'left' : 'right',
+        width: 0,
+        height: 0,
+        displayWidth: 0,
+        displayHeight: 0,
+        dpr: 1,
+        step: 12,
+        stepX: 10,
+        cols: 0,
+        rows: 0,
+        colPositions: [],
+        heads: [],
+        glyphPhase: 0,
+        lastGlyphChange: now,
+        changeInterval: 260 + Math.random() * 140,
+        lastScrollY: window.scrollY || window.pageYOffset || 0,
+        accum: 0,
+        gradientMomentum: 0,
+        gradientTarget: 0.5,
+        gradientMix: 0.5,
+        paused: false
+      };
+    };
+
+    const states = Array.from(canvases, createState).filter(Boolean);
+    if (!states.length) return;
+
+    const resizeState = (state, wrapperHeight, sideWidth) => {
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const cssWidth = Math.max(0, Math.round(sideWidth));
+      const displayWidth = cssWidth || Math.max(1, Math.round(state.canvas.getBoundingClientRect().width));
+      const displayHeight = Math.max(1, Math.round(wrapperHeight || state.canvas.getBoundingClientRect().height));
+
+      if (displayWidth < 2 || displayHeight < 2) {
+        state.cols = 0;
+        state.width = 0;
+        state.height = 0;
+        state.colPositions = [];
+        state.canvas.width = 0;
+        state.canvas.height = 0;
+        return;
+      }
+
+      state.canvas.width = Math.max(1, Math.floor(displayWidth * dpr));
+      state.canvas.height = Math.max(1, Math.floor(displayHeight * dpr));
+      state.width = state.canvas.width;
+      state.height = state.canvas.height;
+      state.displayWidth = displayWidth;
+      state.displayHeight = displayHeight;
+      state.dpr = dpr;
+
+      const baseStep = Math.max(8, Math.round((window.innerWidth > 600 ? 10 : 9) * dpr));
+      state.step = baseStep;
+      state.stepX = Math.max(6, Math.round(baseStep * 0.8));
+      const spacingPx = Math.max(36 * dpr, state.stepX * 2.8);
+      state.cols = Math.max(1, Math.floor((displayWidth * dpr) / spacingPx));
+      if ((displayWidth * dpr) > spacingPx * 1.5) {
+        state.cols = Math.max(2, state.cols);
+      }
+      state.rows = Math.max(1, Math.floor(state.height / state.step));
+
+      if (state.cols < 1 || state.rows < 1) {
+        state.cols = 0;
+        state.colPositions = [];
+        return;
+      }
+
+      const prevHeads = state.heads;
+      state.heads = new Array(state.cols);
+      for (let i = 0; i < state.cols; i++) {
+        const carry = prevHeads && prevHeads[i] !== undefined
+          ? prevHeads[i]
+          : Math.floor(Math.random() * state.rows);
+        state.heads[i] = ((carry % state.rows) + state.rows) % state.rows;
+      }
+
+      const minX = Math.max(4 * dpr, state.stepX * 0.7);
+      const maxX = Math.max(minX + dpr, state.width - minX);
+      const positions = [];
+      for (let i = 0; i < state.cols; i++) {
+        const candidate = minX + Math.random() * (maxX - minX);
+        positions.push(candidate);
+      }
+      positions.sort((a, b) => a - b);
+      state.colPositions = positions;
+    };
+
+    const resizeAll = () => {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const contentRect = contentArea ? contentArea.getBoundingClientRect() : wrapperRect;
+      const viewportWidth = document.documentElement.clientWidth || window.innerWidth || wrapperRect.width;
+      const leftWidth = Math.max(0, Math.floor(contentRect.left));
+      const rightWidth = Math.max(0, Math.floor(viewportWidth - contentRect.right));
+      const insetLeft = Math.max(0, Math.round(contentRect.left - wrapperRect.left));
+      const insetRight = Math.max(0, Math.round(wrapperRect.right - contentRect.right));
+      wrapper.style.setProperty('--rain-left-width', `${leftWidth}px`);
+      wrapper.style.setProperty('--rain-right-width', `${rightWidth}px`);
+      wrapper.style.setProperty('--rain-left-offset', `${insetLeft}px`);
+      wrapper.style.setProperty('--rain-right-offset', `${insetRight}px`);
+      const targetHeight = Math.max(1, Math.round(wrapperRect.height || contentRect.height || window.innerHeight));
+      states.forEach((state) => {
+        const sideWidth = state.side === 'left' ? leftWidth : rightWidth;
+        resizeState(state, targetHeight, sideWidth);
+      });
+    };
+
+    let resizeObserver;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => resizeAll());
+      resizeObserver.observe(wrapper);
+      states.forEach((state) => resizeObserver.observe(state.canvas));
+    }
+    window.addEventListener('resize', resizeAll, { passive: true });
+    resizeAll();
+
+    const tick = () => {
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      const isDark = document.body.classList.contains('dark-mode');
+      const globalScroll = window.scrollY || window.pageYOffset || 0;
+
+      states.forEach((state) => {
+        if (!state.cols || !state.rows || !state.width || !state.height) return;
+
+        if (!isDark) {
+          if (!state.paused) {
+            state.ctx.clearRect(0, 0, state.width, state.height);
+            state.paused = true;
+          }
+          return;
+        }
+        state.paused = false;
+
+        const dy = globalScroll - state.lastScrollY;
+        state.lastScrollY = globalScroll;
+
+        state.gradientMomentum = state.gradientMomentum * 0.9 + dy;
+        state.gradientMomentum = Math.max(-40, Math.min(40, state.gradientMomentum));
+        state.gradientTarget = 0.5 + 0.5 * (state.gradientMomentum / 40);
+        state.gradientTarget = Math.max(0, Math.min(1, state.gradientTarget));
+        state.gradientMix += (state.gradientTarget - state.gradientMix) * 0.2;
+        if (state.gradientMix < 0) state.gradientMix = 0;
+        else if (state.gradientMix > 1) state.gradientMix = 1;
+
+        state.accum += dy / 25;
+        state.accum = Math.max(-3, Math.min(3, state.accum));
+        const sign = state.accum === 0 ? 0 : (state.accum > 0 ? 1 : -1);
+        const moveSteps = Math.floor(Math.min(1, Math.abs(state.accum)));
+        if (moveSteps > 0) {
+          for (let c = 0; c < state.cols; c++) {
+            let head = state.heads[c] + (sign < 0 ? moveSteps : -moveSteps);
+            head %= state.rows;
+            if (head < 0) head += state.rows;
+            state.heads[c] = head;
+          }
+          state.accum -= sign * moveSteps;
+        }
+
+        if (now - state.lastGlyphChange >= state.changeInterval) {
+          state.glyphPhase = (state.glyphPhase + 1) | 0;
+          state.lastGlyphChange = now;
+        }
+
+        const ctx = state.ctx;
+        ctx.clearRect(0, 0, state.width, state.height);
+        ctx.font = Math.floor(state.step * 1.3) + 'px monospace';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
+        ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.25)');
+        ctx.shadowBlur = Math.round(state.step * 0.35);
+
+        const featherPx = Math.round(6 * state.step);
+        const bleedPx = Math.round(2 * state.step);
+        const jitterPx = Math.round(2.5 * state.step);
+        const effectiveGradient = state.gradientMix;
+        const colPositions = state.colPositions || [];
+        if (!colPositions.length) {
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = 1;
+          return;
+        }
+
+        for (let c = 0; c < state.cols; c++) {
+          const chainLen = 9 + (c % 5);
+          const head = state.heads[c];
+          const jitterSeed = hash32((c + 1) * 2654435761);
+          const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx;
+          const colTop = jitter;
+          const baseX = colPositions[c] !== undefined ? colPositions[c] : (state.width * (c / Math.max(1, state.cols)));
+
+          for (let i = 0; i < chainLen; i++) {
+            const r = (head + i) % state.rows;
+            const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (state.glyphPhase * 83492791);
+            const ch = (hash32(seed) & 1) ? '1' : '0';
+            const x = baseX;
+            const y = r * state.step;
+            if (y < colTop - bleedPx || y > state.height + featherPx) continue;
+
+            const gradientIndex = Math.max(
+              0,
+              effectiveGradient * i + (1 - effectiveGradient) * ((chainLen - 1) - i)
+            );
+            const baseAlpha = gradientIndex <= 0.01 ? 0.95 : Math.max(0.25, 0.9 - gradientIndex * 0.1);
+            const delta = y - colTop;
+            let colAlpha;
+            if (delta < 0) {
+              const norm = 1 - (-delta / bleedPx);
+              colAlpha = 0.15 + 0.4 * norm;
+            } else if (delta < featherPx) {
+              const norm2 = delta / featherPx;
+              colAlpha = 0.25 + 0.75 * norm2;
+            } else {
+              colAlpha = 1;
+            }
+            const drawAlpha = baseAlpha * colAlpha;
+            if (drawAlpha <= 0.02) continue;
+            ctx.globalAlpha = drawAlpha;
+            ctx.fillText(ch, x, y);
+          }
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      });
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContentRain);
+  } else {
+    initContentRain();
+  }
+})();
+
 
 // Header Interactive Terminal
 // Tab autocompletes commands, arrow keys recall history
 
 (() => {
+  const toggleDarkMode = (langCode) => {
+    const root = document.body;
+    if (!root) return [];
+
+    const willEnable = !root.classList.contains('dark-mode');
+    root.classList.toggle('dark-mode', willEnable);
+    if (willEnable) {
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      root.removeAttribute('data-theme');
+    }
+
+    const message = langCode === 'fr'
+      ? (willEnable
+        ? 'Mode sombre activé.'
+        : 'Retour au mode clair.')
+      : (willEnable
+        ? 'Dark mode enabled.'
+        : 'Light mode restored.');
+
+    return [message];
+  };
+
   const COMMANDS_EN = {
     help: {
       output: [
         'Available commands:',
-        '  about\t\t- Learn more about me',
+        //'  about\t\t- Learn more about me',
+        '  dark\t\t- Toggle dark mode theme',
         '  skills\t- View technical skills',
         '  projects\t- List recent projects',
         '  work\t\t- View work experience',
         '  status\t- Show my status',
         '  contact\t- My contact information',
-        '  ls\t\t- List sections',
         '  joke\t\t- Random programming joke',
         '  help\t\t- Show this help message',
         '  clear\t\t- Clear the terminal',
         'Use Tab to autocomplete commands, and up/down keys to navigate command history.'
       ]
     },
+    /*
     about: {
       output: [
         '3rd Year Computer Engineering Student at Queen\'s University',
         'Bilingual: English & French'
       ]
     },
+    */
     skills: {
       output: [
         'Languages: Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
@@ -965,11 +1422,11 @@ if (langButton) {
     },
     projects: {
       output: [
-        '1. Running & Jumping Detection (Python ML)',
-        '2. Dynamic Time Allocating Calendar (C++/Qt)',
-        '3. Fluid Dispensing Device (Arduino)',
-        '4. 911 Dispatcher Training Device (Web + Arduino)',
-        '5. Portfolio Website (HTML/CSS/JS)'
+        { text: '1. Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
+        { text: '2. Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
+        { text: '3. Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
+        { text: '4. 911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+        { text: '5. Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
     contact: {
@@ -979,14 +1436,8 @@ if (langButton) {
         'GitHub: github.com/JulienChagnon'
       ]
     },
-    ls: {
-      output: [
-        'about-me.html',
-        'projects.html',
-        'work-history.html',
-        'education.html',
-        'certifications.html'
-      ]
+    dark: {
+      action: toggleDarkMode
     },
     status: {
       output: [
@@ -1016,7 +1467,6 @@ if (langButton) {
       output: null,
       jokes: [
         'Why do programmers prefer dark mode?\nBecause light attracts bugs!',
-        'How many programmers does it take to change a light bulb?\nNone. It\'s a hardware problem.',
         'Why do Java developers wear glasses?\nBecause they don\'t C#!',
         'There are only 10 types of people in the world:\nThose who understand binary, and those who don\'t.',
         'Why did the computer engineer get stuck in the shower?\nThe shampoo bottle said: "Lather, Rinse, Repeat." It never said when to stop!',
@@ -1024,34 +1474,36 @@ if (langButton) {
         'A programmer\'s wife tells him: "Run to the store and pick up a loaf of bread.\nIf they have eggs, get a dozen."\nThe programmer comes home with 12 loaves of bread.',
         '"Knock, knock."\n"Who\'s there?"\n...\n...\nvery long pause...\n"Java."',
         'Why did the computer show up late to work?\nIt had a hard drive!',
-        'What do you call 8 hobbits?\nA hobbyte.',
+        'Why was the computer engineer reported missing? \n Because he didn\'t return in a while'
       ]
     }
   };
 
   const COMMANDS_FR = {
-    help: {
+    aide: {
       output: [
         'Commandes disponibles :',
-        '  about\t\t- En savoir plus sur moi',
+        //'  about\t\t- En savoir plus sur moi',
+        '  sombre\t- Activer le thème sombre',
         '  competences\t- Voir mes compétences techniques',
         '  projets\t- Lister mes projets récents',
         '  travail\t- Voir mon expérience professionnelle',
         '  status\t- Afficher mon statut',
         '  contact\t- Mes coordonnées',
-        '  ls\t\t- Lister les fichiers',
         '  blague\t- Blague aléatoire de programmation',
-        '  help\t\t- Afficher ce message d\'aide',
+        '  aide\t\t- Afficher ce message d\'aide',
         '  clear\t\t- Effacer le terminal',
         'Utilisez Tab pour compléter les commandes, et les flèches haut/bas pour naviguer dans l\'historique des commandes.'
       ]
     },
+    /*
     about: {
       output: [
         'Étudiant de 3e année en Génie informatique à l’Université Queen’s à Kingston, Ontario',
         'Bilingue : français et anglais'
       ]
     },
+    */
     competences: {
       output: [
         'Langages : Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
@@ -1062,11 +1514,11 @@ if (langButton) {
     },
     projets: {
       output: [
-        '1. Détection de course et de saut (Python)',
-        '2. Calendrier à allocation dynamique du temps (C++/Qt)',
-        '3. Dispositif de distribution de liquide (Arduino)',
-        '4. Appareil de formation pour opérateur 911 (Web + Arduino)',
-        '5. Site Web de portfolio (HTML/CSS/JS)'
+        { text: '1. Détection de course et de saut (Python)', href: '#project-running-jumping' },
+        { text: '2. Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
+        { text: '3. Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
+        { text: '4. Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+        { text: '5. Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
     contact: {
@@ -1076,14 +1528,8 @@ if (langButton) {
         'GitHub : github.com/JulienChagnon'
       ]
     },
-    ls: {
-      output: [
-        'à-propos.html',
-        'projets.html',
-        'historique-travail.html',
-        'éducation.html',
-        'certifications.html'
-      ]
+    sombre: {
+      action: toggleDarkMode
     },
     status: {
       output: [
@@ -1114,8 +1560,6 @@ if (langButton) {
       jokes: [
         'C\'est quoi un développeur obèse?\nQuelqu\'un qui mange trop de cookies!',
         'Comment un programmeur répare-t-il une voiture?\nIl éteint et rallume le contact.',
-        'Combien de développeurs faut-il pour changer une ampoule?\nAucun, c\'est un problème hardware!',
-        'Qu\'est-ce qu\'un programmeur trouve romantique?\nUn commit push avec un beau message!',
         'Pourquoi les programmeurs mettent des lunettes?\nParce qu\'ils passent leur vie à chercher le point-virgule manquant!',
         'Pourquoi les développeurs préfèrent le mode sombre?\nParce que la lumière attire les bugs!',
       ]
@@ -1179,9 +1623,48 @@ if (langButton) {
       const hint = document.createElement('div');
       hint.className = 'term-line term-hint';
       hint.textContent = activeLang === 'fr'
-        ? "# Tapez 'help' pour voir les commandes disponibles"
+        ? "# Tapez 'aide' pour voir les commandes disponibles"
         : "# Type 'help' to see available commands";
       term.insertBefore(hint, term.firstChild);
+    };
+
+    const createOutputLine = (line) => {
+      if (line === undefined || line === null) return null;
+      const div = document.createElement('div');
+      div.className = 'term-line term-output';
+
+      if (typeof line === 'object') {
+        const { prefix = '', suffix = '', text = '', href, target, title } = line;
+        if (prefix) {
+          div.appendChild(document.createTextNode(prefix));
+        }
+
+        if (href) {
+          const anchor = document.createElement('a');
+          anchor.className = 'term-link';
+          anchor.href = href;
+          anchor.textContent = text || href;
+          if (title) {
+            anchor.title = title;
+          }
+          if (target === '_blank') {
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+          }
+          div.appendChild(anchor);
+        } else if (text) {
+          div.appendChild(document.createTextNode(text));
+        }
+
+        if (suffix) {
+          div.appendChild(document.createTextNode(suffix));
+        }
+
+        return div;
+      }
+
+      div.textContent = String(line);
+      return div;
     };
 
     const clearTerminal = () => {
@@ -1192,10 +1675,9 @@ if (langButton) {
 
     const printOutput = async (lines) => {
       for (const line of lines) {
-        const div = document.createElement('div');
-        div.className = 'term-line term-output';
-        div.textContent = line;
-        term.insertBefore(div, term.lastElementChild);
+        const outputNode = createOutputLine(line);
+        if (!outputNode) continue;
+        term.insertBefore(outputNode, term.lastElementChild);
         enforceMaxLines();
         await new Promise(resolve => setTimeout(resolve, 15));
       }
@@ -1244,12 +1726,30 @@ if (langButton) {
           const jokes = commands[cmd].jokes;
           const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
           await printOutput(randomJoke.split('\n'));
-        } else if (commands[cmd].output) {
-          await printOutput(commands[cmd].output);
+        } else {
+          const commandDef = commands[cmd];
+          let handled = false;
+
+          if (typeof commandDef.action === 'function') {
+            const result = await commandDef.action(activeLang);
+            if (result !== undefined && result !== null) {
+              const lines = Array.isArray(result)
+                ? result.filter((line) => line !== undefined && line !== null)
+                : [String(result)];
+              if (lines.length) {
+                await printOutput(lines);
+                handled = true;
+              }
+            }
+          }
+
+          if (!handled && commandDef.output) {
+            await printOutput(commandDef.output);
+          }
         }
       } else {
         const notFound = activeLang === 'fr'
-          ? `Commande non trouvée : ${cmd}. Tapez 'help' pour voir les commandes disponibles.`
+          ? `Commande non trouvée : ${cmd}. Tapez 'aide' pour voir les commandes disponibles.`
           : `Command not found: ${cmd}. Type 'help' to see available commands.`;
         await printOutput([notFound]);
       }
