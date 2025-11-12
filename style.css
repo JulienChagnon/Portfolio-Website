@@ -920,6 +920,18 @@ body.fr .sidebar-dropdown a:focus-visible {
   background: #89a0a4;
 }
 
+body.dark-mode .see-more {
+  background: rgba(158, 213, 255, 0.18);
+  color: #f7fbff;
+  border: 1px solid rgba(158, 213, 255, 0.5);
+  box-shadow: 0 10px 30px rgba(7, 9, 20, 0.55);
+}
+
+body.dark-mode .see-more:hover {
+  background: rgba(158, 213, 255, 0.35);
+  color: #081224;
+}
+
 /* Project box and buttons */
 .project-box {
   width: 100%;

@@ -469,57 +469,54 @@ if (langButton) {
   });
 }
 
-// Dynamic scrollbar color: white -> primary (blue in FR)
+// Scrollbar contrast color: white over the dark header, smoothly blending to black over light content
 (() => {
-  const start = [255, 255, 255];        // white
-  const endEN = [83, 67, 104];          // English primary (current theme purple)
+  const doc = document.documentElement;
+  if (!doc) return;
+  const header = document.querySelector('header.header-flex');
+  const COLOR_LIGHT = [255, 255, 255];
+  const COLOR_DARK = [150, 150, 150];
+  const COLOR_DARK_MODE = 'rgb(245, 245, 245)';
+  const TRANSITION_RANGE = 220; // px window around the header bottom
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function mixColor(end, t) {
-    const r = Math.round(lerp(start[0], end[0], t));
-    const g = Math.round(lerp(start[1], end[1], t));
-    const b = Math.round(lerp(start[2], end[2], t));
-    return `rgb(${r}, ${g}, ${b})`;
-  }
+  const setColor = (value) => doc.style.setProperty('--scrollbar-color', value);
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const mixChannel = (start, end, t) => Math.round(start + (end - start) * t);
+  const mixColor = (start, end, t) => (
+    `rgb(${mixChannel(start[0], end[0], t)}, ${mixChannel(start[1], end[1], t)}, ${mixChannel(start[2], end[2], t)})`
+  );
 
-  function parseCssColorToRgbArray(val) {
-    if (!val) return null;
-    const v = ("" + val).trim();
-    const hex = v.match(/^#([\da-fA-F]{6})$/);
-    if (hex) {
-      const n = parseInt(hex[1], 16);
-      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  const updateScrollbarColor = () => {
+    if ((typeof window !== 'undefined' && window.__overlayDragging) || !doc) return;
+    const body = document.body;
+    const isDarkMode = body && body.classList.contains('dark-mode');
+    if (isDarkMode) {
+      setColor(COLOR_DARK_MODE);
+      return;
     }
-    const rgb = v.match(/^rgba?\(([^)]+)\)$/i);
-    if (rgb) {
-      const parts = rgb[1].split(',').map(s => parseFloat(s.trim()));
-      if (parts.length >= 3) return [parts[0], parts[1], parts[2]].map(x => Math.max(0, Math.min(255, Math.round(x))));
-    }
-    return null;
-  }
 
-  function updateScrollbarColor() {
-    if (typeof window !== 'undefined' && window.__overlayDragging) return;
-    const doc = document.documentElement;
-    const isFr = document.body && document.body.classList.contains('fr');
-    let end = endEN;
-    if (isFr) {
-      const cssPrimary = getComputedStyle(document.body || doc).getPropertyValue('--primary') || getComputedStyle(doc).getPropertyValue('--primary');
-      const parsed = parseCssColorToRgbArray(cssPrimary);
-      if (parsed) end = parsed;
+    if (!header) {
+      setColor('rgb(255, 255, 255)');
+      return;
     }
-    const max = Math.max(1, doc.scrollHeight - window.innerHeight);
-    const y = window.scrollY || window.pageYOffset || 0;
-    const t = Math.min(1, Math.max(0, y / max));
-    const color = mixColor(end, t);
-    doc.style.setProperty('--scrollbar-color', color);
-  }
+
+    const headerBottom = header.offsetTop + header.offsetHeight;
+    const scrollTop = window.scrollY || window.pageYOffset || 0;
+    const transitionStart = Math.max(0, headerBottom - TRANSITION_RANGE);
+    const t = clamp(
+      (scrollTop - transitionStart) / Math.max(1, TRANSITION_RANGE),
+      0,
+      1
+    );
+    setColor(mixColor(COLOR_LIGHT, COLOR_DARK, t));
+  };
 
   // Initialize and keep updated
   window.addEventListener('scroll', updateScrollbarColor, { passive: true });
   window.addEventListener('resize', updateScrollbarColor);
   window.addEventListener('load', updateScrollbarColor);
   document.addEventListener('DOMContentLoaded', updateScrollbarColor);
+  updateScrollbarColor();
 })();
 
 // Overlay scrollbar: draws a draggable thumb over the page
@@ -1099,6 +1096,7 @@ if (langButton) {
     const canvases = wrapper.querySelectorAll('.content-rain-canvas');
     if (!canvases.length) return;
     const contentArea = wrapper.querySelector('main');
+    const GUTTER_BUFFER = 18; // keep a small gap between rain and readable content
 
     const hash32 = (x) => {
       x |= 0;
@@ -1176,11 +1174,14 @@ if (langButton) {
       const baseStep = Math.max(8, Math.round((window.innerWidth > 600 ? 10 : 9) * dpr));
       state.step = baseStep;
       state.stepX = Math.max(6, Math.round(baseStep * 0.8));
-      const spacingPx = Math.max(36 * dpr, state.stepX * 2.8);
-      state.cols = Math.max(1, Math.floor((displayWidth * dpr) / spacingPx));
-      if ((displayWidth * dpr) > spacingPx * 1.5) {
-        state.cols = Math.max(2, state.cols);
-      }
+      const pxWidth = displayWidth * dpr;
+      const spacingPx = Math.max(24 * dpr, state.stepX * 1.9);
+      const minSpacingPx = Math.max(18 * dpr, state.stepX * 1.45);
+      let cols = Math.max(1, Math.floor((pxWidth + spacingPx * 0.35) / spacingPx));
+      if (pxWidth > spacingPx * 1.2) cols += 1;
+      if (pxWidth > spacingPx * 2.4) cols += 1;
+      const maxCols = Math.max(1, Math.floor(pxWidth / minSpacingPx));
+      state.cols = Math.min(cols, maxCols);
       state.rows = Math.max(1, Math.floor(state.height / state.step));
 
       if (state.cols < 1 || state.rows < 1) {
@@ -1201,9 +1202,16 @@ if (langButton) {
       const minX = Math.max(4 * dpr, state.stepX * 0.7);
       const maxX = Math.max(minX + dpr, state.width - minX);
       const positions = [];
+      const usableWidth = Math.max(0, maxX - minX);
+      const lane = state.cols > 0 ? usableWidth / state.cols : usableWidth;
       for (let i = 0; i < state.cols; i++) {
-        const candidate = minX + Math.random() * (maxX - minX);
-        positions.push(candidate);
+        const jitterRange = lane * 0.28;
+        const candidate =
+          minX +
+          lane * (i + 0.5) +
+          (Math.random() - 0.5) * jitterRange;
+        const clamped = Math.max(minX, Math.min(maxX - dpr, candidate));
+        positions.push(clamped);
       }
       positions.sort((a, b) => a - b);
       state.colPositions = positions;
@@ -1213,10 +1221,14 @@ if (langButton) {
       const wrapperRect = wrapper.getBoundingClientRect();
       const contentRect = contentArea ? contentArea.getBoundingClientRect() : wrapperRect;
       const viewportWidth = document.documentElement.clientWidth || window.innerWidth || wrapperRect.width;
-      const leftWidth = Math.max(0, Math.floor(contentRect.left));
-      const rightWidth = Math.max(0, Math.floor(viewportWidth - contentRect.right));
-      const insetLeft = Math.max(0, Math.round(contentRect.left - wrapperRect.left));
-      const insetRight = Math.max(0, Math.round(wrapperRect.right - contentRect.right));
+      const rawLeftWidth = Math.max(0, Math.floor(contentRect.left));
+      const rawRightWidth = Math.max(0, Math.floor(viewportWidth - contentRect.right));
+      const rawInsetLeft = Math.max(0, Math.round(contentRect.left - wrapperRect.left));
+      const rawInsetRight = Math.max(0, Math.round(wrapperRect.right - contentRect.right));
+      const leftWidth = Math.max(0, rawLeftWidth - GUTTER_BUFFER);
+      const rightWidth = Math.max(0, rawRightWidth - GUTTER_BUFFER);
+      const insetLeft = Math.max(0, rawInsetLeft - GUTTER_BUFFER);
+      const insetRight = Math.max(0, rawInsetRight - GUTTER_BUFFER);
       wrapper.style.setProperty('--rain-left-width', `${leftWidth}px`);
       wrapper.style.setProperty('--rain-right-width', `${rightWidth}px`);
       wrapper.style.setProperty('--rain-left-offset', `${insetLeft}px`);
@@ -1304,7 +1316,7 @@ if (langButton) {
         }
 
         for (let c = 0; c < state.cols; c++) {
-          const chainLen = 9 + (c % 5);
+          const chainLen = 12 + (c % 7);
           const head = state.heads[c];
           const jitterSeed = hash32((c + 1) * 2654435761);
           const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx;
@@ -1383,6 +1395,8 @@ if (langButton) {
       : (willEnable
         ? 'Dark mode enabled.'
         : 'Light mode restored.');
+
+    try { window.dispatchEvent(new Event('scroll')); } catch (_) {}
 
     return [message];
   };
@@ -1469,7 +1483,7 @@ if (langButton) {
         'Why do programmers prefer dark mode?\nBecause light attracts bugs!',
         'Why do Java developers wear glasses?\nBecause they don\'t C#!',
         'There are only 10 types of people in the world:\nThose who understand binary, and those who don\'t.',
-        'Why did the computer engineer get stuck in the shower?\nThe shampoo bottle said: "Lather, Rinse, Repeat." It never said when to stop!',
+        'Why did the computer engineer get stuck in the shower?\nThe shampoo bottle said: "Lather, Rinse, Repeat."',
         'What\'s the object-oriented way to become wealthy?\nInheritance.',
         'A programmer\'s wife tells him: "Run to the store and pick up a loaf of bread.\nIf they have eggs, get a dozen."\nThe programmer comes home with 12 loaves of bread.',
         '"Knock, knock."\n"Who\'s there?"\n...\n...\nvery long pause...\n"Java."',
