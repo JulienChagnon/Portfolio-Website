@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FCTLYS0LDG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FCTLYS0LDG');
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Julien Chagnon | Portfolio</title>
@@ -153,8 +162,8 @@
 
     <main>
   <!-- Introduction text -->
-  <p class="lang-text" data-en="Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year. Currently seeking a 12-16 month co-op placement in computer engineering related fields" data-fr="Bonjour ! Je me nomme Julien Chagnon. Je suis étudiant bilingue (français/anglais) présentement en troisième année du programme de génie informatique à l’Université Queen’s à Kingston, en Ontario. Présentement à la recherche d'emplois co-op de 12-16 mois and le domain d'ingénerie informatique." style="margin-bottom: 1em;">
-    Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year. Currently seeking a 12-16 month co-op opportunities in computer engineering related fields.
+  <p class="lang-text" data-en="Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year." data-fr="Bonjour ! Je me nomme Julien Chagnon. Je suis étudiant bilingue (français/anglais) présentement en troisième année du programme de génie informatique à l’Université Queen’s à Kingston, en Ontario." style="margin-bottom: 1em;">
+    Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year.
   </p>
 
   <!-- About Me section -->
@@ -341,78 +350,6 @@
       </div>
 
       <br>
-      
-
-      <!-- Fluid and Powder Dispensing Device -->
-      <div id="project-fluid-dispensing" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="Fluid and Powder Dispensing Device - Arduino/C++"
-                  data-fr="Dispositif de distribution de fluide et de poudre – Arduino/C++">
-              Fluid and Powder Dispensing Device - Arduino/C++
-            </span>
-          </h3>
-        </div>
-        <button id="openVideoBtn" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC101Demo.mp4">
-          ▶ 
-          <span class="lang-text"
-                data-en="Watch Video"
-                data-fr="Voir la vidéo">
-            Watch Video
-          </span>
-        </button>
-        <a href="Media/APSC101_FinalReport.pdf"
-          class="btn-report"
-          data-media-type="pdf">
-          📄 
-          <span class="lang-text"
-                data-en="Final Report"
-                data-fr="Rapport final">
-            Final Report
-          </span>
-        </a>
-        <div class="content-row">
-          <div class="content-text">
-            <div class="content-float float-right">
-              <img src="Media/APSC101.jpg"
-                  alt=""
-                  class="float-img">
-              <p style="margin-bottom: 0.7em;">
-                <span class="lang-text"
-                      data-en="As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones."
-                      data-fr="Dans le cadre d'un projet de conception en ingénierie de durée semestrielle en première année, j'ai travaillé sur le développement d'un distributeur de fluide automatisé conçu pour le mélange précis et autonome de solutions pharmaceutiques dans des contraintes strictes d'espace, de matériel et de sécurité. L'équipe a préparé et soumis des rapports intermédiaires aux jalons clés.">
-                  As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones.
-              </p>
-              <p style="margin-bottom: 0.7em;">
-                <span class="lang-text"
-                      data-en=""
-                      data-fr="">
-                </span>
-              </p>
-              <p style="margin-bottom: 0.7em;">
-                <span class="lang-text"
-                      data-en="My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides."
-                      data-fr="Mes contributions au projet se sont concentrées à la fois sur la conception du système et le développement logiciel. J'ai écrit l'intégralité du code C++ pour Arduino, qui comprenait la coordination de trois sous-systèmes : un mécanisme de distribution de poudre actionné par servo-moteur, un plateau tournant motorisé et un système de pompe péristaltique pour la distribution de liquide. Le code utilisait des tableaux pour stocker et itérer des instructions de dosage prédéfinies pour cinq tubes à essai, distribuant des incréments entre 1 g et 2 g de poudre par tube (± 0,2 g) et délivrant 20 mL de liquide par tube, contrôlés par des boutons de démarrage et d'arrêt d'urgence. J'ai implémenté une logique de synchronisation et de contrôle de mouvement de précision pour assurer un dosage exact, ainsi que des vérifications d'interruption en temps réel pour les dérogations de sécurité.">
-                  My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides.
-              </p>
-            </div>
-            <div class="content-float float-left">
-              <img src="Media/APSC101_SDW.jpg"
-                  alt=""
-                  class="float-img">
-              <p>
-                <span class="lang-text"
-                      data-en="Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports."
-                      data-fr="Au-delà de la programmation, j'ai contribué à la conception d'un sketch SolidWorks de l'assemblage final pour les composants imprimés en 3D, s'assurant que la boîte de vitesses, le système de fin de course et la plateforme des tubes à essai répondent aux exigences fonctionnelles et dimensionnelles. J'ai également rédigé des sections de nos rapports de conception approfondis.">
-                  Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <br>
 
       <!-- 911 dispatcher Training Device -->
       <div id="project-911-training" class="project-box">
@@ -478,6 +415,77 @@
                     data-fr="Du côté Web, j'ai également aidé notre équipe à développer une interface Web en HTML, CSS et JavaScript qui a remplacé tous les modules de test sur papier par une expérience interactive moderne. Les invites audio sont diffusées à l'aide de l'API Web Audio, et les réponses vocales sont enregistrées dans le navigateur à l'aide de MediaRecorder. Pour les modules interactifs tels que l'indexation de carte et la transcription, le site valide les réponses en temps réel par rapport aux entrées attendues et calcule à la fois la précision et les temps de réaction. Une fois tous les modules terminés, les résultats sont envoyés à un serveur Node.js qui stocke les données et génère un rapport PDF téléchargeable.">
                 On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report.
             </p>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      
+      <!-- Fluid and Powder Dispensing Device -->
+      <div id="project-fluid-dispensing" class="project-box">
+        <div class="project-header">
+          <h3>
+            <span class="lang-text"
+                  data-en="Fluid and Powder Dispensing Device - Arduino/C++"
+                  data-fr="Dispositif de distribution de fluide et de poudre – Arduino/C++">
+              Fluid and Powder Dispensing Device - Arduino/C++
+            </span>
+          </h3>
+        </div>
+        <button id="openVideoBtn" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC101Demo.mp4">
+          ▶ 
+          <span class="lang-text"
+                data-en="Watch Video"
+                data-fr="Voir la vidéo">
+            Watch Video
+          </span>
+        </button>
+        <a href="Media/APSC101_FinalReport.pdf"
+          class="btn-report"
+          data-media-type="pdf">
+          📄 
+          <span class="lang-text"
+                data-en="Final Report"
+                data-fr="Rapport final">
+            Final Report
+          </span>
+        </a>
+        <div class="content-row">
+          <div class="content-text">
+            <div class="content-float float-right">
+              <img src="Media/APSC101.jpg"
+                  alt=""
+                  class="float-img">
+              <p style="margin-bottom: 0.7em;">
+                <span class="lang-text"
+                      data-en="As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones."
+                      data-fr="Dans le cadre d'un projet de conception en ingénierie de durée semestrielle en première année, j'ai travaillé sur le développement d'un distributeur de fluide automatisé conçu pour le mélange précis et autonome de solutions pharmaceutiques dans des contraintes strictes d'espace, de matériel et de sécurité. L'équipe a préparé et soumis des rapports intermédiaires aux jalons clés.">
+                  As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones.
+              </p>
+              <p style="margin-bottom: 0.7em;">
+                <span class="lang-text"
+                      data-en=""
+                      data-fr="">
+                </span>
+              </p>
+              <p style="margin-bottom: 0.7em;">
+                <span class="lang-text"
+                      data-en="My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides."
+                      data-fr="Mes contributions au projet se sont concentrées à la fois sur la conception du système et le développement logiciel. J'ai écrit l'intégralité du code C++ pour Arduino, qui comprenait la coordination de trois sous-systèmes : un mécanisme de distribution de poudre actionné par servo-moteur, un plateau tournant motorisé et un système de pompe péristaltique pour la distribution de liquide. Le code utilisait des tableaux pour stocker et itérer des instructions de dosage prédéfinies pour cinq tubes à essai, distribuant des incréments entre 1 g et 2 g de poudre par tube (± 0,2 g) et délivrant 20 mL de liquide par tube, contrôlés par des boutons de démarrage et d'arrêt d'urgence. J'ai implémenté une logique de synchronisation et de contrôle de mouvement de précision pour assurer un dosage exact, ainsi que des vérifications d'interruption en temps réel pour les dérogations de sécurité.">
+                  My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides.
+              </p>
+            </div>
+            <div class="content-float float-left">
+              <img src="Media/APSC101_SDW.jpg"
+                  alt=""
+                  class="float-img">
+              <p>
+                <span class="lang-text"
+                      data-en="Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports."
+                      data-fr="Au-delà de la programmation, j'ai contribué à la conception d'un sketch SolidWorks de l'assemblage final pour les composants imprimés en 3D, s'assurant que la boîte de vitesses, le système de fin de course et la plateforme des tubes à essai répondent aux exigences fonctionnelles et dimensionnelles. J'ai également rédigé des sections de nos rapports de conception approfondis.">
+                  Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports.
+              </p>
+            </div>
           </div>
         </div>
       </div>

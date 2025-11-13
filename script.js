@@ -1428,8 +1428,9 @@ if (langButton) {
     */
     skills: {
       output: [
-        'Languages: Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
-        'Tools: Git, Arduino, Qt, LTspice, SolidWorks',
+        'Programming experience: C/C++, Python, Java, Assembly (Nios II), JavaScript, VHDL, Qt framework',
+        'Libraries and Frameworks: Qt, Matplotlib, Pandas, Scikit-learn, Seaborn, h5py',
+        'Tools: Git, Arduino, LTspice, SolidWorks',
         'Databases: SQL, HDF5',
         'Web: HTML, CSS'
       ]
@@ -1455,24 +1456,24 @@ if (langButton) {
     },
     status: {
       output: [
-        'Looking for 12-16 month co-op opportunities in Computer Engineering',
+        'Seeking a 12-16 month co-op placement in Computer Engineering related fields',
       ]
     },
     work: {
       output: [
-        'Work Experience:',
-        '',
-        'Traffic Services Intern @ City of Ottawa (May - Aug 2025)',
-        '  -Applied data analysis to pedestrian & vehicle survey data',
+        'TRAFFIC SERVICES INTERN @ City of Ottawa\n(May - Aug 2025)',
+        '  -Applied data analysis to pedestrian & vehicle',
+        '    survey data',
         '  -Used GIS tools to map and analyze traffic patterns',
-        '  -Automated form collection with Microsoft Power Automate',
-        '',
-        'Graffiti Management Assistant @ City of Ottawa (May - Aug 2024)',
+        '  -Automated form collection with Microsoft Power',
+        '   Automate',
+        '\n',
+        'GRAFFITI MANAGEMENT ASSISTANT @ City of Ottawa\n(May - Aug 2024)',
         '  -Managed city-wide graffiti database',
         '  -Tracked service requests and task completion',
         '  -Operated specialized removal equipment',
-        '',
-        'Camp Counsellor @ Mountain Bike Kids (Jun - Aug 2022)',
+        '\n',
+        'CAMP COUNSELLOR @ Mountain Bike Kids\n(Jun - Aug 2022)',
         '  -Supervised campers aged 8-14',
         '  -Led mountain biking outings and day trips',
       ]
@@ -1486,9 +1487,9 @@ if (langButton) {
         'Why did the computer engineer get stuck in the shower?\nThe shampoo bottle said: "Lather, Rinse, Repeat."',
         'What\'s the object-oriented way to become wealthy?\nInheritance.',
         'A programmer\'s wife tells him: "Run to the store and pick up a loaf of bread.\nIf they have eggs, get a dozen."\nThe programmer comes home with 12 loaves of bread.',
-        '"Knock, knock."\n"Who\'s there?"\n...\n...\nvery long pause...\n"Java."',
+        '"Knock, knock."\n"Who\'s there?"\n...\n...\nvery long pause...\n"Python."',
         'Why did the computer show up late to work?\nIt had a hard drive!',
-        'Why was the computer engineer reported missing? \n Because he didn\'t return in a while'
+        'Why was the computer engineer reported missing?\nBecause he didn\'t return in a while'
       ]
     }
   };
@@ -1502,7 +1503,7 @@ if (langButton) {
         '  competences\t- Voir mes compétences techniques',
         '  projets\t- Lister mes projets récents',
         '  travail\t- Voir mon expérience professionnelle',
-        '  status\t- Afficher mon statut',
+        '  statut\t- Afficher mon statut',
         '  contact\t- Mes coordonnées',
         '  blague\t- Blague aléatoire de programmation',
         '  aide\t\t- Afficher ce message d\'aide',
@@ -1552,22 +1553,21 @@ if (langButton) {
     },
     travail: {
       output: [
-        'Expérience professionnelle :',
-        '',
-        'Stagiaire aux Services de la circulation @ Ville d\'Ottawa (mai - août 2025)',
+        'STAGIAIRE AUX SERVICES DE LA CIRCULATION @ Ville d\'Ottawa\n(mai - août 2025)',
         '  -Analyse de données piétonnes et routières',
         '  -Outils SIG pour cartographier les modèles de circulation',
         '  -Automatisation avec Microsoft Power Automate',
-        '',
-        'Assistant à la Gestion des graffitis @ Ville d\'Ottawa (mai - août 2024)',
-        '  -Gestion de base de données municipale de graffitis',
-        '  -Suivi des demandes de service',
+        '\n',
+        'ASSISTANT À LA GESTION DES GRAFFITIS @ Ville d\'Ottawa\n(mai - août 2024)',
+        '  -Gestion de la base de données municipale de graffitis',
+        '  -Suivi des demandes de service et de l’avancement des tâches',
         '  -Utilisation d\'équipements spécialisés de nettoyage',
-        '',
-        'Animateur de camp @ Mountain Bike Kids (juin - août 2022)',
-        '  -Supervision de campeurs de 8 à 14 ans',
-        '  -Organisation de sorties en vélo de montagne',
-      ]
+        '\n',
+        'ANIMATEUR DE CAMP @ Mountain Bike Kids\n(juin - août 2022)',
+        '  -Supervision de campeurs âgés de 8 à 14 ans',
+        '  -Organisation de sorties en vélo de montagne et excursions',
+      ] 
+
     },
     blague: {
       output: null,
@@ -1579,6 +1579,8 @@ if (langButton) {
       ]
     }
 };
+
+COMMANDS_FR.statut = COMMANDS_FR.status;
 
 
   const currentLanguage = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
@@ -1610,19 +1612,64 @@ if (langButton) {
     const header = document.querySelector('header.header-flex') || document.querySelector('header');
     if (!header) return;
 
+    let wrapper = header.querySelector('#headerTerminalWrapper');
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.id = 'headerTerminalWrapper';
+      header.appendChild(wrapper);
+    }
+
     let term = header.querySelector('#headerTerminal');
     if (!term) {
       term = document.createElement('div');
       term.id = 'headerTerminal';
       term.setAttribute('role', 'application');
       term.setAttribute('aria-label', 'Interactive terminal');
-      header.appendChild(term);
+    } else {
+      term.setAttribute('role', 'application');
+      term.setAttribute('aria-label', 'Interactive terminal');
+    }
+    if (term.parentElement !== wrapper) {
+      wrapper.appendChild(term);
+    }
+
+    // Remove any legacy inline hint nodes from previous builds
+    term.querySelectorAll('.term-hint').forEach(node => node.remove());
+
+    let hintOverlay = wrapper.querySelector('#headerTerminalHint');
+    if (!hintOverlay) {
+      hintOverlay = header.querySelector('#headerTerminalHint');
+    }
+    if (!hintOverlay) {
+      hintOverlay = document.createElement('div');
+      hintOverlay.id = 'headerTerminalHint';
+    }
+    hintOverlay.setAttribute('role', 'status');
+    hintOverlay.setAttribute('aria-live', 'polite');
+    if (term && term.parentElement === wrapper) {
+      if (hintOverlay.parentElement !== wrapper) {
+        wrapper.insertBefore(hintOverlay, term);
+      } else if (hintOverlay.nextElementSibling !== term) {
+        wrapper.insertBefore(hintOverlay, term);
+      }
+    } else if (hintOverlay.parentElement !== wrapper) {
+      wrapper.appendChild(hintOverlay);
     }
 
     let activeLang = currentLanguage();
     let history = [];
     let historyIndex = -1;
-    const MAX_LINES = 25;
+    let activeInputLine = null;
+    let activeInput = null;
+    let activeCursor = null;
+    const autoCommandRun = { en: false, fr: false };
+    const MAX_LINES = 250;
+    const scrollTerminalToBottom = () => {
+      if (!term) return;
+      requestAnimationFrame(() => {
+        term.scrollTop = term.scrollHeight;
+      });
+    };
 
     const enforceMaxLines = () => {
       const lines = term.querySelectorAll('.term-line:not(.term-input-line):not(.term-hint)');
@@ -1634,12 +1681,10 @@ if (langButton) {
     };
 
     const addPermanentHint = () => {
-      const hint = document.createElement('div');
-      hint.className = 'term-line term-hint';
-      hint.textContent = activeLang === 'fr'
-        ? "# Tapez 'aide' pour voir les commandes disponibles"
-        : "# Type 'help' to see available commands";
-      term.insertBefore(hint, term.firstChild);
+      if (!hintOverlay) return;
+      hintOverlay.textContent = activeLang === 'fr'
+        ? "# TERMINAL INTERACTIF: Tapez 'aide' pour voir les commandes disponibles"
+        : "# INTERACTIVE TERMINAL: Type 'help' to see available commands";
     };
 
     const createOutputLine = (line) => {
@@ -1681,19 +1726,39 @@ if (langButton) {
       return div;
     };
 
-    const clearTerminal = () => {
+    const clearTerminal = ({ hiddenInput = false } = {}) => {
       term.innerHTML = '';
+      term.scrollTop = 0;
       addPermanentHint();
-      createInputLine();
+      activeInputLine = null;
+      activeInput = null;
+      activeCursor = null;
+      createInputLine({ hidden: hiddenInput });
     };
 
-    const printOutput = async (lines) => {
+    const printOutput = async (lines, { lineDelay = 15, charDelay = 0 } = {}) => {
       for (const line of lines) {
+        if (charDelay > 0 && typeof line === 'string') {
+          const outputNode = document.createElement('div');
+          outputNode.className = 'term-line term-output';
+          term.insertBefore(outputNode, term.lastElementChild);
+          enforceMaxLines();
+          scrollTerminalToBottom();
+          const text = String(line);
+          for (const char of text) {
+            outputNode.textContent += char;
+            await new Promise(resolve => setTimeout(resolve, charDelay));
+          }
+          await new Promise(resolve => setTimeout(resolve, lineDelay));
+          continue;
+        }
+
         const outputNode = createOutputLine(line);
         if (!outputNode) continue;
         term.insertBefore(outputNode, term.lastElementChild);
         enforceMaxLines();
-        await new Promise(resolve => setTimeout(resolve, 15));
+        scrollTerminalToBottom();
+        await new Promise(resolve => setTimeout(resolve, lineDelay));
       }
     };
 
@@ -1713,14 +1778,51 @@ if (langButton) {
       line.appendChild(typed);
       term.insertBefore(line, term.lastElementChild);
       enforceMaxLines();
+      scrollTerminalToBottom();
     };
 
-    const executeCommand = async (input) => {
+    const hideInputLine = () => {
+      if (!activeInputLine) return;
+      activeInputLine.style.visibility = 'hidden';
+      activeInputLine.style.pointerEvents = 'none';
+      if (activeInput) {
+        activeInput.disabled = true;
+        activeInput.blur();
+      }
+      if (activeCursor) {
+        activeCursor.style.display = 'none';
+      }
+    };
+
+    const showInputLine = () => {
+      if (!activeInputLine) {
+        createInputLine();
+        return;
+      }
+      activeInputLine.style.visibility = '';
+      activeInputLine.style.pointerEvents = '';
+      if (activeCursor) {
+        activeCursor.style.display = 'inline-block';
+      }
+      if (activeInput) {
+        activeInput.disabled = false;
+        setTimeout(() => {
+          activeInput.focus();
+          scrollTerminalToBottom();
+        }, 0);
+      }
+    };
+
+    const executeCommand = async (input, options = {}) => {
+      const {
+        recordHistory = true,
+        outputOptions = undefined
+      } = options;
       const cmd = input.trim().toLowerCase();
       const commands = getCommands(activeLang);
 
       // Only add non-empty commands to history
-      if (cmd !== '') {
+      if (recordHistory && cmd !== '') {
         history.push(input);
       }
       historyIndex = history.length;
@@ -1739,7 +1841,7 @@ if (langButton) {
         if ((cmd === 'joke' || cmd === 'blague') && commands[cmd].jokes) {
           const jokes = commands[cmd].jokes;
           const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-          await printOutput(randomJoke.split('\n'));
+          await printOutput(randomJoke.split('\n'), outputOptions);
         } else {
           const commandDef = commands[cmd];
           let handled = false;
@@ -1751,25 +1853,45 @@ if (langButton) {
                 ? result.filter((line) => line !== undefined && line !== null)
                 : [String(result)];
               if (lines.length) {
-                await printOutput(lines);
+                await printOutput(lines, outputOptions);
                 handled = true;
               }
             }
           }
 
           if (!handled && commandDef.output) {
-            await printOutput(commandDef.output);
+            await printOutput(commandDef.output, outputOptions);
           }
         }
       } else {
         const notFound = activeLang === 'fr'
           ? `Commande non trouvée : ${cmd}. Tapez 'aide' pour voir les commandes disponibles.`
           : `Command not found: ${cmd}. Type 'help' to see available commands.`;
-        await printOutput([notFound]);
+        await printOutput([notFound], outputOptions);
       }
     };
 
-    const createInputLine = () => {
+    const runAutoStatusCommand = ({ force = false } = {}) => {
+      const langKey = activeLang === 'fr' ? 'fr' : 'en';
+      if (!force && autoCommandRun[langKey]) {
+        return;
+      }
+      autoCommandRun[langKey] = true;
+      const autoCommand = langKey === 'fr' ? 'statut' : 'status';
+      hideInputLine();
+      requestAnimationFrame(() => {
+        executeCommand(autoCommand, {
+          recordHistory: false,
+          outputOptions: { charDelay: 5, lineDelay: 20 }
+        }).catch((err) => {
+          console.error('Automatic status command failed', err);
+        }).then(() => {
+          showInputLine();
+        });
+      });
+    };
+
+    function createInputLine({ hidden = false } = {}) {
       const line = document.createElement('div');
       line.className = 'term-line term-input-line';
 
@@ -1797,6 +1919,23 @@ if (langButton) {
       inputContainer.appendChild(cursor);
       line.appendChild(inputContainer);
       term.appendChild(line);
+      scrollTerminalToBottom();
+
+      activeInputLine = line;
+      activeInput = input;
+      activeCursor = cursor;
+
+      if (hidden) {
+        line.style.visibility = 'hidden';
+        line.style.pointerEvents = 'none';
+        input.disabled = true;
+        cursor.style.display = 'none';
+      } else {
+        line.style.visibility = '';
+        line.style.pointerEvents = '';
+        input.disabled = false;
+        cursor.style.display = 'inline-block';
+      }
 
       // Adjust input size as user types (add 1 for cursor space)
       input.addEventListener('input', () => {
@@ -1909,14 +2048,17 @@ if (langButton) {
         }
       });
 
-      setTimeout(() => input.focus(), 100);
-    };
+      if (!hidden) {
+        setTimeout(() => input.focus(), 100);
+      }
+    }
 
     const handleLanguageChange = async (event) => {
       const lang = event && event.detail && event.detail.lang ? event.detail.lang : currentLanguage();
       if (lang !== activeLang) {
         activeLang = lang;
-        clearTerminal();
+        clearTerminal({ hiddenInput: true });
+        runAutoStatusCommand({ force: true });
       }
     };
 
@@ -1924,7 +2066,8 @@ if (langButton) {
 
     // Initialize terminal with permanent hint
     addPermanentHint();
-    createInputLine();
+    createInputLine({ hidden: true });
+    runAutoStatusCommand();
   }
 
   if (document.readyState === 'loading') {
