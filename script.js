@@ -1662,6 +1662,7 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
     let activeInputLine = null;
     let activeInput = null;
     let activeCursor = null;
+    let pendingAutoCommand = null;
     const autoCommandRun = { en: false, fr: false };
     const MAX_LINES = 250;
     const scrollTerminalToBottom = () => {
@@ -1874,21 +1875,26 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
     const runAutoStatusCommand = ({ force = false } = {}) => {
       const langKey = activeLang === 'fr' ? 'fr' : 'en';
       if (!force && autoCommandRun[langKey]) {
-        return;
+        return Promise.resolve();
       }
       autoCommandRun[langKey] = true;
       const autoCommand = langKey === 'fr' ? 'statut' : 'status';
       hideInputLine();
-      requestAnimationFrame(() => {
-        executeCommand(autoCommand, {
-          recordHistory: false,
-          outputOptions: { charDelay: 5, lineDelay: 20 }
-        }).catch((err) => {
+      const execPromise = executeCommand(autoCommand, {
+        recordHistory: false,
+        outputOptions: { charDelay: 5, lineDelay: 20 }
+      });
+      pendingAutoCommand = execPromise;
+      return execPromise
+        .catch((err) => {
           console.error('Automatic status command failed', err);
-        }).then(() => {
+        })
+        .finally(() => {
+          if (pendingAutoCommand === execPromise) {
+            pendingAutoCommand = null;
+          }
           showInputLine();
         });
-      });
     };
 
     function createInputLine({ hidden = false } = {}) {
@@ -2056,6 +2062,13 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
     const handleLanguageChange = async (event) => {
       const lang = event && event.detail && event.detail.lang ? event.detail.lang : currentLanguage();
       if (lang !== activeLang) {
+        if (pendingAutoCommand) {
+          try {
+            await pendingAutoCommand;
+          } catch (_) {
+            // errors already logged in runAutoStatusCommand
+          }
+        }
         activeLang = lang;
         clearTerminal({ hiddenInput: true });
         runAutoStatusCommand({ force: true });
@@ -2067,7 +2080,16 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
     // Initialize terminal with permanent hint
     addPermanentHint();
     createInputLine({ hidden: true });
-    runAutoStatusCommand();
+
+    const bootstrapAutoStatus = () => {
+      runAutoStatusCommand();
+    };
+
+    if (document.readyState === 'complete') {
+      bootstrapAutoStatus();
+    } else {
+      document.addEventListener('DOMContentLoaded', bootstrapAutoStatus, { once: true });
+    }
   }
 
   if (document.readyState === 'loading') {
