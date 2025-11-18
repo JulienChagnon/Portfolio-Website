@@ -1021,9 +1021,31 @@ body.dark-mode .see-more:hover {
 .project-box .project-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 0.75rem;
   margin-bottom: 1rem;
+}
+.project-box .project-header h3 {
+  flex: 1 1 auto;
+}
+.project-tech {
+  display: inline-flex;
+  margin-left: auto;
+  margin-right: 0;
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  padding: 0.25rem 0.95rem;
+  border-radius: 999px;
+  border: 2px solid var(--primary);
+  background: rgba(83, 67, 104, 0.08);
+  color: var(--primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: right;
+  white-space: nowrap;
 }
 .project-box .btn-report,
 .project-box .btn-video {
@@ -1078,7 +1100,7 @@ body.dark-mode .see-more:hover {
   margin: 0 !important;     
   text-align: left !important;
   max-width: none !important; 
-  font-size: 1.25rem !important;
+  font-size: 1.4rem !important;
 }
 
 
@@ -1117,6 +1139,13 @@ body.dark-mode .see-more:hover {
   .header-info {
     align-items: flex-start;
     width: 100%;
+  }
+
+  .project-tech {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
   }
 
   .header-info h1 {
@@ -1528,6 +1557,12 @@ body.dark-mode .project-box {
   background: rgba(13, 22, 41, 0.9);
   border-color: rgba(196, 220, 255, 0.28);
   box-shadow: 0 25px 55px rgba(3, 5, 12, 0.7);
+}
+
+body.dark-mode .project-tech {
+  border-color: var(--primary);
+  background: rgba(158, 213, 255, 0.12);
+  color: var(--primary);
 }
 
 body.dark-mode .project-box .btn-report,
