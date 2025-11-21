@@ -5,14 +5,163 @@
   const moreJobs = document.querySelector('.more-jobs');
   if (!btn || !moreJobs) return; // gracefully skip if not present
   const labelSpan = btn.querySelector('.lang-text') || btn;
-  btn.addEventListener('click', () => {
-    const isOpen = moreJobs.classList.toggle('show');
+  const updateToggleLabel = (isOpen) => {
     const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
     const key  = isOpen ? 'hide' : 'show';
     const attr = `data-${lang}-${key}`;
-    const newLabel = btn.getAttribute(attr);
-    if (newLabel) labelSpan.textContent = newLabel;
+    const baseLabel = btn.getAttribute(attr);
+    if (baseLabel) {
+      labelSpan.textContent = isOpen ? `${baseLabel} ↑` : baseLabel;
+    }
+    btn.classList.toggle('see-more--less', isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  };
+  btn.addEventListener('click', () => {
+    const isOpen = moreJobs.classList.toggle('show');
+    updateToggleLabel(isOpen);
   });
+  updateToggleLabel(moreJobs.classList.contains('show'));
+  window.addEventListener('portfolio:languagechange', () => {
+    updateToggleLabel(moreJobs.classList.contains('show'));
+  });
+})();
+
+// Keep project cards open while pointer stays inside the stack
+(() => {
+  const stack = document.querySelector('.project-stack');
+  if (!stack) return;
+  const cards = Array.from(stack.querySelectorAll('.project-card'));
+  if (!cards.length) return;
+  const collapseBtn = document.getElementById('collapseProjects');
+
+  const snapshotForCollapse = () => {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const rect = stack.getBoundingClientRect();
+    return {
+      scrollY,
+      viewportHeight: window.innerHeight || document.documentElement.clientHeight || 0,
+      stackTop: rect.top + scrollY,
+      stackHeight: stack.offsetHeight,
+    };
+  };
+
+  const restoreAfterCollapse = (snapshot) => {
+    if (!snapshot) return;
+
+    const currentScroll = window.scrollY || window.pageYOffset || 0;
+    const rectAfter = stack.getBoundingClientRect();
+    const stackTopAfter = rectAfter.top + currentScroll;
+    const stackHeightAfter = stack.offsetHeight;
+    if (stackHeightAfter >= snapshot.stackHeight - 1) return;
+
+    const prevViewportTop = snapshot.scrollY;
+    const prevViewportBottom = snapshot.scrollY + snapshot.viewportHeight;
+    const prevStackBottom = snapshot.stackTop + snapshot.stackHeight;
+    const wasViewingStack = prevViewportBottom > snapshot.stackTop && prevViewportTop < prevStackBottom;
+    if (!wasViewingStack) return;
+
+    const relativeScrollInStack = snapshot.scrollY - snapshot.stackTop;
+    const maxAllowedRelative = Math.max(0, stackHeightAfter - snapshot.viewportHeight * 0.3);
+    const desiredRelative = Math.min(Math.max(0, relativeScrollInStack), maxAllowedRelative);
+    const desiredScroll = stackTopAfter + desiredRelative;
+
+    const maxScroll = Math.max(
+      0,
+      (document.documentElement.scrollHeight || document.body.scrollHeight) - snapshot.viewportHeight
+    );
+    const target = Math.max(0, Math.min(desiredScroll, maxScroll));
+
+    if (Math.abs((window.scrollY || window.pageYOffset) - target) > 1) {
+      window.scrollTo({ top: target, behavior: 'auto' });
+    }
+  };
+
+  const closeAll = () => {
+    const snapshot = snapshotForCollapse();
+    cards.forEach((card) => card.classList.remove('is-open'));
+    if (snapshot) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => restoreAfterCollapse(snapshot));
+      });
+    }
+  };
+
+  const pointerActivates = (event) => {
+    if (!event || typeof event.pointerType === 'undefined') return true;
+    return event.pointerType === 'mouse' || event.pointerType === 'pen';
+  };
+
+  let modalOpen = document.body.classList.contains('media-modal-open');
+  let pendingClose = false;
+
+  const shouldCloseNow = () => (
+    !stack.matches(':hover') && !stack.contains(document.activeElement)
+  );
+
+  const requestClose = (event) => {
+    if (event && !pointerActivates(event)) return;
+    if (modalOpen) {
+      pendingClose = true;
+      return;
+    }
+    if (shouldCloseNow()) closeAll();
+  };
+
+  const clearPending = () => {
+    pendingClose = false;
+  };
+
+  cards.forEach((card) => {
+    const markOpen = () => {
+      card.classList.add('is-open');
+      clearPending();
+    };
+    card.addEventListener('mouseenter', markOpen);
+    card.addEventListener('pointerenter', (event) => {
+      if (!pointerActivates(event)) return;
+      markOpen();
+    });
+    card.addEventListener('focusin', markOpen);
+  });
+
+  const handleStackFocusOut = (event) => {
+    const next = event.relatedTarget;
+    if (next && stack.contains(next)) return;
+    requestClose();
+  };
+
+  stack.addEventListener('pointerleave', requestClose);
+  stack.addEventListener('pointercancel', requestClose);
+  stack.addEventListener('mouseleave', requestClose);
+  stack.addEventListener('focusout', handleStackFocusOut);
+  stack.addEventListener('focusin', clearPending);
+
+  const flushPendingClose = () => {
+    if (!pendingClose) return;
+    pendingClose = false;
+    if (shouldCloseNow()) closeAll();
+  };
+
+  const updateModalState = (open) => {
+    modalOpen = open;
+    if (!modalOpen) {
+      flushPendingClose();
+    }
+  };
+
+  window.addEventListener('portfolio:media-modal', (event) => {
+    const open = !!(event && event.detail && event.detail.open);
+    updateModalState(open);
+  });
+
+  updateModalState(modalOpen);
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      pendingClose = false;
+      closeAll();
+    });
+  }
 })();
 
 //Set the footer year dynamically
@@ -122,6 +271,16 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.toggle('is-open', open);
     modal.setAttribute('aria-hidden', open ? 'false' : 'true');
     document.body.classList.toggle('media-modal-open', open);
+    const detail = { open };
+    try {
+      window.dispatchEvent(new CustomEvent('portfolio:media-modal', { detail }));
+    } catch (err) {
+      try {
+        const legacy = document.createEvent('CustomEvent');
+        legacy.initCustomEvent('portfolio:media-modal', false, false, detail);
+        window.dispatchEvent(legacy);
+      } catch (_) {}
+    }
   };
 
   const clearContent = () => {
@@ -341,10 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const buildList = () => {
-      const boxes = projectsSection.querySelectorAll('.project-box');
+      const cards = projectsSection.querySelectorAll('.project-card');
       list.innerHTML = '';
-      boxes.forEach((box, index) => {
-        const titleNode = box.querySelector('.project-header .lang-text');
+      cards.forEach((box, index) => {
+        const titleNode = box.querySelector('.project-card-title .lang-text') || box.querySelector('.lang-text');
         if (!titleNode) return;
         const englishBase = labelFor('en', index, (titleNode.getAttribute('data-en') || titleNode.textContent || '').trim());
         if (!englishBase) return;
@@ -1882,7 +2041,7 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
       hideInputLine();
       const execPromise = executeCommand(autoCommand, {
         recordHistory: false,
-        outputOptions: { charDelay: 5, lineDelay: 20 }
+        outputOptions: { charDelay: 8, lineDelay: 28 }
       });
       pendingAutoCommand = execPromise;
       return execPromise

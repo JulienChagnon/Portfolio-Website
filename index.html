@@ -212,346 +212,333 @@
       </h2>
       <p>
         <span class="lang-text"
-              data-en="Explore my projects, showcasing my skills in software development and hardware design. Be sure to check out the detailed reports and videos for each project!"
-              data-fr="Découvrez mes projets, que mettent en valeur mes compétences en développement logiciel et en conception matérielle. Il est possible de consulter les rapports détaillés et les vidéos pour chaque projet !">
-          Explore my projects, showcasing my skills in software development and hardware design. Be sure to check out the detailed reports and videos for each project!
+              data-en="Hover or click to expand project window size."
+              data-fr="Survolez ou cliquez pour agrandir la fenêtre des projets.">
+          Hover or click to expand project window size. 
         </span>
       </p>
 
       <br>
 
-      <!-- Running and Jumping Detection -->
-      <div id="project-running-jumping" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="Running and Jumping Detection using Machine Learning"
-                  data-fr="Détection de course et de saut par apprentissage automatique">
-              Running and Jumping Detection using Machine Learning
-            </span>
-          </h3>
-          <div class="project-tech" aria-label="Technologies used">
-            Python, scikit-learn
-          </div>
-        </div>
-        <button id="openVideoBtn3" class="btn-video" type="button" data-media-type="video" data-media-src="Media/ELEC292Demo.mp4">
-          ▶ 
-          <span class="lang-text"
-                data-en="Watch Video"
-                data-fr="Voir la vidéo">
-            Watch Video
-          </span>
-        </button>
-        <a href="Media/ELEC292_FinalReport.pdf"
-          class="btn-report"
-          data-media-type="pdf">
-          📄 
-          <span class="lang-text"
-                data-en="Final Report"
-                data-fr="Rapport final">
-            Final Report
-          </span>
-        </a>
-        <a href="Media/ELEC292_Code.pdf"
-          class="btn-code"
-          data-media-type="pdf">
-          <p>&lt;/&gt;</p>
-          <span class="lang-text"
-                data-en="See Code"
-                data-fr="Voir le code">
-            See Code
-          </span>
-        </a>
-        <div class="content-row">
-          <div class="content-text">
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                    data-en="As part of a Data Science group project, our 2-student team developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit-learn) to import CSV files from an accelerometer app, clean and smooth the time series with forward-fill and moving-average filters, extract a suite of 40 statistical features per 5-second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application."
-                    data-fr="Dans le cadre d’un projet de groupe en science des données, notre équipe de deux étudiants a développé un système complet de reconnaissance d’activité humaine qui traite les données brutes d’accéléromètre de smartphone pour distinguer la marche du saut. En suivant un flux de travail structuré englobant la collecte de données, le stockage hiérarchique HDF5, la visualisation du signal, le prétraitement, l’extraction et la normalisation des caractéristiques, l’entraînement du classificateur et le déploiement de l’interface graphique, nous avons exploité la stack scientifique de Python (pandas, h5py, scipy, scikit-learn) pour importer des fichiers CSV depuis une application d’accéléromètre, nettoyer et lisser les séries temporelles avec des filtres de remplissage vers l’avant et de moyenne mobile, extraire un ensemble de 40 caractéristiques statistiques par fenêtre de 5 secondes, entraîner un classificateur de régression logistique à plus de 95% de précision et enfin empaqueter le processus dans une application de bureau Tkinter.">
-                As part of a Data Science group project, our 2-student team developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit-learn) to import CSV files from an accelerometer app, clean and smooth the time series with forward-fill and moving-average filters, extract a suite of 40 statistical features per 5-second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application.
-            </p>
-            <div class="content-float float-left">
-              <img src="Media/ELEC292.jpg"
-                  alt="Running and Jumping Detection with Machine Learning"
-                  class="float-bigimg">
-              <p style="margin-bottom: 0.7em;">
+      <div class="project-stack">
+        <article id="project-running-jumping" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
                 <span class="lang-text"
-                      data-en="We implemented a function to dynamically partition input CSV data into time-based windows for classification. Then integrated the trained logistic regression model and normalization scaler (using joblib) into the classify_csv function, enabling real-time predictions on user data. On the GUI side, we built the user interface using Tkinter, with classification results visualized using matplotlib. Colour coded overlays indicate detected activity types alongside timestamped labels."
-                      data-fr="Nous avons implémenté une fonction pour partitionner dynamiquement les données CSV d'entrée en fenêtres de temps pour la classification. Nous avons ensuite intégré le modèle de régression logistique entraîné et le normaliseur (avec joblib) dans la fonction classify_csv, permettant des prédictions en temps réel sur les données utilisateur. Du côté de l'interface graphique, nous avons construit l'interface utilisateur avec Tkinter, les résultats de classification étant visualisés avec matplotlib. Des superpositions colorées indiquent les types d'activité détectés et une sortie défilante affiche les étiquettes horodatées.">
-                   We implemented a function to dynamically partition input CSV data into time-based windows for classification. Then integrated the trained logistic regression model and normalization scaler (using joblib) into the classify_csv function, enabling real-time predictions on user data. On the GUI side, we built the user interface using Tkinter, with classification results visualized using matplotlib. Colour coded overlays indicate detected activity types alongside timestamped labels.
-              </p>
+                      data-en="Running and Jumping Detection using Machine Learning"
+                      data-fr="Détection de course et de saut par apprentissage automatique">
+                  Running and Jumping Detection using Machine Learning
+                </span>
+              </h3>
+              <div class="project-tech">Python, scikit-learn</div>
             </div>
-            <p>
-              <span class="lang-text"
-                    data-en="We used Git throughout the development process to collaborate on code. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self contained and intuitive activity tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report."
-                    data-fr="Nous avons utilisé Git tout au long du processus de développement pour collaborer sur le code. L’interface graphique résultante offrait une visualisation en temps réel intuitive des résultats de classification, répondant à notre objectif de créer un outil de suivi d’activité autonome et convivial. Une présentation complète de l’implémentation et de l’interface utilisateur est disponible dans la vidéo de démonstration et le rapport final.">
-                We used Git throughout the development process to collaborate on code. The resulting GUI offered an intuitive, real-time visualization of classification output, meeting our goal of creating a self contained and intuitive activity tracking tool. A full breakdown of the implementation and user interface can be seen in the demonstration video and final project report.
-            </p>
-          </div>
-        </div>
-      </div>
-      <br>
-
-      <!-- Dynamic Time Allocating Calendar -->
-      <div id="project-dynamic-calendar" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="Dynamic Time Allocating Calendar"
-                  data-fr="Calendrier à allocation dynamique du temps">
-              Dynamic Time Allocating Calendar
-            </span>
-          </h3>
-          <div class="project-tech" aria-label="Technologies used">
-            C++, Qt Framework
-          </div>
-        </div>
-        <a href="Media/ELEC_376_Sprint_Report_2_Group_3.pdf"
-          class="btn-report"
-          data-media-type="pdf">
-          📄 
-          <span class="lang-text"
-                data-en="Sprint Report"
-                data-fr="Rapport de Sprint">
-            Sprint Report
-          </span>
-        </a>
-
-        <a href="Media/ELEC376_CalendarApp.zip"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-code">
-          <p>&lt;/&gt;</p>
-          <span class="lang-text"
-                data-en="Download Repo zip"
-                data-fr="Télécharger le zip du dépôt">
-            Download Repo zip
-          </span>
-        </a>
-
-        <div class="content-row">
-          <div class="content-text">
-            <div class="content-float float-right">
-          <img src="Media/ELEC376.png"
-            alt="Dynamic Time Allocating Calendar"
-            class="float-bigimg">
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                data-en="As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered events. The different time blocks consist of classes parsed from the .ics file, fixed events, and tasks which prompt the user for an estimated effort in hours and dynamically allocate study sessions around the existing schedule.  Unlike static scheduling tools, this system dynamically redistributes the study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload."
-                data-fr="Dans le cadre d’un projet de développement logiciel Agile s’étendant sur toute la session, notre équipe a conçu et mis en œuvre un calendrier à allocation de temps dynamique qui adapte intelligemment l’horaire hebdomadaire d’un étudiant en temps réel. Développée en C++ avec le framework Qt, l’application importe directement les horaires académiques du système SOLUS de Queen’s University via des fichiers .ics et les combine avec les événements saisis par l’utilisateur. Les différents blocs de temps comprennent les cours extraits du fichier .ics, les événements fixes, ainsi que les tâches pour lesquelles l’utilisateur fournit une estimation d’effort en heures; le système génère ensuite automatiquement des séances d’étude autour de l’horaire existant. Contrairement aux outils de planification statiques, cette solution réajuste dynamiquement les séances d’étude à mesure que de nouvelles échéances sont ajoutées ou que les priorités changent, en utilisant un algorithme pondéré d’allocation du temps pour équilibrer la charge de travail.">
-              As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered events. The different time blocks consist of classes parsed from the .ics file, fixed events, and tasks which prompt the user for an estimated effort in hours and dynamically allocate study sessions around the existing schedule.  Unlike static scheduling tools, this system dynamically redistributes the study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload.
-              </span>
-              </p>
+            <div class="project-card-summary-thumb">
+              <img src="Media/ELEC292_Small.jpg" alt="" aria-hidden="true">
             </div>
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                data-en="The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members."
-                data-fr="Le projet a suivi la méthodologie Agile Scrum, avec un développement organisé en sprints de deux semaines. Notre programmation a également été gérée via GitLab, chaque fonctionnalité étant suivie à l’aide de jalons, d’issues et de merge requests entre les membres de l’équipe.">
-                The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members.
-              </span>
-            </p>
           </div>
-        </div>
-      </div>
-
-      <br>
-
-      <!-- 911 dispatcher Training Device -->
-      <div id="project-911-training" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="911 Dispatcher Training Device"
-                  data-fr="Dispositif de formation d’opérateur 911">
-              911 Dispatcher Training Device
-            </span>
-          </h3>
-          <div class="project-tech" aria-label="Technologies used">
-            Arduino, HTML, CSS, JavaScript
-          </div>
-        </div>
-        <button id="openVideoBtn2" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC103Demo.mp4">
-          ▶ 
-          <span class="lang-text"
-                data-en="Watch Video"
-                data-fr="Voir la vidéo">
-            Watch Video
-          </span>
-        </button>
-        <a href="Media/APSC103_FinalReport.pdf"
-          class="btn-report"
-          data-media-type="pdf">
-          📄 
-          <span class="lang-text"
-                data-en="Final Report"
-                data-fr="Rapport final">
-            Final Report
-          </span>
-        </a>
-        <a href="Media/APSC103_code.pdf"
-          class="btn-code"
-          data-media-type="pdf">
-          <p>&lt;/&gt;</p>
-          <span class="lang-text"
-                data-en="See Code"
-                data-fr="Voir le code">
-            See Code
-          </span>
-        </a>
-        <div class="content-row">
-          <div class="content-text">
-            <div class="content-float float-right">
-              <img src="Media/APSC103.jpg"
-                  alt="911 Operator Training Device"
-                  class="float-img">
-              <p style="margin-bottom: 0.7em;">
+          <div class="project-card-details">
+            <div class="project-card-actions">
+              <button class="btn-video" type="button" data-media-type="video" data-media-src="Media/ELEC292Demo.mp4">
+                ▶ 
                 <span class="lang-text"
+                      data-en="Watch Video"
+                      data-fr="Voir la vidéo">
+                  Watch Video
+                </span>
+              </button>
+              <a href="https://github.com/JulienChagnon/Running-and-Jumping-Detection---scikit-learn"
+                target="_blank" rel="noopener noreferrer"
+                class="btn-code">
+                <p>&lt;/&gt;</p>
+                <span class="lang-text"
+                      data-en="See Code"
+                      data-fr="Voir le code">
+                  See Code
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <p>
+                  <span class="lang-text"
+                        data-en="I developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit-learn) to import CSV files from an accelerometer app, clean and smooth the time series with forward-fill and moving-average filters, extract a suite of 40 statistical features per 5-second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application."
+                        data-fr="J’ai développé un système complet de reconnaissance d’activités humaines qui traite les données brutes d’un accéléromètre de téléphone intelligent pour distinguer la marche du saut. En suivant un flux de travail structuré comprenant la collecte de données, le stockage hiérarchique HDF5, la visualisation du signal, le prétraitement, l’extraction et la normalisation des caractéristiques, l’entraînement du classificateur et le déploiement de l’interface graphique, nous avons utilisé la pile scientifique de Python (pandas, h5py, scipy, scikit-learn) pour importer des fichiers CSV d’une application d’accéléromètre, nettoyer et lisser les séries temporelles avec un remplissage vers l’avant et des filtres de moyenne mobile, extraire un ensemble de 40 caractéristiques statistiques par fenêtre de 5 secondes, entraîner un classificateur de régression logistique à plus de 95 % de précision et finalement empaqueter le tout dans une application Tkinter.">
+                    I developed a complete human activity recognition system that processes raw smartphone accelerometer data to distinguish between walking and jumping. Following a structured workflow encompassing data collection, hierarchical HDF5 storage, signal visualization, preprocessing, feature extraction and normalization, classifier training, and GUI deployment, we leveraged Python’s scientific stack (pandas, h5py, scipy, scikit-learn) to import CSV files from an accelerometer app, clean and smooth the time series with forward-fill and moving-average filters, extract a suite of 40 statistical features per 5-second window, train a logistic regression classifier to over 95% accuracy, and finally package the process into a Tkinter desktop application.
+                  </span>
+                </p>
+                <div class="content-float float-left">
+                  <img src="Media/ELEC292.jpg" alt="Tkinter dashboard highlighting classified windows" class="float-bigimg">
+                  <p>
+                    <span class="lang-text"
+                          data-en="A function segments incoming CSV data into time-based windows and feeds them through the trained logistic-regression model and normalization scaler (loaded via joblib), allowing the classify_csv routine to generate real-time predictions on user data. On the GUI side, the user interface was built using Tkinter, with classification results visualized using matplotlib. Colour coded overlays indicate detected activity types alongside timestamped labels."
+                          data-fr="Une fonction segmente les données CSV entrantes en fenêtres basées sur le temps et les transmet au modèle de régression logistique entraîné ainsi qu’au normaliseur (chargés avec joblib), ce qui permet à la routine classify_csv de produire des prédictions en temps réel sur les données de l’utilisateur. Du côté de l’interface graphique, l’interface a été construite avec Tkinter, et les résultats de classification sont visualisés avec matplotlib. Des superpositions de couleurs indiquent les types d’activités détectés, accompagnées d’étiquettes horodatées.">
+                      A function segments incoming CSV data into time-based windows and feeds them through the trained logistic-regression model and normalization scaler (loaded via joblib), allowing the classify_csv routine to generate real-time predictions on user data. On the GUI side, the user interface was built using Tkinter, with classification results visualized using matplotlib. Colour coded overlays indicate detected activity types alongside timestamped labels.
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article id="project-dynamic-calendar" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="Dynamic Time Allocating Calendar"
+                      data-fr="Calendrier à allocation dynamique du temps">
+                  Dynamic Time Allocating Calendar
+                </span>
+              </h3>
+              <div class="project-tech">C++, Qt Framework</div>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/ELEC376_Small.png" alt="" aria-hidden="true">
+            </div>
+          </div>
+          <div class="project-card-details">
+            <div class="project-card-actions">
+              <a href="Media/ELEC_376_Sprint_Report_2_Group_3.pdf"
+                class="btn-report"
+                data-media-type="pdf">
+                📄 
+                <span class="lang-text"
+                      data-en="Sprint Report"
+                      data-fr="Rapport de Sprint">
+                  Sprint Report
+                </span>
+              </a>
+              <a href="https://github.com/JulienChagnon/Dynamic-Time-Allocating-Calendar"
+                target="_blank" rel="noopener noreferrer"
+                class="btn-code">
+                <p>&lt;/&gt;</p>
+                <span class="lang-text"
+                      data-en="See Code"
+                      data-fr="Voir le code">
+                  See Code
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <div class="content-float float-right">
+                  <img src="Media/ELEC376.png" alt="Qt calendar displaying classes and study blocks" class="float-bigimg">
+                  <p>
+                    <span class="lang-text"
+                          data-en="As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered events. The different time blocks consist of classes parsed from the .ics file, fixed events, and tasks which prompt the user for an estimated effort in hours and dynamically allocate study sessions around the existing schedule.  Unlike static scheduling tools, this system dynamically redistributes the study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload."
+                          data-fr="Dans le cadre d’un projet de développement logiciel Agile s’étendant sur toute la session, notre équipe a conçu et mis en œuvre un calendrier à allocation de temps dynamique qui adapte intelligemment l’horaire hebdomadaire d’un étudiant en temps réel. Développée en C++ avec le framework Qt, l’application importe directement les horaires académiques du système SOLUS de Queen’s University via des fichiers .ics et les combine avec les événements saisis par l’utilisateur. Les différents blocs de temps comprennent les cours extraits du fichier .ics, les événements fixes, ainsi que les tâches pour lesquelles l’utilisateur fournit une estimation d’effort en heures; le système génère ensuite automatiquement des séances d’étude autour de l’horaire existant. Contrairement aux outils de planification statiques, cette solution réajuste dynamiquement les séances d’étude à mesure que de nouvelles échéances sont ajoutées ou que les priorités changent, en utilisant un algorithme pondéré d’allocation du temps pour équilibrer la charge de travail.">
+                      As part of a semester-long Agile software development project, our team designed and implemented a dynamic time allocating calendar that intelligently adapts a student’s weekly schedule in real time. Built in C++ using the Qt framework, the application imports academic timetables directly from Queen’s University’s SOLUS system via .ics files and integrates them with user-entered events. The different time blocks consist of classes parsed from the .ics file, fixed events, and tasks which prompt the user for an estimated effort in hours and dynamically allocate study sessions around the existing schedule.  Unlike static scheduling tools, this system dynamically redistributes the study sessions as new deadlines are added or priorities change, using a weighted time-allocation algorithm to balance workload.
+                  </span>
+                  </p>
+                </div>
+                <p>
+                  <span class="lang-text"
+                        data-en="The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members."
+                        data-fr="Le projet a suivi la méthodologie Agile Scrum, avec un développement organisé en sprints de deux semaines. Notre programmation a également été gérée via GitLab, chaque fonctionnalité étant suivie à l’aide de jalons, d’issues et de merge requests entre les membres de l’équipe.">
+                    The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article id="project-911-training" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="911 Dispatcher Training Device"
+                      data-fr="Dispositif de formation d’opérateur 911">
+                  911 Dispatcher Training Device
+                </span>
+              </h3>
+              <div class="project-tech">Arduino, HTML, CSS, JavaScript</div>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/APSC103.jpg" alt="" aria-hidden="true">
+            </div>
+          </div>
+          <div class="project-card-details">
+            <div class="project-card-actions">
+              <button class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC103Demo.mp4">
+                ▶ 
+                <span class="lang-text"
+                      data-en="Watch Video"
+                      data-fr="Voir la vidéo">
+                  Watch Video
+                </span>
+              </button>
+              <a href="Media/APSC103_FinalReport.pdf"
+                class="btn-report"
+                data-media-type="pdf">
+                📄 
+                <span class="lang-text"
+                      data-en="Final Report"
+                      data-fr="Rapport final">
+                  Final Report
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <p>
+                  <span class="lang-text"
                       data-en="As part of a client-based design project, our team partnered with the Toronto Police Service to modernize the Perfex training device, a 911 dispatcher testing platform built around manual time checks and paper-based modules that is becoming outdated. We translated all five original test stations (short-story recall, reading aloud, copying critical information, simulated telephone dispatch, and map indexing) into a cohesive web interface seamlessly integrated with an Arduino taskbox housed in a portable briefcase with the goal of increasing test accuracy and repeatability."
                       data-fr="Dans le cadre d'un projet de conception client, notre équipe s'est associée au Service de police de Toronto pour moderniser le dispositif de formation Perfex, une plateforme de test des répartiteurs du 911 basée sur des vérifications manuelles du temps et des modules sur papier, devenue obsolète. Nous avons traduit les cinq stations de test originales (rappel de courte histoire, lecture à voix haute, reproduction d'informations critiques, répartition téléphonique simulée et indexation de carte) en une interface Web cohésive, intégrée de manière transparente à une boîte à tâches Arduino logée dans une mallette portable, dans le but d'améliorer la précision et la répétabilité des tests.">
-                  As part of a client-based design project, our team partnered with the Toronto Police Service to modernize the Perfex training device, a 911 dispatcher testing platform built around manual time checks and paper-based modules that is becoming outdated. We translated all five original test stations (short-story recall, reading aloud, copying critical information, simulated telephone dispatch, and map indexing) into a cohesive web interface seamlessly integrated with an Arduino taskbox housed in a portable briefcase with the goal of increasing test accuracy and repeatability.
-              </p>
+                    As part of a client-based design project, our team partnered with the Toronto Police Service to modernize the Perfex training device, a 911 dispatcher testing platform built around manual time checks and paper-based modules that is becoming outdated. We translated all five original test stations (short-story recall, reading aloud, copying critical information, simulated telephone dispatch, and map indexing) into a cohesive web interface seamlessly integrated with an Arduino taskbox housed in a portable briefcase with the goal of increasing test accuracy and repeatability.
+                  </span>
+                </p>
+                <p>
+                    <span class="lang-text"
+                          data-en="Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping push-buttons, sliders, and rotary encoders to mirror the look and feel of the legacy device's five stations. I co-developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action and allowing me to implement a real-time scoring system."
+                          data-fr="Plus précisément, mes tâches consistaient à transposer la configuration physique de l'appareil Perfex d'origine dans la nouvelle boîte à tâches Arduino, en assignant les boutons-poussoirs, les curseurs et les encodeurs rotatifs pour reproduire fidèlement l'apparence et la convivialité des cinq stations de l'ancien dispositif. J'ai co-développé le code embarqué Arduino qui générait des tests de stimuli physiques à partir d'invites utilisateur, tout en horodatant chaque action afin de permettre la mise en place d'un système de pointage en temps réel.">
+                      Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping push-buttons, sliders, and rotary encoders to mirror the look and feel of the legacy device's five stations. I co-developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action and allowing me to implement a real-time scoring system.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report."
+                        data-fr="Du côté Web, j'ai également aidé notre équipe à développer une interface Web en HTML, CSS et JavaScript qui a remplacé tous les modules de test sur papier par une expérience interactive moderne. Les invites audio sont diffusées à l'aide de l'API Web Audio, et les réponses vocales sont enregistrées dans le navigateur à l'aide de MediaRecorder. Pour les modules interactifs tels que l'indexation de carte et la transcription, le site valide les réponses en temps réel par rapport aux entrées attendues et calcule à la fois la précision et les temps de réaction. Une fois tous les modules terminés, les résultats sont envoyés à un serveur Node.js qui stocke les données et génère un rapport PDF téléchargeable.">
+                    On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report.
+                </p>
+              </div>
             </div>
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                    data-en="Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping push-buttons, sliders, and rotary encoders to mirror the look and feel of the legacy device's five stations. I co-developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action and allowing me to implement a real-time scoring system."
-                    data-fr="Plus précisément, mes tâches consistaient à transposer la configuration physique de l'appareil Perfex d'origine dans la nouvelle boîte à tâches Arduino, en assignant les boutons-poussoirs, les curseurs et les encodeurs rotatifs pour reproduire fidèlement l'apparence et la convivialité des cinq stations de l'ancien dispositif. J'ai co-développé le code embarqué Arduino qui générait des tests de stimuli physiques à partir d'invites utilisateur, tout en horodatant chaque action afin de permettre la mise en place d'un système de pointage en temps réel.">
-                Specifically, my roles included translating the physical layout of the original Perfex device into the physical Arduino taskbox, mapping push-buttons, sliders, and rotary encoders to mirror the look and feel of the legacy device's five stations. I co-developed the embedded Arduino code that generated physical stimuli tests through user prompts, timestamping every user action and allowing me to implement a real-time scoring system.
-            </p>
-            <p>
-              <span class="lang-text"
-                    data-en="On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report."
-                    data-fr="Du côté Web, j'ai également aidé notre équipe à développer une interface Web en HTML, CSS et JavaScript qui a remplacé tous les modules de test sur papier par une expérience interactive moderne. Les invites audio sont diffusées à l'aide de l'API Web Audio, et les réponses vocales sont enregistrées dans le navigateur à l'aide de MediaRecorder. Pour les modules interactifs tels que l'indexation de carte et la transcription, le site valide les réponses en temps réel par rapport aux entrées attendues et calcule à la fois la précision et les temps de réaction. Une fois tous les modules terminés, les résultats sont envoyés à un serveur Node.js qui stocke les données et génère un rapport PDF téléchargeable.">
-                On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report.
-            </p>
           </div>
-        </div>
-      </div>
-      <br>
+        </article>
 
-      
-      <!-- Fluid and Powder Dispensing Device -->
-      <div id="project-fluid-dispensing" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="Fluid and Powder Dispensing Device"
-                  data-fr="Dispositif de distribution de fluide et de poudre">
-              Fluid and Powder Dispensing Device
-            </span>
-          </h3>
-          <div class="project-tech" aria-label="Technologies used">
-            Arduino, C++
-          </div>
-        </div>
-        <button id="openVideoBtn" class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC101Demo.mp4">
-          ▶ 
-          <span class="lang-text"
-                data-en="Watch Video"
-                data-fr="Voir la vidéo">
-            Watch Video
-          </span>
-        </button>
-        <a href="Media/APSC101_FinalReport.pdf"
-          class="btn-report"
-          data-media-type="pdf">
-          📄 
-          <span class="lang-text"
-                data-en="Final Report"
-                data-fr="Rapport final">
-            Final Report
-          </span>
-        </a>
-        <div class="content-row">
-          <div class="content-text">
-            <div class="content-float float-right">
-              <img src="Media/APSC101.jpg"
-                  alt=""
-                  class="float-img">
-              <p style="margin-bottom: 0.7em;">
+        <article id="project-fluid-dispensing" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
                 <span class="lang-text"
-                      data-en="As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones."
-                      data-fr="Dans le cadre d'un projet de conception en ingénierie de durée semestrielle en première année, j'ai travaillé sur le développement d'un distributeur de fluide automatisé conçu pour le mélange précis et autonome de solutions pharmaceutiques dans des contraintes strictes d'espace, de matériel et de sécurité. L'équipe a préparé et soumis des rapports intermédiaires aux jalons clés.">
-                  As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones.
-              </p>
-              <p style="margin-bottom: 0.7em;">
-                <span class="lang-text"
-                      data-en=""
-                      data-fr="">
+                      data-en="Fluid and Powder Dispensing Device"
+                      data-fr="Dispositif de distribution de fluide et de poudre">
+                  Fluid and Powder Dispensing Device
                 </span>
-              </p>
-              <p style="margin-bottom: 0.7em;">
-                <span class="lang-text"
-                      data-en="My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides."
-                      data-fr="Mes contributions au projet se sont concentrées à la fois sur la conception du système et le développement logiciel. J'ai écrit l'intégralité du code C++ pour Arduino, qui comprenait la coordination de trois sous-systèmes : un mécanisme de distribution de poudre actionné par servo-moteur, un plateau tournant motorisé et un système de pompe péristaltique pour la distribution de liquide. Le code utilisait des tableaux pour stocker et itérer des instructions de dosage prédéfinies pour cinq tubes à essai, distribuant des incréments entre 1 g et 2 g de poudre par tube (± 0,2 g) et délivrant 20 mL de liquide par tube, contrôlés par des boutons de démarrage et d'arrêt d'urgence. J'ai implémenté une logique de synchronisation et de contrôle de mouvement de précision pour assurer un dosage exact, ainsi que des vérifications d'interruption en temps réel pour les dérogations de sécurité.">
-                  My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides.
-              </p>
+              </h3>
+              <div class="project-tech">Arduino, C++</div>
             </div>
-            <div class="content-float float-left">
-              <img src="Media/APSC101_SDW.jpg"
-                  alt=""
-                  class="float-img">
-              <p>
-                <span class="lang-text"
-                      data-en="Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports."
-                      data-fr="Au-delà de la programmation, j'ai contribué à la conception d'un sketch SolidWorks de l'assemblage final pour les composants imprimés en 3D, s'assurant que la boîte de vitesses, le système de fin de course et la plateforme des tubes à essai répondent aux exigences fonctionnelles et dimensionnelles. J'ai également rédigé des sections de nos rapports de conception approfondis.">
-                  Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports.
-              </p>
+            <div class="project-card-summary-thumb">
+              <img src="Media/APSC101.jpg" alt="" aria-hidden="true">
             </div>
           </div>
-        </div>
+          <div class="project-card-details">
+            <div class="project-card-actions">
+              <button class="btn-video" type="button" data-media-type="video" data-media-src="Media/APSC101Demo.mp4">
+                ▶ 
+                <span class="lang-text"
+                      data-en="Watch Video"
+                      data-fr="Voir la vidéo">
+                  Watch Video
+                </span>
+              </button>
+              <a href="Media/APSC101_FinalReport.pdf"
+                class="btn-report"
+                data-media-type="pdf">
+                📄 
+                <span class="lang-text"
+                      data-en="Final Report"
+                      data-fr="Rapport final">
+                  Final Report
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <p>
+                  <span class="lang-text"
+                        data-en="As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones."
+                        data-fr="Dans le cadre d'un projet de conception en ingénierie de durée semestrielle en première année, j'ai travaillé sur le développement d'un distributeur de fluide automatisé conçu pour le mélange précis et autonome de solutions pharmaceutiques dans des contraintes strictes d'espace, de matériel et de sécurité. L'équipe a préparé et soumis des rapports intermédiaires aux jalons clés.">
+                      As part of a semester-long engineering design project in first year, I worked on the development of an Automated Fluid Dispenser designed for precise, autonomous mixing of pharmaceutical solutions within strict space, material, and safety constraints. The team prepared and submitted interim reports at key milestones.
+                    </span>
+                    <br><br>
+                    <span class="lang-text"
+                        data-en="My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides."
+                        data-fr="Mes contributions au projet se sont concentrées à la fois sur la conception du système et le développement logiciel. J'ai écrit l'intégralité du code C++ pour Arduino, qui comprenait la coordination de trois sous-systèmes : un mécanisme de distribution de poudre actionné par servo-moteur, un plateau tournant motorisé et un système de pompe péristaltique pour la distribution de liquide. Le code utilisait des tableaux pour stocker et itérer des instructions de dosage prédéfinies pour cinq tubes à essai, distribuant des incréments entre 1 g et 2 g de poudre par tube (± 0,2 g) et délivrant 20 mL de liquide par tube, contrôlés par des boutons de démarrage et d'arrêt d'urgence. J'ai implémenté une logique de synchronisation et de contrôle de mouvement de précision pour assurer un dosage exact, ainsi que des vérifications d'interruption en temps réel pour les dérogations de sécurité.">
+                      My contributions to the project focused heavily on both the system design and the software development. I wrote the complete Arduino C++ codebase, which included coordinating three subsystems: a servo-powered powder dispensing mechanism, a motor rotating turntable, and a peristaltic pump liquid delivery system. The code used arrays to store and iterate over preset dosing instructions for five test tubes dispensing increments between 1 g and 2 g of powder per tube (± 0.2 g) and delivering 20 mL of liquid per tube, controlled with start and emergency stop buttons. I implemented precision timing and motion control logic to ensure accurate dosing, along with real-time interrupt checks for safety overrides.
+                    </span>
+                  </p>
+                <div class="content-float float-left">
+                  <img src="Media/APSC101_SDW.jpg" alt="SolidWorks assembly for the device" class="float-img">
+                  <p>
+                    <span class="lang-text"
+                        data-en="Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports."
+                        data-fr="Au-delà de la programmation, j'ai contribué à la conception d'un sketch SolidWorks de l'assemblage final pour les composants imprimés en 3D, s'assurant que la boîte de vitesses, le système de fin de course et la plateforme des tubes à essai répondent aux exigences fonctionnelles et dimensionnelles. J'ai également rédigé des sections de nos rapports de conception approfondis.">
+                      Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports.
+                    </span>
+                  </p>
+            </div>
+          </div>
+        </article>
+
+        <article id="project-portfolio-website" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="Portfolio Website"
+                      data-fr="Site portfolio">
+                  Portfolio Website
+                </span>
+              </h3>
+              <div class="project-tech">HTML, CSS, JavaScript</div>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/JC_logo.png" alt="" aria-hidden="true">
+            </div>
+          </div>
+          <div class="project-card-details">
+            <div class="project-card-actions">
+              <a href="https://github.com/JulienChagnon/Portfolio-Website"
+                target="_blank" rel="noopener noreferrer"
+                class="btn-code">
+                <p>&lt;/&gt;</p>
+                <span class="lang-text"
+                      data-en="See Code"
+                      data-fr="Voir le code">
+                  See Code
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <p>
+                  <span class="lang-text"
+                        data-en="As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain."
+                        data-fr="Dans le cadre d'un projet personnel de développement Web, j'ai conçu et réalisé ce site portfolio de A à Z en HTML, CSS et JavaScript pour présenter mes compétences, projets et expériences de manière interactive. Le site est hébergé sur GitHub Pages et configuré avec un domaine personnalisé.">
+                    As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain.
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="In CSS, I implemented responsive design through dynamic viewport units to ensure optimal viewing across all devices. For instance, media queries detect viewports under 768px and automatically disable floats, stacking content vertically and converting all images to full width for improved readability on smartphones. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!"
+                        data-fr="En CSS, j'ai mis en œuvre une conception adaptative à l'aide d'unités de fenêtre d'affichage dynamiques pour garantir un affichage optimal sur tous les appareils. Par exemple, les requêtes média détectent les fenêtres d'affichage de moins de 768 px et désactivent automatiquement les flottants, empilent le contenu verticalement et convertissent toutes les images en pleine largeur pour améliorer la lisibilité sur les téléphones intelligents. Pour le constater par vous-même, essayez de modifier la largeur de votre fenêtre de navigateur pour observer le contenu s'adapter dynamiquement !">
+                    In CSS, I implemented responsive design through dynamic viewport units to ensure optimal viewing across all devices. For instance, media queries detect viewports under 768px and automatically disable floats, stacking content vertically and converting all images to full width for improved readability on smartphones. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events."
+                        data-fr="J'ai développé la logique JavaScript qui alimente tous les comportements dynamiques du site. Principalement un terminal interactif qui prend en charge l'autocomplétion par tabulation, le rappel d'historique par touches fléchées à l'aide d'un tampon d'historique basé sur un tableau, et des ensembles de commandes localisés en anglais et en français. Le terminal ajuste dynamiquement sa position d'absolue à fixe en fonction de la profondeur de défilement, avec des transitions fluides empêchant les sauts visuels. J'ai également intégré une version française de l'ensemble du site Web en basculant la classe lang sur l'élément &lt;body&gt; et en échangeant dynamiquement tout le contenu visible à l'aide d'attributs de données. Un autre élément important est l'animation de pluie binaire inspirée de Matrix qui réagit à la vélocité de défilement ; se déplaçant vers le haut lors du défilement vers le bas et vice versa, avec des changements de chiffres à intervalle programmé pour l'intérêt visuel. D'autres éléments dynamiques comprennent une barre de défilement personnalisée qui interpole la couleur du blanc à la couleur du thème principal en fonction de la position de défilement, et une barre latérale avec des transitions de position fluides déclenchées par les événements de défilement.">
+                    I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
       <br>
 
-      <!-- Project: Portfolio Website -->
-      <div id="project-portfolio-website" class="project-box">
-        <div class="project-header">
-          <h3>
-            <span class="lang-text"
-                  data-en="Portfolio Website"
-                  data-fr="Site portfolio">
-              Portfolio Website
-            </span>
-          </h3>
-          <div class="project-tech" aria-label="Technologies used">
-            HTML, CSS, JavaScript
-          </div>
-        </div>
-        <a href="https://github.com/JulienChagnon/Portfolio-Website"
-          target="_blank" rel="noopener noreferrer"
-          class="btn-report">
-          📄 
+      <div class="project-stack-controls">
+        <button type="button" id="collapseProjects" class="collapse-projects-btn">
           <span class="lang-text"
-                data-en="Git Repository"
-                data-fr="Dépôt Git">
-            Git Repository
+                data-en="Collapse all"
+                data-fr="Tout réduire">
+            Collapse all
           </span>
-        </a>
-        <div class="content-row">
-          <div class="content-text">
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                    data-en="As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain."
-                    data-fr="Dans le cadre d'un projet personnel de développement Web, j'ai conçu et réalisé ce site portfolio de A à Z en HTML, CSS et JavaScript pour présenter mes compétences, projets et expériences de manière interactive. Le site est hébergé sur GitHub Pages et configuré avec un domaine personnalisé.">
-                As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain.
-              </span>
-            </p>
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                    data-en="In CSS, I implemented responsive design through dynamic viewport units to ensure optimal viewing across all devices. For instance, media queries detect viewports under 768px and automatically disable floats, stacking content vertically and converting all images to full width for improved readability on smartphones. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!"
-                    data-fr="En CSS, j'ai mis en œuvre une conception adaptative à l'aide d'unités de fenêtre d'affichage dynamiques pour garantir un affichage optimal sur tous les appareils. Par exemple, les requêtes média détectent les fenêtres d'affichage de moins de 768 px et désactivent automatiquement les flottants, empilent le contenu verticalement et convertissent toutes les images en pleine largeur pour améliorer la lisibilité sur les téléphones intelligents. Pour le constater par vous-même, essayez de modifier la largeur de votre fenêtre de navigateur pour observer le contenu s'adapter dynamiquement !">
-                In CSS, I implemented responsive design through dynamic viewport units to ensure optimal viewing across all devices. For instance, media queries detect viewports under 768px and automatically disable floats, stacking content vertically and converting all images to full width for improved readability on smartphones. To observe this firsthand, try changing your browser window width to watch the content wrap dynamically!
-              </span>
-            </p>
-            <p style="margin-bottom: 0.7em;">
-              <span class="lang-text"
-                    data-en="I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events."
-                    data-fr="J'ai développé la logique JavaScript qui alimente tous les comportements dynamiques du site. Principalement un terminal interactif qui prend en charge l'autocomplétion par tabulation, le rappel d'historique par touches fléchées à l'aide d'un tampon d'historique basé sur un tableau, et des ensembles de commandes localisés en anglais et en français. Le terminal ajuste dynamiquement sa position d'absolue à fixe en fonction de la profondeur de défilement, avec des transitions fluides empêchant les sauts visuels. J'ai également intégré une version française de l'ensemble du site Web en basculant la classe lang sur l'élément &lt;body&gt; et en échangeant dynamiquement tout le contenu visible à l'aide d'attributs de données. Un autre élément important est l'animation de pluie binaire inspirée de Matrix qui réagit à la vélocité de défilement ; se déplaçant vers le haut lors du défilement vers le bas et vice versa, avec des changements de chiffres à intervalle programmé pour l'intérêt visuel. D'autres éléments dynamiques comprennent une barre de défilement personnalisée qui interpole la couleur du blanc à la couleur du thème principal en fonction de la position de défilement, et une barre latérale avec des transitions de position fluides déclenchées par les événements de défilement.">
-                I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events.
-              </span>
-            </p>
-          </div>
-        </div>
+          <span class="collapse-projects-arrow" aria-hidden="true">↑</span>
+        </button>
       </div>
-      <br>
 
       <!-- Project: Birthday Guessing Game -->
       <!--
@@ -605,7 +592,6 @@
 
     <section id="work-history">
     <h2 class="lang-text" data-en="Work History" data-fr="Historique de Travail">Work History</h2>
-    <p class="lang-text" data-en="Explore my professional experiences, highlighting my growth and adaptability." data-fr="Découvrez mes expériences professionnelles.">Explore my professional experiences, highlighting my growth and adaptability.</p>
 
     <figure class="timeline" style="margin-left:0; margin-right:auto;">
       <ul>
@@ -664,20 +650,22 @@
         </ul>
       </figure>
 
-    <button
-      id="toggleJobs"
-      class="see-more"
-      data-en-show="See More"
-      data-en-hide="See Less"
-      data-fr-show="Voir plus"
-      data-fr-hide="Voir moins"
-    >
-      <span class="lang-text"
-        data-en="See More"
-        data-fr="Voir plus">
-      See More
-      </span>
-    </button>
+    <div class="work-history-cta">
+      <button
+        id="toggleJobs"
+        class="see-more"
+        data-en-show="See More"
+        data-en-hide="See Less"
+        data-fr-show="Voir plus"
+        data-fr-hide="Voir moins"
+      >
+        <span class="lang-text"
+          data-en="See More"
+          data-fr="Voir plus">
+        See More
+        </span>
+      </button>
+    </div>
 
     </section>
 
