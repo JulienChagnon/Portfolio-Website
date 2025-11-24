@@ -1152,6 +1152,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   pointer-events: auto;
   margin-top: 1.2rem;
   padding-top: 1.2rem;
+  overflow: visible;
 }
 
 .project-card-actions {
@@ -1312,6 +1313,14 @@ body.fr .sidebar-dropdown a:focus-visible {
   .project-card-summary {
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .project-card-summary-info {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
   }
 
   .project-card-summary-thumb {

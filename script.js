@@ -34,56 +34,60 @@
   if (!cards.length) return;
   const collapseBtn = document.getElementById('collapseProjects');
 
-  const snapshotForCollapse = () => {
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const rect = stack.getBoundingClientRect();
-    return {
-      scrollY,
-      viewportHeight: window.innerHeight || document.documentElement.clientHeight || 0,
-      stackTop: rect.top + scrollY,
-      stackHeight: stack.offsetHeight,
-    };
-  };
-
-  const restoreAfterCollapse = (snapshot) => {
-    if (!snapshot) return;
-
-    const currentScroll = window.scrollY || window.pageYOffset || 0;
-    const rectAfter = stack.getBoundingClientRect();
-    const stackTopAfter = rectAfter.top + currentScroll;
-    const stackHeightAfter = stack.offsetHeight;
-    if (stackHeightAfter >= snapshot.stackHeight - 1) return;
-
-    const prevViewportTop = snapshot.scrollY;
-    const prevViewportBottom = snapshot.scrollY + snapshot.viewportHeight;
-    const prevStackBottom = snapshot.stackTop + snapshot.stackHeight;
-    const wasViewingStack = prevViewportBottom > snapshot.stackTop && prevViewportTop < prevStackBottom;
-    if (!wasViewingStack) return;
-
-    const relativeScrollInStack = snapshot.scrollY - snapshot.stackTop;
-    const maxAllowedRelative = Math.max(0, stackHeightAfter - snapshot.viewportHeight * 0.3);
-    const desiredRelative = Math.min(Math.max(0, relativeScrollInStack), maxAllowedRelative);
-    const desiredScroll = stackTopAfter + desiredRelative;
-
-    const maxScroll = Math.max(
-      0,
-      (document.documentElement.scrollHeight || document.body.scrollHeight) - snapshot.viewportHeight
-    );
-    const target = Math.max(0, Math.min(desiredScroll, maxScroll));
-
-    if (Math.abs((window.scrollY || window.pageYOffset) - target) > 1) {
-      window.scrollTo({ top: target, behavior: 'auto' });
-    }
-  };
-
   const closeAll = () => {
-    const snapshot = snapshotForCollapse();
-    cards.forEach((card) => card.classList.remove('is-open'));
-    if (snapshot) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => restoreAfterCollapse(snapshot));
-      });
+    const openCards = cards.filter((card) => card.classList.contains('is-open'));
+    if (!openCards.length) return;
+
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+
+    // Find the lowest card whose top is visible - this is our anchor point
+    let anchor = null;
+    let anchorTopBefore = 0;
+    for (let i = cards.length - 1; i >= 0; i -= 1) {
+      const rect = cards[i].getBoundingClientRect();
+      if (rect.top < viewportHeight) {
+        anchor = cards[i];
+        anchorTopBefore = rect.top;
+        break;
+      }
     }
+
+    if (!anchor) {
+      anchor = stack;
+      const rect = stack.getBoundingClientRect();
+      anchorTopBefore = Math.min(rect.top, viewportHeight * 0.6);
+    }
+
+    const htmlEl = document.documentElement;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    htmlEl.style.scrollBehavior = 'auto';
+
+    openCards.forEach((card) => card.classList.remove('is-open'));
+
+    // Continuously adjust scroll to keep anchor fixed during the entire collapse
+    let animating = true;
+    const startTime = performance.now();
+    const duration = 650; 
+
+    const maintainPosition = () => {
+      if (!animating) return;
+
+      const currentTop = anchor.getBoundingClientRect().top;
+      if (Math.abs(currentTop - anchorTopBefore) > 0.5) {
+        const shift = currentTop - anchorTopBefore;
+        const currentScroll = window.scrollY || window.pageYOffset || 0;
+        window.scrollTo(0, Math.max(0, currentScroll + shift));
+      }
+
+      if (performance.now() - startTime < duration + 50) {
+        requestAnimationFrame(maintainPosition);
+      } else {
+        animating = false;
+        htmlEl.style.scrollBehavior = originalScrollBehavior;
+      }
+    };
+
+    requestAnimationFrame(maintainPosition);
   };
 
   const pointerActivates = (event) => {
