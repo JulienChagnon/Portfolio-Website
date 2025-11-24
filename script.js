@@ -58,6 +58,12 @@
       anchorTopBefore = Math.min(rect.top, viewportHeight * 0.6);
     }
 
+    // Signal sidebar to use smooth transitions during collapse
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.add('collapsing-projects');
+    }
+
     const htmlEl = document.documentElement;
     const originalScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = 'auto';
@@ -67,7 +73,7 @@
     // Continuously adjust scroll to keep anchor fixed during the entire collapse
     let animating = true;
     const startTime = performance.now();
-    const duration = 650; 
+    const duration = 650;
 
     const maintainPosition = () => {
       if (!animating) return;
@@ -84,6 +90,12 @@
       } else {
         animating = false;
         htmlEl.style.scrollBehavior = originalScrollBehavior;
+        // Remove smooth transition class from sidebar after animation completes
+        if (sidebar) {
+          setTimeout(() => {
+            sidebar.classList.remove('collapsing-projects');
+          }, 100);
+        }
       }
     };
 
@@ -200,6 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Calculate when sidebar should stick
     const stickPoint = sidebarTop - STICK_OFFSET;
 
+    // Check if we're in the middle of a project collapse animation
+    const isCollapsing = sidebar.classList.contains('collapsing-projects');
+
     if (scrollY >= stickPoint) {
       // Stick to viewport
       if (!isSticky) {
@@ -209,14 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.style.top = currentTop + 'px';
         // Force reflow then animate to target position
         void sidebar.offsetHeight;
-        sidebar.style.transition = 'top 0.1s ease-out';
+        // Use longer transition during collapse for smoothness
+        sidebar.style.transition = isCollapsing
+          ? 'top 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
+          : 'top 0.1s ease-out';
         sidebar.style.top = STICK_OFFSET + 'px';
         isSticky = true;
       }
     } else {
       // Flow with page
       if (isSticky) {
-        sidebar.style.transition = 'none';
+        // During collapse, use smooth transition instead of 'none'
+        sidebar.style.transition = isCollapsing
+          ? 'top 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
+          : 'none';
         sidebar.style.position = 'absolute';
         sidebar.style.top = sidebarTop + 'px';
         isSticky = false;
