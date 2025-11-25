@@ -34,9 +34,29 @@
   if (!cards.length) return;
   const collapseBtn = document.getElementById('collapseProjects');
 
+  // Skip scroll-locking while the user is actively scrolling to avoid jitter
+  let recentlyScrolled = false;
+  let scrollTimer = null;
+  const markScroll = () => {
+    recentlyScrolled = true;
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      recentlyScrolled = false;
+    }, 140);
+  };
+  window.addEventListener('scroll', markScroll, { passive: true });
+  window.addEventListener('wheel', markScroll, { passive: true });
+  window.addEventListener('touchmove', markScroll, { passive: true });
+
   const closeAll = () => {
     const openCards = cards.filter((card) => card.classList.contains('is-open'));
     if (!openCards.length) return;
+
+    // If a fast scroll is in progress, collapse without fighting the scroll position
+    if (recentlyScrolled) {
+      openCards.forEach((card) => card.classList.remove('is-open'));
+      return;
+    }
 
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
 
