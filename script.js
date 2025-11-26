@@ -996,19 +996,26 @@ if (langButton) {
     const header = document.querySelector('header');
     if (!header) return;
 
+    const MAX_DPR = 1.25; // cap resolution 
+    const FRAME_INTERVAL = 1000 / 48; //limit to 48fps
     const canvas = document.createElement('canvas');
     canvas.id = 'headerRainCanvas';
     header.appendChild(canvas);
     const ctx = canvas.getContext('2d');
 
-    let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    let dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
     let w = 0, h = 0, step = 14 * dpr, stepX = 14 * dpr, cols = 0, rows = 0;
     let heads = [];
+    let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    let isHeaderVisible = true;
+    let pausedForVisibility = false;
+
+    const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
     function size() {
       const cw = Math.max(1, header.clientWidth);
       const ch = Math.max(1, header.clientHeight);
-      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
       canvas.width = Math.floor(cw * dpr);
       canvas.height = Math.floor(ch * dpr);
       canvas.style.width = cw + 'px';
@@ -1030,6 +1037,25 @@ if (langButton) {
     window.addEventListener('resize', size);
     window.addEventListener('load', size);
     document.addEventListener('DOMContentLoaded', size);
+
+    const updateVisibilityFallback = () => {
+      const rect = header.getBoundingClientRect();
+      const viewport = window.innerHeight || document.documentElement.clientHeight || 0;
+      isHeaderVisible = rect.bottom > 0 && rect.top < viewport * 1.1;
+    };
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      const io = new IntersectionObserver((entries) => {
+        if (!entries || !entries.length) return;
+        const entry = entries[0];
+        isHeaderVisible = entry.isIntersecting || entry.intersectionRatio > 0.05;
+      }, { threshold: [0, 0.05, 0.2, 0.4, 0.6] });
+      io.observe(header);
+    } else {
+      window.addEventListener('scroll', updateVisibilityFallback, { passive: true });
+      window.addEventListener('resize', updateVisibilityFallback, { passive: true });
+      updateVisibilityFallback();
+    }
 
     let lastY = window.scrollY || window.pageYOffset || 0;
     let accum = 0;
@@ -1071,6 +1097,23 @@ if (langButton) {
     }
 
     function tick() {
+      const nowTs = now();
+      if (nowTs - lastFrameTime < FRAME_INTERVAL) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      lastFrameTime = nowTs;
+
+      if (!isHeaderVisible) {
+        if (!pausedForVisibility) {
+          ctx.clearRect(0, 0, w, h);
+          pausedForVisibility = true;
+        }
+        requestAnimationFrame(tick);
+        return;
+      }
+      pausedForVisibility = false;
+
       const nowY = window.scrollY || window.pageYOffset || 0;
       const dy = nowY - lastY;
       lastY = nowY;
@@ -1112,7 +1155,7 @@ if (langButton) {
       ctx.shadowBlur = Math.round(step * 0.35);
 
       // Advance glyph phase on a slower timer so values change less frequently
-      const tnow = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const tnow = nowTs;
       if (tnow - lastChange >= changeInterval) {
         glyphPhase = (glyphPhase + 1) | 0;
         lastChange = tnow;
