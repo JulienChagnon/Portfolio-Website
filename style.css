@@ -168,22 +168,26 @@ body.fr #headerTerminal .typed { color: #9bc9ff; }
 #headerTerminalHint {
   color: #e8ecff;
   font-style: italic;
-  padding: 0;
+  padding: 0.25rem 0.45rem;
   position: relative;
   top: auto;
   left: auto;
   z-index: 11;
-  margin-left: 0.5rem;
+  margin-left: 0.12rem;
   white-space: normal;
   pointer-events: none;
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 900;
   transform: none;
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.55);
+  background: rgba(40, 44, 52, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-shadow: 0 1px 3px rgba(8, 12, 24, 0.65);
 }
 #headerTerminal .term-output a.term-link {
   color: #7aabff;
@@ -1415,9 +1419,9 @@ body.fr .sidebar-dropdown a:focus-visible {
     position: relative;
     bottom: auto;
     left: auto;
-    margin-left: 0.25rem;
+    margin-left: 0.1rem;
     margin-bottom: 0;
-    padding: 0;
+    padding: 0.22rem 0.4rem;
     display: inline-flex;
     transform: none;
   }
@@ -1629,6 +1633,13 @@ html { scrollbar-width: none; }
   box-shadow: 0 0 0 2px rgba(0,0,0,0.08) inset;
   will-change: transform;
   cursor: grab;
+  transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1),
+              height 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+#scrollbarThumb.dragging {
+  transition: none;
+  cursor: grabbing;
 }
 
 /* On small screens/touch, slim scrollbar and add small right padding to header */

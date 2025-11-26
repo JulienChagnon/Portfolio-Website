@@ -55,12 +55,38 @@
     // If a fast scroll is in progress, collapse without fighting the scroll position
     if (recentlyScrolled) {
       openCards.forEach((card) => card.classList.remove('is-open'));
+      // Update scrollbar after fast close
+      if (typeof window.__updateScrollbarOverlay === 'function') {
+        requestAnimationFrame(() => {
+          window.__updateScrollbarOverlay();
+        });
+      }
+      return;
+    }
+
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+
+    const hasContentAboveScroll = openCards.some((card) => {
+      const rect = card.getBoundingClientRect();
+      const cardTop = scrollY + rect.top;
+      return cardTop < scrollY;
+    });
+
+    //If no content is collapsing above scroll position, just collapse normal
+    if (!hasContentAboveScroll) {
+      openCards.forEach((card) => card.classList.remove('is-open'));
+      // Update scrollbar after simple close
+      if (typeof window.__updateScrollbarOverlay === 'function') {
+        requestAnimationFrame(() => {
+          window.__updateScrollbarOverlay();
+        });
+      }
       return;
     }
 
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
 
-    // Find the lowest card whose top is visible - this is our anchor point
+    // Find the lowest open card that is still visible in the viewport to use as anchor
     let anchor = null;
     let anchorTopBefore = 0;
     for (let i = cards.length - 1; i >= 0; i -= 1) {
@@ -116,6 +142,10 @@
             sidebar.classList.remove('collapsing-projects');
           }, 100);
         }
+        // Final scrollbar update after collapse animation completes
+        if (typeof window.__updateScrollbarOverlay === 'function') {
+          window.__updateScrollbarOverlay();
+        }
       }
     };
 
@@ -151,7 +181,27 @@
     const markOpen = () => {
       card.classList.add('is-open');
       clearPending();
+      // Update scrollbar immediately when project opens
+      if (typeof window.__updateScrollbarOverlay === 'function') {
+        requestAnimationFrame(() => {
+          window.__updateScrollbarOverlay();
+        });
+      }
     };
+
+    // Update scrollbar after expansion animation completes
+    const details = card.querySelector('.project-card-details');
+    if (details) {
+      details.addEventListener('transitionend', (event) => {
+        // Only update for the max-height transition (not other properties)
+        if (event.propertyName === 'max-height' && card.classList.contains('is-open')) {
+          if (typeof window.__updateScrollbarOverlay === 'function') {
+            window.__updateScrollbarOverlay();
+          }
+        }
+      });
+    }
+
     card.addEventListener('mouseenter', markOpen);
     card.addEventListener('pointerenter', (event) => {
       if (!pointerActivates(event)) return;
@@ -755,14 +805,26 @@ if (langButton) {
     thumb.style.height = `${thumbHeight}px`;
   }
 
-  function updateOverlay() {
+  function updateOverlay(options = {}) {
+    const { disableTransition = false } = options;
     // Skip scroll-driven updates while dragging
     if (dragging) return;
     computeMetrics();
     const y = window.scrollY || window.pageYOffset || 0;
     const t = Math.min(1, Math.max(0, y / maxScroll));
     const top = Math.round(maxThumbTop * t);
-    thumb.style.transform = `translateY(${top}px)`;
+
+    // Disable transition temporarily during scroll events for immediate feedback
+    if (disableTransition) {
+      thumb.classList.add('dragging');
+      thumb.style.transform = `translateY(${top}px)`;
+      // Re-enable transition after a brief delay
+      setTimeout(() => {
+        thumb.classList.remove('dragging');
+      }, 50);
+    } else {
+      thumb.style.transform = `translateY(${top}px)`;
+    }
   }
 
   let dragging = false;
@@ -789,7 +851,7 @@ if (langButton) {
     document.addEventListener('touchmove', onDrag, { passive: false });
     document.addEventListener('touchend', endDrag);
     document.body.style.userSelect = 'none';
-    thumb.style.cursor = 'grabbing';
+    thumb.classList.add('dragging');
   }
 
   function onDrag(e) {
@@ -813,7 +875,7 @@ if (langButton) {
     document.removeEventListener('touchmove', onDrag);
     document.removeEventListener('touchend', endDrag);
     document.body.style.userSelect = '';
-    thumb.style.cursor = '';
+    thumb.classList.remove('dragging');
     if (scrollBehaviorPatched) {
       docEl.style.scrollBehavior = savedScrollBehavior;
       scrollBehaviorPatched = false;
@@ -827,10 +889,13 @@ if (langButton) {
   overlay.addEventListener('mousedown', startDrag);
   overlay.addEventListener('touchstart', startDrag, { passive: false });
 
-  window.addEventListener('scroll', () => { ensureAttached(); updateOverlay(); }, { passive: true });
+  window.addEventListener('scroll', () => { ensureAttached(); updateOverlay({ disableTransition: true }); }, { passive: true });
   window.addEventListener('resize', () => { ensureAttached(); updateOverlay(); });
   window.addEventListener('load', () => { ensureAttached(); updateOverlay(); });
   document.addEventListener('DOMContentLoaded', () => { ensureAttached(); updateOverlay(); });
+
+  // Expose updateOverlay globally so project cards can trigger updates (with transition enabled)
+  window.__updateScrollbarOverlay = () => updateOverlay({ disableTransition: false });
 })();
 
 (() => {
