@@ -89,6 +89,7 @@
     // Find the highest visible top edge of any card to use as anchor
     let anchor = null;
     let anchorTopBefore = 0;
+    let skipScrollCompensation = false;
 
     // First, try to find the highest visible top edge in viewport
     for (let i = 0; i < cards.length; i += 1) {
@@ -101,23 +102,35 @@
       }
     }
 
+    // If no top edge is visible, look for cards that span the viewport
     if (!anchor) {
       for (let i = 0; i < cards.length; i += 1) {
-        const rect = cards[i].getBoundingClientRect();
-        // Card's top is above viewport but bottom is visible
+        const card = cards[i];
+        const rect = card.getBoundingClientRect();
+        const isOpen = card.classList.contains('is-open');
+
         if (rect.top < 0 && rect.bottom > 0) {
-          anchor = cards[i];
-          anchorTopBefore = rect.top;
-          break;
+        anchor = card;
+        anchorTopBefore = rect.top;
+        break;
         }
       }
     }
 
-    // Fallback to stack if still no anchor found
-    if (!anchor) {
-      anchor = stack;
-      const rect = stack.getBoundingClientRect();
-      anchorTopBefore = Math.min(rect.top, viewportHeight * 0.6);
+    // Check if we're scrolled past all project cards or before them
+    if (!anchor && !skipScrollCompensation) {
+      const firstCard = cards[0];
+      const lastCard = cards[cards.length - 1];
+      const firstCardRect = firstCard.getBoundingClientRect();
+      const lastCardRect = lastCard.getBoundingClientRect();
+
+      // If we're before first card or after last card, skip compensation
+      if (firstCardRect.top > viewportHeight || lastCardRect.bottom < 0) {
+        skipScrollCompensation = true;
+      } else {
+
+        skipScrollCompensation = true;
+      }
     }
 
     // Signal sidebar to use smooth transitions during collapse
@@ -126,13 +139,27 @@
       sidebar.classList.add('collapsing-projects');
     }
 
+    openCards.forEach((card) => card.classList.remove('is-open'));
+
+    // If we should skip scroll compensation, just do a simple collapse
+    if (skipScrollCompensation) {
+      // Wait for animation to complete, then cleanup
+      setTimeout(() => {
+        if (sidebar) {
+          sidebar.classList.remove('collapsing-projects');
+        }
+        if (typeof window.__updateScrollbarOverlay === 'function') {
+          window.__updateScrollbarOverlay();
+        }
+      }, 700);
+      return;
+    }
+
+    // Continuously adjust scroll to keep anchor fixed during the entire collapse
     const htmlEl = document.documentElement;
     const originalScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = 'auto';
 
-    openCards.forEach((card) => card.classList.remove('is-open'));
-
-    // Continuously adjust scroll to keep anchor fixed during the entire collapse
     let animating = true;
     const startTime = performance.now();
     const duration = 650;
