@@ -527,15 +527,15 @@ document.addEventListener('DOMContentLoaded', () => {
     en: [
       'Running and Jumping Detection (Python ML)',
       'Dynamic Time Allocating Calendar (Qt/C++)',
-      'Fluid and Powder Dispensing Device (Arduino)',
       '911 Dispatcher Training Device (Web + Arduino)',
+      'Fluid and Powder Dispensing Device (Arduino)',
       'Portfolio Website (HTML/CSS/JS)',
     ],
     fr: [
       'Détection de course et saut (Python)',
       'Calendrier dynamique (C++/Qt)',
-      'Distributeur fluide et poudre (Arduino)',
       'Simulateur d\'opérateur 911 (Web + Arduino)',
+      'Distributeur fluide et poudre (Arduino)',
       'Site portfolio (HTML/CSS/JS)',
     ],
   };
@@ -615,6 +615,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const link = document.createElement('a');
         link.href = `#${anchor}`;
         link.textContent = displayTitle;
+
+        // Handle click to properly open project card and scroll
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+
+          const targetElement = document.getElementById(anchor);
+          if (!targetElement) return;
+
+          const stack = document.querySelector('.project-stack');
+          if (stack) {
+            const openCards = stack.querySelectorAll('.project-card.is-open');
+            openCards.forEach((card) => card.classList.remove('is-open'));
+          }
+
+          setTimeout(() => {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            setTimeout(() => {
+              targetElement.classList.add('is-open');
+
+  
+              if (typeof window.__updateScrollbarOverlay === 'function') {
+                requestAnimationFrame(() => {
+                  window.__updateScrollbarOverlay();
+                });
+              }
+            }, 500); 
+          }, 700); 
+        });
+
         li.appendChild(link);
         list.appendChild(li);
       });
@@ -997,7 +1027,7 @@ if (langButton) {
     if (!header) return;
 
     const MAX_DPR = 1.25; // cap resolution 
-    const FRAME_INTERVAL = 1000 / 48; //limit to 48fps
+    const FRAME_INTERVAL = 1000 / 30; //limit to 30fps
     const canvas = document.createElement('canvas');
     canvas.id = 'headerRainCanvas';
     header.appendChild(canvas);
@@ -1751,8 +1781,8 @@ if (langButton) {
       output: [
         { text: '1. Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
         { text: '2. Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
-        { text: '3. Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
-        { text: '4. 911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+        { text: '3. 911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+        { text: '4. Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
         { text: '5. Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
@@ -1843,8 +1873,8 @@ if (langButton) {
       output: [
         { text: '1. Détection de course et de saut (Python)', href: '#project-running-jumping' },
         { text: '2. Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
-        { text: '3. Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
-        { text: '4. Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+        { text: '3. Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+        { text: '4. Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
         { text: '5. Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
