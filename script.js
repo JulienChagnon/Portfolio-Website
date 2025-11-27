@@ -86,18 +86,34 @@
 
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
 
-    // Find the lowest open card that is still visible in the viewport to use as anchor
+    // Find the highest visible top edge of any card to use as anchor
     let anchor = null;
     let anchorTopBefore = 0;
-    for (let i = cards.length - 1; i >= 0; i -= 1) {
+
+    // First, try to find the highest visible top edge in viewport
+    for (let i = 0; i < cards.length; i += 1) {
       const rect = cards[i].getBoundingClientRect();
-      if (rect.top < viewportHeight) {
+      // Check if the top edge is visible in viewport
+      if (rect.top >= 0 && rect.top < viewportHeight) {
         anchor = cards[i];
         anchorTopBefore = rect.top;
         break;
       }
     }
 
+    if (!anchor) {
+      for (let i = 0; i < cards.length; i += 1) {
+        const rect = cards[i].getBoundingClientRect();
+        // Card's top is above viewport but bottom is visible
+        if (rect.top < 0 && rect.bottom > 0) {
+          anchor = cards[i];
+          anchorTopBefore = rect.top;
+          break;
+        }
+      }
+    }
+
+    // Fallback to stack if still no anchor found
     if (!anchor) {
       anchor = stack;
       const rect = stack.getBoundingClientRect();
