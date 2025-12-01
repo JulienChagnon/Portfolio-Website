@@ -35,6 +35,7 @@
   const collapseBtn = document.getElementById('collapseProjects');
 
   // Skip scroll-locking while the user is actively scrolling to avoid jitter
+  const SCROLL_SETTLE_DELAY = 220;
   let recentlyScrolled = false;
   let scrollTimer = null;
   const markScroll = () => {
@@ -42,7 +43,8 @@
     if (scrollTimer) clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
       recentlyScrolled = false;
-    }, 140);
+      flushPendingClose();
+    }, SCROLL_SETTLE_DELAY);
   };
   window.addEventListener('scroll', markScroll, { passive: true });
   window.addEventListener('wheel', markScroll, { passive: true });
@@ -52,10 +54,8 @@
     const openCards = cards.filter((card) => card.classList.contains('is-open'));
     if (!openCards.length) return;
 
-    // If a fast scroll is in progress, collapse without fighting the scroll position
     if (recentlyScrolled) {
       openCards.forEach((card) => card.classList.remove('is-open'));
-      // Update scrollbar after fast close
       if (typeof window.__updateScrollbarOverlay === 'function') {
         requestAnimationFrame(() => {
           window.__updateScrollbarOverlay();
@@ -65,6 +65,9 @@
     }
 
     const scrollY = window.scrollY || window.pageYOffset || 0;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const viewportTop = scrollY;
+    const viewportBottom = scrollY + viewportHeight;
 
     const hasContentAboveScroll = openCards.some((card) => {
       const rect = card.getBoundingClientRect();
@@ -72,10 +75,8 @@
       return cardTop < scrollY;
     });
 
-    //If no content is collapsing above scroll position, just collapse normal
     if (!hasContentAboveScroll) {
       openCards.forEach((card) => card.classList.remove('is-open'));
-      // Update scrollbar after simple close
       if (typeof window.__updateScrollbarOverlay === 'function') {
         requestAnimationFrame(() => {
           window.__updateScrollbarOverlay();
@@ -84,66 +85,87 @@
       return;
     }
 
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const stackRect = stack.getBoundingClientRect();
+    const stackTop = scrollY + stackRect.top;
+    const stackBottom = scrollY + stackRect.bottom;
 
-    // Find the highest visible top edge of any card to use as anchor
+    let skipScrollCompensation = !(
+      viewportBottom > stackTop && viewportTop < stackBottom
+    );
+
     let anchor = null;
     let anchorTopBefore = 0;
-    let skipScrollCompensation = false;
 
-    // First, try to find the highest visible top edge in viewport
-    for (let i = 0; i < cards.length; i += 1) {
-      const rect = cards[i].getBoundingClientRect();
-      // Check if the top edge is visible in viewport
-      if (rect.top >= 0 && rect.top < viewportHeight) {
-        anchor = cards[i];
-        anchorTopBefore = rect.top;
-        break;
-      }
-    }
+    if (!skipScrollCompensation) {
+      // 1) Find the lowest open project in DOM order
+      let lowestOpenIndex = -1;
+      cards.forEach((card, index) => {
+        if (card.classList.contains('is-open')) {
+          lowestOpenIndex = index;
+        }
+      });
 
-    // If no top edge is visible, look for cards that span the viewport
-    if (!anchor) {
-      for (let i = 0; i < cards.length; i += 1) {
-        const card = cards[i];
-        const rect = card.getBoundingClientRect();
-        const isOpen = card.classList.contains('is-open');
+      if (lowestOpenIndex !== -1) {
+        const lowestOpenCard = cards[lowestOpenIndex];
+        const lowestRect = lowestOpenCard.getBoundingClientRect();
+        const lowestTop = lowestRect.top;
+        const lowestBottom = lowestRect.bottom;
 
-        if (rect.top < 0 && rect.bottom > 0) {
-        anchor = card;
-        anchorTopBefore = rect.top;
-        break;
+        // 2) If the *next unopened* project is visible, anchor on its top border
+        const nextCard = cards[lowestOpenIndex + 1];
+        if (nextCard && !nextCard.classList.contains('is-open')) {
+          const nextRect = nextCard.getBoundingClientRect();
+          if (nextRect.bottom > 0 && nextRect.top < viewportHeight) {
+            anchor = nextCard;
+            anchorTopBefore = nextRect.top;
+          }
+        }
+
+        // 3) Otherwise, anchor on the lowest open project (if it intersects viewport)
+        if (!anchor && lowestBottom > 0 && lowestTop < viewportHeight) {
+          anchor = lowestOpenCard;
+          anchorTopBefore = lowestTop;
         }
       }
-    }
 
-    // Check if we're scrolled past all project cards or before them
-    if (!anchor && !skipScrollCompensation) {
-      const firstCard = cards[0];
-      const lastCard = cards[cards.length - 1];
-      const firstCardRect = firstCard.getBoundingClientRect();
-      const lastCardRect = lastCard.getBoundingClientRect();
+      // 4) Fallback: original heuristic (highest visible top or spanning card)
+      if (!anchor) {
+        for (let i = 0; i < cards.length; i += 1) {
+          const rect = cards[i].getBoundingClientRect();
+          if (rect.top >= 0 && rect.top < viewportHeight) {
+            anchor = cards[i];
+            anchorTopBefore = rect.top;
+            break;
+          }
+        }
+      }
 
-      // If we're before first card or after last card, skip compensation
-      if (firstCardRect.top > viewportHeight || lastCardRect.bottom < 0) {
-        skipScrollCompensation = true;
-      } else {
-
+      if (!anchor) {
+        for (let i = 0; i < cards.length; i += 1) {
+          const card = cards[i];
+          const rect = card.getBoundingClientRect();
+          if (rect.top < 0 && rect.bottom > 0) {
+            anchor = card;
+            anchorTopBefore = rect.top;
+            break;
+          }
+        }
+      }
+      if (!anchor) {
         skipScrollCompensation = true;
       }
     }
 
-    // Signal sidebar to use smooth transitions during collapse
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
       sidebar.classList.add('collapsing-projects');
     }
 
+    // Trigger collapse
     openCards.forEach((card) => card.classList.remove('is-open'));
 
     // If we should skip scroll compensation, just do a simple collapse
     if (skipScrollCompensation) {
-      // Wait for animation to complete, then cleanup
       setTimeout(() => {
         if (sidebar) {
           sidebar.classList.remove('collapsing-projects');
@@ -155,7 +177,7 @@
       return;
     }
 
-    // Continuously adjust scroll to keep anchor fixed during the entire collapse
+    // Continuously adjust scroll to keep the chosen anchor's top border fixed
     const htmlEl = document.documentElement;
     const originalScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = 'auto';
@@ -166,6 +188,20 @@
 
     const maintainPosition = () => {
       if (!animating) return;
+
+      if (!anchor || !anchor.getBoundingClientRect) {
+        animating = false;
+        htmlEl.style.scrollBehavior = originalScrollBehavior;
+        if (sidebar) {
+          setTimeout(() => {
+            sidebar.classList.remove('collapsing-projects');
+          }, 100);
+        }
+        if (typeof window.__updateScrollbarOverlay === 'function') {
+          window.__updateScrollbarOverlay();
+        }
+        return;
+      }
 
       const currentTop = anchor.getBoundingClientRect().top;
       if (Math.abs(currentTop - anchorTopBefore) > 0.5) {
@@ -179,13 +215,11 @@
       } else {
         animating = false;
         htmlEl.style.scrollBehavior = originalScrollBehavior;
-        // Remove smooth transition class from sidebar after animation completes
         if (sidebar) {
           setTimeout(() => {
             sidebar.classList.remove('collapsing-projects');
           }, 100);
         }
-        // Final scrollbar update after collapse animation completes
         if (typeof window.__updateScrollbarOverlay === 'function') {
           window.__updateScrollbarOverlay();
         }
@@ -194,6 +228,7 @@
 
     requestAnimationFrame(maintainPosition);
   };
+
 
   const pointerActivates = (event) => {
     if (!event || typeof event.pointerType === 'undefined') return true;
@@ -209,7 +244,7 @@
 
   const requestClose = (event) => {
     if (event && !pointerActivates(event)) return;
-    if (modalOpen) {
+    if (modalOpen || recentlyScrolled) {
       pendingClose = true;
       return;
     }
@@ -265,11 +300,12 @@
   stack.addEventListener('focusout', handleStackFocusOut);
   stack.addEventListener('focusin', clearPending);
 
-  const flushPendingClose = () => {
+  function flushPendingClose() {
     if (!pendingClose) return;
+    if (modalOpen || recentlyScrolled) return;
     pendingClose = false;
     if (shouldCloseNow()) closeAll();
-  };
+  }
 
   const updateModalState = (open) => {
     modalOpen = open;
