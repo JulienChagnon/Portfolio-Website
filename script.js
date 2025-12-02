@@ -1986,12 +1986,19 @@ if (langButton) {
       'projects.txt': PROJECT_LINKS_EN,
       'skills.txt': SKILLS_OUTPUT_EN,
       'work.txt': WORK_HISTORY_EN,
+      'projects': PROJECT_LINKS_EN,
+      'skills': SKILLS_OUTPUT_EN,
+      'work': WORK_HISTORY_EN,
     },
     fr: {
       'projets.txt': PROJECT_LINKS_FR,
       'habiletes.txt': SKILLS_OUTPUT_FR,
       'habiletés.txt': SKILLS_OUTPUT_FR,
       'travail.txt': WORK_HISTORY_FR,
+      'projets': PROJECT_LINKS_FR,
+      'habiletes': SKILLS_OUTPUT_FR,
+      'habiletés': SKILLS_OUTPUT_FR,
+      'travail': WORK_HISTORY_FR,
     },
   };
 
