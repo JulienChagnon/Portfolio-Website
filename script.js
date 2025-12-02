@@ -711,15 +711,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectsSection = document.getElementById('projects');
     if (!toggle || !dropdown || !list || !sidebar || !projectsSection) return;
 
+    let closeTimer = null;
+
     const setOpen = (open) => {
       const expanded = !!open;
-      dropdown.hidden = !expanded;
-      dropdown.classList.toggle('open', expanded);
       toggle.classList.toggle('open', expanded);
       toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
       sidebar.classList.toggle('sidebar-expanded', expanded);
       // Update arrow direction
       toggle.textContent = expanded ? '🠅' : '🠇';
+      if (expanded) {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        dropdown.hidden = false;
+        dropdown.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => dropdown.classList.add('open'));
+      } else {
+        dropdown.classList.remove('open');
+        dropdown.setAttribute('aria-hidden', 'true');
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+          if (!dropdown.classList.contains('open')) {
+            dropdown.hidden = true;
+          }
+        }, 360);
+      }
     };
 
     const isOpen = () => dropdown.classList.contains('open');
@@ -1899,11 +1917,11 @@ if (langButton) {
         //'  about\t\t- Learn more about me',
         '  dark\t\t- Toggle dark mode theme',
         '  skills\t- View technical skills',
-        '  projects\t- List recent projects',
-        '  work\t\t- View work experience',
-        '  status\t- Show my status',
-        '  contact\t- My contact information',
-        '  joke\t\t- Random programming joke',
+        '  ls\t\t- List recent projects',
+        '  git log\t- View work experience',
+        '  git status\t- Show my status',
+        '  whois\t\t- My contact information',
+        '  fortune\t- Random programming joke',
         '  help\t\t- Show this help message',
         '  clear\t\t- Clear the terminal',
         'Use Tab to autocomplete commands, and up/down keys to navigate command history.'
@@ -1926,7 +1944,7 @@ if (langButton) {
         'Web: HTML, CSS'
       ]
     },
-    projects: {
+    ls: {
       output: [
         { text: '1. Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
         { text: '2. Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
@@ -1935,7 +1953,7 @@ if (langButton) {
         { text: '5. Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
-    contact: {
+    whois: {
       output: [
         'Email: julienchagnon9@gmail.com',
         'LinkedIn: linkedin.com/in/julienjchagnon',
@@ -1945,12 +1963,12 @@ if (langButton) {
     dark: {
       action: toggleDarkMode
     },
-    status: {
+    'git status': {
       output: [
         'Seeking a 12-16 month co-op placement in Computer Engineering related fields',
       ]
     },
-    work: {
+    'git log': {
       output: [
         'TRAFFIC SERVICES INTERN @ City of Ottawa\n(May - Aug 2025)',
         '  -Applied data analysis to pedestrian & vehicle',
@@ -1969,7 +1987,7 @@ if (langButton) {
         '  -Led mountain biking outings and day trips',
       ]
     },
-    joke: {
+    fortune: {
       output: null,
       jokes: [
         'Why do programmers prefer dark mode?\nBecause light attracts bugs!',
@@ -1992,11 +2010,11 @@ if (langButton) {
         //'  about\t\t- En savoir plus sur moi',
         '  sombre\t- Activer le thème sombre',
         '  competences\t- Voir mes compétences techniques',
-        '  projets\t- Lister mes projets récents',
-        '  travail\t- Voir mon expérience professionnelle',
-        '  statut\t- Afficher mon statut',
-        '  contact\t- Mes coordonnées',
-        '  blague\t- Blague aléatoire de programmation',
+        '  ls\t\t- Lister mes projets récents',
+        '  git log\t- Voir mon expérience professionnelle',
+        '  git status\t- Afficher mon statut',
+        '  whois\t\t- Mes contacts',
+        '  fortune\t- Blague de programmation',
         '  aide\t\t- Afficher ce message d\'aide',
         '  clear\t\t- Effacer le terminal',
         'Utilisez Tab pour compléter les commandes, et les flèches haut/bas pour naviguer dans l\'historique des commandes.'
@@ -2018,7 +2036,7 @@ if (langButton) {
         'Web : HTML, CSS'
       ]
     },
-    projets: {
+    ls: {
       output: [
         { text: '1. Détection de course et de saut (Python)', href: '#project-running-jumping' },
         { text: '2. Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
@@ -2027,7 +2045,7 @@ if (langButton) {
         { text: '5. Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
       ]
     },
-    contact: {
+    whois: {
       output: [
         'Courriel : julienchagnon9@gmail.com',
         'LinkedIn : linkedin.com/in/julienjchagnon',
@@ -2037,12 +2055,12 @@ if (langButton) {
     sombre: {
       action: toggleDarkMode
     },
-    status: {
+    'git status': {
       output: [
         'À la recherche de stages coop de 12 à 16 mois en génie informatique',
       ]
     },
-    travail: {
+    'git log': {
       output: [
         'STAGIAIRE AUX SERVICES DE LA CIRCULATION @ Ville d\'Ottawa\n(mai - août 2025)',
         '  -Analyse de données piétonnes et routières',
@@ -2060,7 +2078,7 @@ if (langButton) {
       ] 
 
     },
-    blague: {
+    fortune: {
       output: null,
       jokes: [
         'C\'est quoi un développeur obèse?\nQuelqu\'un qui mange trop de cookies!',
@@ -2070,9 +2088,6 @@ if (langButton) {
       ]
     }
 };
-
-COMMANDS_FR.statut = COMMANDS_FR.status;
-
 
   const currentLanguage = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
   const getPrompt = (lang) => lang === 'fr' ? 'julien@profil:~$ ' : 'julien@profile:~$ ';
@@ -2329,8 +2344,8 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
       }
 
       if (commands[cmd]) {
-        // Special handling for joke command - pick random joke
-        if ((cmd === 'joke' || cmd === 'blague') && commands[cmd].jokes) {
+        // Special handling for fortune command - pick random fortune
+        if (cmd === 'fortune' && commands[cmd].jokes) {
           const jokes = commands[cmd].jokes;
           const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
           await printOutput(randomJoke.split('\n'), outputOptions);
@@ -2369,7 +2384,7 @@ COMMANDS_FR.statut = COMMANDS_FR.status;
         return Promise.resolve();
       }
       autoCommandRun[langKey] = true;
-      const autoCommand = langKey === 'fr' ? 'statut' : 'status';
+      const autoCommand = 'git status';
       hideInputLine();
       const execPromise = executeCommand(autoCommand, {
         recordHistory: false,

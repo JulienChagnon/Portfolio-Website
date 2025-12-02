@@ -180,7 +180,7 @@ body.fr #headerTerminal .typed { color: #9bc9ff; }
   font-weight: 900;
   transform: none;
   background: rgba(40, 44, 52, 0.9);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.18);
   display: inline-flex;
@@ -883,17 +883,35 @@ footer {
 }
 
 .sidebar-dropdown {
-  display: none;
+  display: block;
   background: #2a2a2a;
-  border: 1px solid rgba(223, 212, 241, 0.25);
-  border-radius: 8px;
-  padding: 0.75rem;
-  margin: 0.25rem 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(223, 212, 241, 0.18);
+  border-radius: 10px;
+  padding: 0 0.75rem;
+  margin: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  overflow: hidden;
+  pointer-events: none;
+  transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.26s ease,
+              transform 0.3s ease,
+              padding 0.3s ease,
+              margin 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+  will-change: max-height, opacity, transform;
 }
 
 .sidebar-dropdown.open {
-  display: block;
+  max-height: 420px;
+  opacity: 1;
+  pointer-events: auto;
+  padding: 0.75rem;
+  margin: 0.35rem 0 0.1rem;
+  transform: translateY(0);
 }
 
 .sidebar-dropdown ul {
@@ -906,10 +924,11 @@ footer {
   display: block;
   color: #ffffff;
   text-decoration: none;
-  padding: 0.35rem 0.25rem;
-  border-radius: 4px;
-  font-weight: normal;
-  font-size: 0.78rem;
+  padding: 0.45rem 0.35rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
