@@ -26,6 +26,59 @@
   });
 })();
 
+// Performance preferences
+const portfolioPrefs = (() => {
+  const root = document.documentElement;
+  const params = new URLSearchParams(window.location.search || '');
+  const forceLiteOn = params.get('lite') === '1';
+  const forceLiteOff = params.get('lite') === '0';
+  const motionQuery = (typeof window !== 'undefined' && typeof window.matchMedia === 'function')
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+  const prefersReduce = motionQuery && motionQuery.matches;
+  const saveData = typeof navigator !== 'undefined' &&
+    navigator.connection &&
+    navigator.connection.saveData === true;
+
+  const setLite = (enabled) => {
+    root.classList.toggle('lite-mode', !!enabled);
+  };
+
+  const initialLite = forceLiteOn || (!forceLiteOff && (prefersReduce || saveData));
+  setLite(initialLite);
+
+  if (motionQuery && typeof motionQuery.addEventListener === 'function' && !forceLiteOn && !forceLiteOff) {
+    motionQuery.addEventListener('change', (event) => setLite(event.matches));
+  }
+
+  return {
+    isLite: () => root.classList.contains('lite-mode'),
+    setLite,
+  };
+})();
+window.__portfolioPrefs = portfolioPrefs;
+
+// Default lazy loading for non-critical images
+(() => {
+  const isCriticalImage = (img) => img.classList.contains('headshot');
+  const applyLazyDefaults = () => {
+    document.querySelectorAll('img').forEach((img) => {
+      if (!isCriticalImage(img) && !img.hasAttribute('loading')) {
+        img.loading = 'lazy';
+      }
+      if (!img.hasAttribute('decoding')) {
+        img.decoding = 'async';
+      }
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLazyDefaults, { once: true });
+  } else {
+    applyLazyDefaults();
+  }
+})();
+
 // Keep project cards open while pointer stays inside the stack
 (() => {
   const stack = document.querySelector('.project-stack');
@@ -53,6 +106,7 @@
   const closeAll = () => {
     const openCards = cards.filter((card) => card.classList.contains('is-open'));
     if (!openCards.length) return;
+    const singleOpenCard = openCards.length === 1 ? openCards[0] : null;
 
     if (recentlyScrolled) {
       openCards.forEach((card) => card.classList.remove('is-open'));
@@ -92,39 +146,50 @@
     let skipScrollCompensation = !(
       viewportBottom > stackTop && viewportTop < stackBottom
     );
+    if (singleOpenCard) {
+      skipScrollCompensation = false;
+    }
 
     let anchor = null;
     let anchorTopBefore = 0;
 
     if (!skipScrollCompensation) {
+      if (singleOpenCard) {
+        const rect = singleOpenCard.getBoundingClientRect();
+        anchor = singleOpenCard;
+        anchorTopBefore = rect.top;
+      }
+
       // 1) Find the lowest open project in DOM order
-      let lowestOpenIndex = -1;
-      cards.forEach((card, index) => {
-        if (card.classList.contains('is-open')) {
-          lowestOpenIndex = index;
-        }
-      });
-
-      if (lowestOpenIndex !== -1) {
-        const lowestOpenCard = cards[lowestOpenIndex];
-        const lowestRect = lowestOpenCard.getBoundingClientRect();
-        const lowestTop = lowestRect.top;
-        const lowestBottom = lowestRect.bottom;
-
-        // 2) If the *next unopened* project is visible, anchor on its top border
-        const nextCard = cards[lowestOpenIndex + 1];
-        if (nextCard && !nextCard.classList.contains('is-open')) {
-          const nextRect = nextCard.getBoundingClientRect();
-          if (nextRect.bottom > 0 && nextRect.top < viewportHeight) {
-            anchor = nextCard;
-            anchorTopBefore = nextRect.top;
+      if (!anchor) {
+        let lowestOpenIndex = -1;
+        cards.forEach((card, index) => {
+          if (card.classList.contains('is-open')) {
+            lowestOpenIndex = index;
           }
-        }
+        });
 
-        // 3) Otherwise, anchor on the lowest open project (if it intersects viewport)
-        if (!anchor && lowestBottom > 0 && lowestTop < viewportHeight) {
-          anchor = lowestOpenCard;
-          anchorTopBefore = lowestTop;
+        if (lowestOpenIndex !== -1) {
+          const lowestOpenCard = cards[lowestOpenIndex];
+          const lowestRect = lowestOpenCard.getBoundingClientRect();
+          const lowestTop = lowestRect.top;
+          const lowestBottom = lowestRect.bottom;
+
+          // 2) If the *next unopened* project is visible, anchor on its top border
+          const nextCard = cards[lowestOpenIndex + 1];
+          if (nextCard && !nextCard.classList.contains('is-open')) {
+            const nextRect = nextCard.getBoundingClientRect();
+            if (nextRect.bottom > 0 && nextRect.top < viewportHeight) {
+              anchor = nextCard;
+              anchorTopBefore = nextRect.top;
+            }
+          }
+
+          // 3) Otherwise, anchor on the lowest open project (if it intersects viewport)
+          if (!anchor && lowestBottom > 0 && lowestTop < viewportHeight) {
+            anchor = lowestOpenCard;
+            anchorTopBefore = lowestTop;
+          }
         }
       }
 
@@ -884,6 +949,11 @@ if (langButton) {
 
 // Overlay scrollbar: draws a draggable thumb over the page
 (() => {
+  const isLiteMode = window.__portfolioPrefs && typeof window.__portfolioPrefs.isLite === 'function'
+    ? window.__portfolioPrefs.isLite
+    : () => document.documentElement.classList.contains('lite-mode');
+  if (isLiteMode()) return;
+
   const docEl = document.documentElement;
   const overlay = document.createElement('div');
   overlay.id = 'scrollbarOverlay';
