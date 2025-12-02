@@ -867,7 +867,10 @@ function updateLanguage(isFr) {
   const langCode = isFr ? 'fr' : 'en';
   body.classList.toggle('fr', isFr);
   if (langButton) {
-    langButton.textContent = isFr ? 'English' : 'Français';
+    const toggleLabel = isFr ? 'Switch to English' : 'Passer en français';
+    langButton.setAttribute('aria-label', toggleLabel);
+    langButton.setAttribute('aria-pressed', isFr ? 'true' : 'false');
+    langButton.dataset.lang = langCode;
   }
 
   if (resumeLink) {
@@ -1910,15 +1913,98 @@ if (langButton) {
     return [message];
   };
 
+  const FILE_LIST_EN = ['work.txt', '\nskills.txt', '\nprojects.txt'];
+  const FILE_LIST_FR = ['travail.txt', '\nhabiletes.txt', '\nprojets.txt'];
+
+  const PROJECT_LINKS_EN = [
+    { prefix: '1. ', text: 'Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
+    { prefix: '2. ', text: 'Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '3. ', text: '911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '4. ', text: 'Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
+    { prefix: '5. ', text: 'Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
+  ];
+
+  const PROJECT_LINKS_FR = [
+    { prefix: '1. ', text: 'Détection de course et de saut (Python)', href: '#project-running-jumping' },
+    { prefix: '2. ', text: 'Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '3. ', text: 'Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '4. ', text: 'Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
+    { prefix: '5. ', text: 'Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
+  ];
+
+  const SKILLS_OUTPUT_EN = [
+    'PROGRAMMING EXPERIENCE: C/C++, Python, Java, Assembly (Nios II), JavaScript, VHDL, Qt framework',
+    'LIBRARIES AND FRAMEWORKS: Qt, Matplotlib, Pandas, Scikit-learn, Seaborn, h5py',
+    'TOOLS: Git, Arduino, LTspice, SolidWorks',
+    'DATABASES: SQL, HDF5',
+    'WEB: HTML, CSS'
+  ];
+
+  const SKILLS_OUTPUT_FR = [
+    'LANGAGES: Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
+    'OUTILS: Git, Arduino, Qt, LTspice, SolidWorks',
+    'BASES DE DONNÉES: SQL, HDF5',
+    'WEB: HTML, CSS'
+  ];
+
+  const WORK_HISTORY_EN = [
+    'TRAFFIC SERVICES INTERN @ City of Ottawa\n(May - Aug 2025)',
+    '  -Applied data analysis to pedestrian & vehicle',
+    '    survey data',
+    '  -Used GIS tools to map and analyze traffic patterns',
+    '  -Automated form collection with Microsoft Power',
+    '   Automate',
+    '\n',
+    'GRAFFITI MANAGEMENT ASSISTANT @ City of Ottawa\n(May - Aug 2024)',
+    '  -Managed city-wide graffiti database',
+    '  -Tracked service requests and task completion',
+    '  -Operated specialized removal equipment',
+    '\n',
+    'CAMP COUNSELLOR @ Mountain Bike Kids\n(Jun - Aug 2022)',
+    '  -Supervised campers aged 8-14',
+    '  -Led mountain biking outings and day trips',
+  ];
+
+  const WORK_HISTORY_FR = [
+    'STAGIAIRE AUX SERVICES DE LA CIRCULATION @ Ville d\'Ottawa\n(mai - août 2025)',
+    '  -Analyse de données piétonnes et routières',
+    '  -Outils SIG pour cartographier les modèles de circulation',
+    '  -Automatisation avec Microsoft Power Automate',
+    '\n',
+    'ASSISTANT À LA GESTION DES GRAFFITIS @ Ville d\'Ottawa\n(mai - août 2024)',
+    '  -Gestion de la base de données municipale de graffitis',
+    '  -Suivi des demandes de service et de l’avancement des tâches',
+    '  -Utilisation d\'équipements spécialisés de nettoyage',
+    '\n',
+    'ANIMATEUR DE CAMP @ Mountain Bike Kids\n(juin - août 2022)',
+    '  -Supervision de campeurs âgés de 8 à 14 ans',
+    '  -Organisation de sorties en vélo de montagne et excursions',
+  ];
+
+  const VIRTUAL_FILES = {
+    en: {
+      'projects.txt': PROJECT_LINKS_EN,
+      'skills.txt': SKILLS_OUTPUT_EN,
+      'work.txt': WORK_HISTORY_EN,
+    },
+    fr: {
+      'projets.txt': PROJECT_LINKS_FR,
+      'habiletes.txt': SKILLS_OUTPUT_FR,
+      'habiletés.txt': SKILLS_OUTPUT_FR,
+      'travail.txt': WORK_HISTORY_FR,
+    },
+  };
+
+  const fileListFor = (lang) => (lang === 'fr' ? FILE_LIST_FR : FILE_LIST_EN);
+
   const COMMANDS_EN = {
     help: {
       output: [
         'Available commands:',
         //'  about\t\t- Learn more about me',
         '  dark\t\t- Toggle dark mode theme',
-        '  skills\t- View technical skills',
-        '  ls\t\t- List recent projects',
-        '  git log\t- View work experience',
+        '  ls\t\t- List files',
+        '  cat <file>\t- View file contents',
         '  git status\t- Show my status',
         '  whois\t\t- My contact information',
         '  fortune\t- Random programming joke',
@@ -1927,30 +2013,9 @@ if (langButton) {
         'Use Tab to autocomplete commands, and up/down keys to navigate command history.'
       ]
     },
-    /*
-    about: {
-      output: [
-        '3rd Year Computer Engineering Student at Queen\'s University',
-        'Bilingual: English & French'
-      ]
-    },
-    */
-    skills: {
-      output: [
-        'Programming experience: C/C++, Python, Java, Assembly (Nios II), JavaScript, VHDL, Qt framework',
-        'Libraries and Frameworks: Qt, Matplotlib, Pandas, Scikit-learn, Seaborn, h5py',
-        'Tools: Git, Arduino, LTspice, SolidWorks',
-        'Databases: SQL, HDF5',
-        'Web: HTML, CSS'
-      ]
-    },
     ls: {
       output: [
-        { text: '1. Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
-        { text: '2. Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
-        { text: '3. 911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
-        { text: '4. Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
-        { text: '5. Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
+        FILE_LIST_EN.join('  ')
       ]
     },
     whois: {
@@ -1966,25 +2031,6 @@ if (langButton) {
     'git status': {
       output: [
         'Seeking a 12-16 month co-op placement in Computer Engineering related fields',
-      ]
-    },
-    'git log': {
-      output: [
-        'TRAFFIC SERVICES INTERN @ City of Ottawa\n(May - Aug 2025)',
-        '  -Applied data analysis to pedestrian & vehicle',
-        '    survey data',
-        '  -Used GIS tools to map and analyze traffic patterns',
-        '  -Automated form collection with Microsoft Power',
-        '   Automate',
-        '\n',
-        'GRAFFITI MANAGEMENT ASSISTANT @ City of Ottawa\n(May - Aug 2024)',
-        '  -Managed city-wide graffiti database',
-        '  -Tracked service requests and task completion',
-        '  -Operated specialized removal equipment',
-        '\n',
-        'CAMP COUNSELLOR @ Mountain Bike Kids\n(Jun - Aug 2022)',
-        '  -Supervised campers aged 8-14',
-        '  -Led mountain biking outings and day trips',
       ]
     },
     fortune: {
@@ -2009,9 +2055,8 @@ if (langButton) {
         'Commandes disponibles :',
         //'  about\t\t- En savoir plus sur moi',
         '  sombre\t- Activer le thème sombre',
-        '  competences\t- Voir mes compétences techniques',
-        '  ls\t\t- Lister mes projets récents',
-        '  git log\t- Voir mon expérience professionnelle',
+        '  ls\t\t- Lister les fichiers',
+        '  cat <fichier>\t- Lire un fichier',
         '  git status\t- Afficher mon statut',
         '  whois\t\t- Mes contacts',
         '  fortune\t- Blague de programmation',
@@ -2020,29 +2065,9 @@ if (langButton) {
         'Utilisez Tab pour compléter les commandes, et les flèches haut/bas pour naviguer dans l\'historique des commandes.'
       ]
     },
-    /*
-    about: {
-      output: [
-        'Étudiant de 3e année en Génie informatique à l’Université Queen’s à Kingston, Ontario',
-        'Bilingue : français et anglais'
-      ]
-    },
-    */
-    competences: {
-      output: [
-        'Langages : Python, C, C++, Java, JavaScript, Assembly (NIOS II), VHDL',
-        'Outils : Git, Arduino, Qt, LTspice, SolidWorks',
-        'Bases de données : SQL, HDF5',
-        'Web : HTML, CSS'
-      ]
-    },
     ls: {
       output: [
-        { text: '1. Détection de course et de saut (Python)', href: '#project-running-jumping' },
-        { text: '2. Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
-        { text: '3. Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
-        { text: '4. Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
-        { text: '5. Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
+        FILE_LIST_FR.join('  ')
       ]
     },
     whois: {
@@ -2060,24 +2085,6 @@ if (langButton) {
         'À la recherche de stages coop de 12 à 16 mois en génie informatique',
       ]
     },
-    'git log': {
-      output: [
-        'STAGIAIRE AUX SERVICES DE LA CIRCULATION @ Ville d\'Ottawa\n(mai - août 2025)',
-        '  -Analyse de données piétonnes et routières',
-        '  -Outils SIG pour cartographier les modèles de circulation',
-        '  -Automatisation avec Microsoft Power Automate',
-        '\n',
-        'ASSISTANT À LA GESTION DES GRAFFITIS @ Ville d\'Ottawa\n(mai - août 2024)',
-        '  -Gestion de la base de données municipale de graffitis',
-        '  -Suivi des demandes de service et de l’avancement des tâches',
-        '  -Utilisation d\'équipements spécialisés de nettoyage',
-        '\n',
-        'ANIMATEUR DE CAMP @ Mountain Bike Kids\n(juin - août 2022)',
-        '  -Supervision de campeurs âgés de 8 à 14 ans',
-        '  -Organisation de sorties en vélo de montagne et excursions',
-      ] 
-
-    },
     fortune: {
       output: null,
       jokes: [
@@ -2092,8 +2099,16 @@ if (langButton) {
   const currentLanguage = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
   const getPrompt = (lang) => lang === 'fr' ? 'julien@profil:~$ ' : 'julien@profile:~$ ';
   const getCommands = (lang) => lang === 'fr' ? COMMANDS_FR : COMMANDS_EN;
+  const getVirtualFiles = (lang) => lang === 'fr' ? VIRTUAL_FILES.fr : VIRTUAL_FILES.en;
+  const catFileNamesFor = (lang) => Object.keys(getVirtualFiles(lang) || {});
   const commandNamesFor = (lang) => {
     const names = Object.keys(getCommands(lang));
+    catFileNamesFor(lang).forEach((file) => {
+      const catName = `cat ${file}`;
+      if (!names.includes(catName)) {
+        names.push(catName);
+      }
+    });
     if (!names.includes('clear')) {
       names.push('clear');
     }
@@ -2340,6 +2355,40 @@ if (langButton) {
 
       if (cmd === 'clear') {
         clearTerminal();
+        return;
+      }
+
+      const virtualFiles = getVirtualFiles(activeLang);
+      const availableFiles = fileListFor(activeLang);
+      if (cmd === 'cat') {
+        const usageList = activeLang === 'fr'
+          ? 'travail.txt, habiletes.txt (habiletés.txt), projets.txt'
+          : availableFiles.join(', ');
+        const usage = activeLang === 'fr'
+          ? `Utilisation : cat <fichier>. Fichiers disponibles : ${usageList}`
+          : `Usage: cat <file>. Available files: ${usageList}`;
+        await printOutput([usage], outputOptions);
+        return;
+      }
+
+      if (cmd.startsWith('cat ')) {
+        const fileName = cmd.slice(4).trim().toLowerCase();
+        if (!fileName) {
+          const exampleFile = availableFiles[0] || 'projects.txt';
+          const missing = activeLang === 'fr'
+            ? `Veuillez préciser un fichier. Exemple : cat ${exampleFile}`
+            : `Please specify a file. Example: cat ${exampleFile}`;
+          await printOutput([missing], outputOptions);
+          return;
+        }
+        if (virtualFiles[fileName]) {
+          await printOutput(virtualFiles[fileName], outputOptions);
+        } else {
+          const notFoundFile = activeLang === 'fr'
+            ? `Fichier introuvable : ${fileName}`
+            : `File not found: ${fileName}`;
+          await printOutput([notFoundFile], outputOptions);
+        }
         return;
       }
 
