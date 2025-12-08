@@ -86,13 +86,35 @@ window.__portfolioPrefs = portfolioPrefs;
   const cards = Array.from(stack.querySelectorAll('.project-card'));
   if (!cards.length) return;
   const collapseBtn = document.getElementById('collapseProjects');
+  // Track baseline scroll so collapsing multiple cards without scrolling returns to the same spot
+  let hasOpenCards = false;
+  let openSessionScrollY = null;
+  let scrolledDuringOpen = false;
+
+  const startOpenSession = () => {
+    if (hasOpenCards) return;
+    hasOpenCards = true;
+    openSessionScrollY = window.scrollY || window.pageYOffset || 0;
+    scrolledDuringOpen = false;
+  };
+
+  const resetOpenSession = () => {
+    hasOpenCards = false;
+    openSessionScrollY = null;
+    scrolledDuringOpen = false;
+  };
 
   // Skip scroll-locking while the user is actively scrolling to avoid jitter
   const SCROLL_SETTLE_DELAY = 220;
+  // Allow some buffer before we lock scroll when a card has drifted above the viewport
+  const ANCHOR_TOP_BUFFER = 220; // px above the viewport a card can travel before anchoring the next card
   let recentlyScrolled = false;
   let scrollTimer = null;
   const markScroll = () => {
     recentlyScrolled = true;
+    if (hasOpenCards) {
+      scrolledDuringOpen = true;
+    }
     if (scrollTimer) clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
       recentlyScrolled = false;
@@ -107,6 +129,8 @@ window.__portfolioPrefs = portfolioPrefs;
     const openCards = cards.filter((card) => card.classList.contains('is-open'));
     if (!openCards.length) return;
     const singleOpenCard = openCards.length === 1 ? openCards[0] : null;
+    const preserveInitialScroll = hasOpenCards && !scrolledDuringOpen && openSessionScrollY !== null;
+    const desiredScrollY = preserveInitialScroll ? openSessionScrollY : null;
 
     if (recentlyScrolled) {
       openCards.forEach((card) => card.classList.remove('is-open'));
@@ -115,6 +139,7 @@ window.__portfolioPrefs = portfolioPrefs;
           window.__updateScrollbarOverlay();
         });
       }
+      resetOpenSession();
       return;
     }
 
@@ -126,7 +151,7 @@ window.__portfolioPrefs = portfolioPrefs;
     const hasContentAboveScroll = openCards.some((card) => {
       const rect = card.getBoundingClientRect();
       const cardTop = scrollY + rect.top;
-      return cardTop < scrollY;
+      return cardTop < (scrollY - ANCHOR_TOP_BUFFER);
     });
 
     if (!hasContentAboveScroll) {
@@ -136,6 +161,7 @@ window.__portfolioPrefs = portfolioPrefs;
           window.__updateScrollbarOverlay();
         });
       }
+      resetOpenSession();
       return;
     }
 
@@ -149,11 +175,14 @@ window.__portfolioPrefs = portfolioPrefs;
     if (singleOpenCard) {
       skipScrollCompensation = false;
     }
+    if (preserveInitialScroll) {
+      skipScrollCompensation = false;
+    }
 
     let anchor = null;
     let anchorTopBefore = 0;
 
-    if (!skipScrollCompensation) {
+    if (!skipScrollCompensation && !preserveInitialScroll) {
       if (singleOpenCard) {
         const rect = singleOpenCard.getBoundingClientRect();
         anchor = singleOpenCard;
@@ -216,7 +245,7 @@ window.__portfolioPrefs = portfolioPrefs;
           }
         }
       }
-      if (!anchor) {
+      if (!anchor && !preserveInitialScroll) {
         skipScrollCompensation = true;
       }
     }
@@ -228,6 +257,7 @@ window.__portfolioPrefs = portfolioPrefs;
 
     // Trigger collapse
     openCards.forEach((card) => card.classList.remove('is-open'));
+    resetOpenSession();
 
     // If we should skip scroll compensation, just do a simple collapse
     if (skipScrollCompensation) {
@@ -251,43 +281,43 @@ window.__portfolioPrefs = portfolioPrefs;
     const startTime = performance.now();
     const duration = 650;
 
+    const finishCollapse = () => {
+      animating = false;
+      htmlEl.style.scrollBehavior = originalScrollBehavior;
+      if (sidebar) {
+        setTimeout(() => {
+          sidebar.classList.remove('collapsing-projects');
+        }, 100);
+      }
+      if (typeof window.__updateScrollbarOverlay === 'function') {
+        window.__updateScrollbarOverlay();
+      }
+    };
+
     const maintainPosition = () => {
       if (!animating) return;
 
-      if (!anchor || !anchor.getBoundingClientRect) {
-        animating = false;
-        htmlEl.style.scrollBehavior = originalScrollBehavior;
-        if (sidebar) {
-          setTimeout(() => {
-            sidebar.classList.remove('collapsing-projects');
-          }, 100);
-        }
-        if (typeof window.__updateScrollbarOverlay === 'function') {
-          window.__updateScrollbarOverlay();
-        }
-        return;
-      }
-
-      const currentTop = anchor.getBoundingClientRect().top;
-      if (Math.abs(currentTop - anchorTopBefore) > 0.5) {
-        const shift = currentTop - anchorTopBefore;
+      if (preserveInitialScroll && desiredScrollY !== null) {
         const currentScroll = window.scrollY || window.pageYOffset || 0;
-        window.scrollTo(0, Math.max(0, currentScroll + shift));
+        if (Math.abs(currentScroll - desiredScrollY) > 0.5) {
+          window.scrollTo(0, Math.max(0, desiredScrollY));
+        }
+      } else if (anchor && anchor.getBoundingClientRect) {
+        const currentTop = anchor.getBoundingClientRect().top;
+        if (Math.abs(currentTop - anchorTopBefore) > 0.5) {
+          const shift = currentTop - anchorTopBefore;
+          const currentScroll = window.scrollY || window.pageYOffset || 0;
+          window.scrollTo(0, Math.max(0, currentScroll + shift));
+        }
+      } else {
+        finishCollapse();
+        return;
       }
 
       if (performance.now() - startTime < duration + 50) {
         requestAnimationFrame(maintainPosition);
       } else {
-        animating = false;
-        htmlEl.style.scrollBehavior = originalScrollBehavior;
-        if (sidebar) {
-          setTimeout(() => {
-            sidebar.classList.remove('collapsing-projects');
-          }, 100);
-        }
-        if (typeof window.__updateScrollbarOverlay === 'function') {
-          window.__updateScrollbarOverlay();
-        }
+        finishCollapse();
       }
     };
 
@@ -322,6 +352,7 @@ window.__portfolioPrefs = portfolioPrefs;
 
   cards.forEach((card) => {
     const markOpen = () => {
+      startOpenSession();
       card.classList.add('is-open');
       clearPending();
       // Update scrollbar immediately when project opens
