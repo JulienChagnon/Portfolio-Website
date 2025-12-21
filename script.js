@@ -86,6 +86,7 @@ window.__portfolioPrefs = portfolioPrefs;
   const cards = Array.from(stack.querySelectorAll('.project-card'));
   if (!cards.length) return;
   const collapseBtn = document.getElementById('collapseProjects');
+  const isMobileProjects = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
   // Track baseline scroll so collapsing multiple cards without scrolling returns to the same spot
   let hasOpenCards = false;
   let openSessionScrollY = null;
@@ -102,6 +103,29 @@ window.__portfolioPrefs = portfolioPrefs;
     hasOpenCards = false;
     openSessionScrollY = null;
     scrolledDuringOpen = false;
+  };
+
+  const toggleLabelsFor = (isOpen) => ({
+    en: isOpen ? 'See less' : 'See more',
+    fr: isOpen ? 'Voir moins' : 'Voir plus'
+  });
+
+  const applyToggleLabel = (toggle, isOpen) => {
+    const labels = toggleLabelsFor(isOpen);
+    toggle.setAttribute('data-en', labels.en);
+    toggle.setAttribute('data-fr', labels.fr);
+    toggle.textContent = document.body.classList.contains('fr') ? labels.fr : labels.en;
+  };
+
+  const syncToggleButtons = () => {
+    cards.forEach((card) => {
+      const toggle = card.querySelector('.project-see-more');
+      if (toggle) {
+        const isOpen = card.classList.contains('is-open');
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        applyToggleLabel(toggle, isOpen);
+      }
+    });
   };
 
   // Skip scroll-locking while the user is actively scrolling to avoid jitter
@@ -134,6 +158,7 @@ window.__portfolioPrefs = portfolioPrefs;
 
     if (recentlyScrolled) {
       openCards.forEach((card) => card.classList.remove('is-open'));
+      syncToggleButtons();
       if (typeof window.__updateScrollbarOverlay === 'function') {
         requestAnimationFrame(() => {
           window.__updateScrollbarOverlay();
@@ -156,6 +181,7 @@ window.__portfolioPrefs = portfolioPrefs;
 
     if (!hasContentAboveScroll) {
       openCards.forEach((card) => card.classList.remove('is-open'));
+      syncToggleButtons();
       if (typeof window.__updateScrollbarOverlay === 'function') {
         requestAnimationFrame(() => {
           window.__updateScrollbarOverlay();
@@ -257,6 +283,7 @@ window.__portfolioPrefs = portfolioPrefs;
 
     // Trigger collapse
     openCards.forEach((card) => card.classList.remove('is-open'));
+    syncToggleButtons();
     resetOpenSession();
 
     // If we should skip scroll compensation, just do a simple collapse
@@ -354,6 +381,7 @@ window.__portfolioPrefs = portfolioPrefs;
     const markOpen = () => {
       startOpenSession();
       card.classList.add('is-open');
+      syncToggleButtons();
       clearPending();
       // Update scrollbar immediately when project opens
       if (typeof window.__updateScrollbarOverlay === 'function') {
@@ -376,12 +404,38 @@ window.__portfolioPrefs = portfolioPrefs;
       });
     }
 
-    card.addEventListener('mouseenter', markOpen);
-    card.addEventListener('pointerenter', (event) => {
-      if (!pointerActivates(event)) return;
-      markOpen();
-    });
-    card.addEventListener('focusin', markOpen);
+    if (!isMobileProjects) {
+      card.addEventListener('mouseenter', markOpen);
+      card.addEventListener('pointerenter', (event) => {
+        if (!pointerActivates(event)) return;
+        markOpen();
+      });
+      card.addEventListener('focusin', markOpen);
+    }
+
+    const toggleButton = card.querySelector('.project-see-more');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', (event) => {
+        if (!isMobileProjects) return;
+        event.preventDefault();
+        const isOpen = card.classList.contains('is-open');
+        if (isOpen) {
+          card.classList.remove('is-open');
+        } else {
+          startOpenSession();
+          card.classList.add('is-open');
+        }
+        syncToggleButtons();
+        if (!cards.some((entry) => entry.classList.contains('is-open'))) {
+          resetOpenSession();
+        }
+        if (typeof window.__updateScrollbarOverlay === 'function') {
+          requestAnimationFrame(() => {
+            window.__updateScrollbarOverlay();
+          });
+        }
+      });
+    }
   });
 
   const handleStackFocusOut = (event) => {
@@ -390,11 +444,13 @@ window.__portfolioPrefs = portfolioPrefs;
     requestClose();
   };
 
-  stack.addEventListener('pointerleave', requestClose);
-  stack.addEventListener('pointercancel', requestClose);
-  stack.addEventListener('mouseleave', requestClose);
-  stack.addEventListener('focusout', handleStackFocusOut);
-  stack.addEventListener('focusin', clearPending);
+  if (!isMobileProjects) {
+    stack.addEventListener('pointerleave', requestClose);
+    stack.addEventListener('pointercancel', requestClose);
+    stack.addEventListener('mouseleave', requestClose);
+    stack.addEventListener('focusout', handleStackFocusOut);
+    stack.addEventListener('focusin', clearPending);
+  }
 
   function flushPendingClose() {
     if (!pendingClose) return;
@@ -416,6 +472,7 @@ window.__portfolioPrefs = portfolioPrefs;
   });
 
   updateModalState(modalOpen);
+  syncToggleButtons();
 
   if (collapseBtn) {
     collapseBtn.addEventListener('click', () => {
@@ -423,6 +480,8 @@ window.__portfolioPrefs = portfolioPrefs;
       closeAll();
     });
   }
+
+  window.addEventListener('portfolio:languagechange', syncToggleButtons);
 })();
 
 //Set the footer year dynamically
@@ -2170,6 +2229,14 @@ if (langButton) {
   function initHeaderTerminal() {
     const header = document.querySelector('header.header-flex') || document.querySelector('header');
     if (!header) return;
+    const disableTerminal = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+    if (disableTerminal) {
+      const existingWrapper = header.querySelector('#headerTerminalWrapper');
+      if (existingWrapper) {
+        existingWrapper.remove();
+      }
+      return;
+    }
 
     let wrapper = header.querySelector('#headerTerminalWrapper');
     if (!wrapper) {
