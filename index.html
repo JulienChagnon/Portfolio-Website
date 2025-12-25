@@ -221,10 +221,97 @@
           Hover or click to expand project window size. 
         </span>
       </p>
-
       <br>
 
+            
       <div class="project-stack">
+
+        <article id="road-learning-tool" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="Road Learning Tool"
+                      data-fr="Outil d’apprentissage des routes">
+                  Road Learning Tool
+                </span>
+              </h3>
+              <div class="project-tech">React, TypeScript, MapLibre GL, Python</div>
+              <button type="button"
+                      class="see-more project-see-more lang-text"
+                      data-en="See more"
+                      data-fr="Voir plus"
+                      aria-expanded="false"
+                      aria-controls="road-learning-tool-details">
+                See more
+              </button>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/RLT_Icon.png" alt="" aria-hidden="true">
+            </div>
+          </div>
+
+          <div class="project-card-details" id="road-learning-tool-details">
+            <div class="project-card-actions">
+              <a href="https://julienchagnon.github.io/Road-Learning-Tool/"
+                 target="_blank" rel="noopener noreferrer"
+                 class="btn-report">
+                <img src="Media/Website_Logo.png"
+                  alt="Website Icon"
+                  class="btn-icon" />
+                <span class="lang-text"
+                      data-en="See Website"
+                      data-fr="Voir le code">
+                  See Website
+                </span>
+              </a>
+              <a href="https://github.com/JulienChagnon/Road-Learning-Tool"
+                 target="_blank" rel="noopener noreferrer"
+                 class="btn-code">
+                <p>&lt;/&gt;</p>
+                <span class="lang-text"
+                      data-en="See Code"
+                      data-fr="Voir le code">
+                  See Code
+                </span>
+              </a>
+            </div>
+
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <div class="content-float float-right">
+                  <img src="Media/Road_Learning_Tool.png"
+                      alt="Road Learning Tool map view (satellite basemap, white highlighted roads)"
+                      class="float-bigimg">
+                      <p>
+                        <span class="lang-text"
+                              data-en="I developed a high-performance Road Learning Tool using React and TypeScript. Its core is a custom MapView that programmatically instantiates MapLibre GL to render a satellite basemap overlaid with local vector tiles. The rendering logic manages three distinct layers: base roads, a dynamic highlight layer for user selection, and a symbol layer that renders road labels along geometry paths."
+                              data-fr="J'ai développé un outil d'apprentissage routier performant en React et TypeScript. Son cœur est une MapView personnalisée qui instancie MapLibre GL pour afficher un fond satellite superposé de tuiles vectorielles locales. La logique de rendu gère trois couches : les routes de base, une couche de surbrillance dynamique et une couche de symboles affichant les noms de rues le long de leur géométrie.">
+                          I developed a high-performance Road Learning Tool using React and TypeScript. Its core is a custom MapView that programmatically instantiates MapLibre GL to render a satellite basemap overlaid with local vector tiles. The rendering logic manages three distinct layers: base roads, a dynamic highlight layer for user selection, and a symbol layer that renders road labels along geometry paths.
+                        </span>
+                      </p>
+
+                      <p>
+                        <span class="lang-text"
+                              data-en="The frontend features a custom lookup index that normalizes names and references into stable tokens for fuzzy matching drives. This drives the input search system, compiling user inputted road additions to the map into real-time MapLibre filters. Quiz Mode reuses this logic to create an interactive loop: isolating target roads, validating user guesses against the index, and instantly updating styling to lock correct answers or reveal clues."
+                              data-fr="Le frontend utilise un index de recherche personnalisé qui normalise les noms en tokens stables pour une correspondance floue. Cela alimente l'autocomplétion, compilant les sélections en filtres MapLibre temps réel. Le mode Quiz réutilise cette logique : il isole des routes cibles, valide les réponses de l'utilisateur et met à jour le style instantanément pour verrouiller les bonnes réponses ou révéler des indices.">
+                          The frontend features a custom lookup index that normalizes names and references into stable tokens for fuzzy matching drives. This drives the input search system, compiling user inputted road additions to the map into real-time MapLibre filters. Quiz Mode reuses this logic to create an interactive loop: isolating target roads, validating user guesses against the index, and instantly updating styling to lock correct answers or reveal clues.
+                        </span>
+                      </p>
+
+                      <p>
+                        <span class="lang-text"
+                              data-en="Data is processed via an automated Python pipeline that streams large GeoJSON inputs to extract road features. A specialized shell script wraps Tippecanoe to generate local vector tiles (.pbf). Specifically for the tiling process, I used an AI-assisted IDE to optimize Tippecanoe’s CLI configuration, refining normalization, and feature-dropping behavior to preserve road density while keeping tile sizes performant across zoom levels."
+                              data-fr="Les données sont traitées par un pipeline Python automatisé qui filtre les fichiers GeoJSON. Un script shell spécialisé utilise Tippecanoe pour générer des tuiles vectorielles locales (.pbf). Spécifiquement pour le processus de tuilage, j’ai utilisé un IDE assisté par l’intelligence artificielle pour optimiser la configuration CLI de Tippecanoe, en affinant la normalisation et le comportement d’élagage des entités afin de préserver la densité du réseau routier tout en maintenant des tuiles performantes à tous les niveaux de zoom.">
+                          Data is processed via an automated Python pipeline that streams large GeoJSON inputs to extract road features. A specialized shell script wraps Tippecanoe to generate local vector tiles (.pbf). Specifically for the tiling process, I used an AI-assisted IDE to optimize Tippecanoe’s CLI configuration, refining normalization and feature-dropping behavior to preserve road detail while keeping tile sizes performant across zoom levels.
+                        </span>
+                      </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+
         <article id="project-running-jumping" class="project-card" tabindex="0">
           <div class="project-card-summary">
             <div class="project-card-summary-info">
@@ -489,6 +576,7 @@
           </div>
         </article>
 
+        <!--
         <article id="project-portfolio-website" class="project-card" tabindex="0">
           <div class="project-card-summary">
             <div class="project-card-summary-info">
@@ -548,16 +636,7 @@
       </div>
       <br>
 
-      <div class="project-stack-controls">
-        <button type="button" id="collapseProjects" class="collapse-projects-btn">
-          <span class="lang-text"
-                data-en="Collapse all"
-                data-fr="Tout réduire">
-            Collapse all
-          </span>
-          <span class="collapse-projects-arrow" aria-hidden="true">↑</span>
-        </button>
-      </div>
+      -->
 
       <!-- Project: Birthday Guessing Game -->
       <!--
@@ -607,6 +686,18 @@
         </div>
       </div>
       -->
+
+      <div class="project-stack-controls">
+        <button type="button" id="collapseProjects" class="collapse-projects-btn">
+          <span class="lang-text"
+                data-en="Collapse all"
+                data-fr="Tout réduire">
+            Collapse all
+          </span>
+          <span class="collapse-projects-arrow" aria-hidden="true">↑</span>
+        </button>
+      </div>
+      
     </section>
 
     <section id="work-history">

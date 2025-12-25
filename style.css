@@ -1294,6 +1294,18 @@ body.fr .sidebar-dropdown a:focus-visible {
   border: 2px solid var(--accent);
 }
 
+.project-card .btn-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* space between icon and text */
+}
+
+.project-card .btn-icon {
+  width: 20px;      /* tiny icon */
+  height: 20px;
+  opacity: 0.85;
+}
+
 .project-card .btn-code {
   background: transparent;
   color: var(--dark);

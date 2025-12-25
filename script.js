@@ -759,18 +759,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const PROJECT_LINK_LABELS = {
     en: [
+      'Road Learning Tool (React/TypeScript)',
       'Running and Jumping Detection (Python ML)',
       'Dynamic Time Allocating Calendar (Qt/C++)',
       '911 Dispatcher Training Device (Web + Arduino)',
       'Fluid and Powder Dispensing Device (Arduino)',
-      'Portfolio Website (HTML/CSS/JS)',
     ],
     fr: [
+      'Outil d\'apprentissage des routes (React/TypeScript)',
       'Détection de course et saut (Python)',
       'Calendrier dynamique (C++/Qt)',
       'Simulateur d\'opérateur 911 (Web + Arduino)',
       'Distributeur fluide et poudre (Arduino)',
-      'Site portfolio (HTML/CSS/JS)',
     ],
   };
 
@@ -2007,19 +2007,19 @@ if (langButton) {
   const FILE_LIST_FR = ['travail.txt', '\nhabiletes.txt', '\nprojets.txt'];
 
   const PROJECT_LINKS_EN = [
-    { prefix: '1. ', text: 'Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
-    { prefix: '2. ', text: 'Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
-    { prefix: '3. ', text: '911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
-    { prefix: '4. ', text: 'Fluid Dispensing Device (Arduino)', href: '#project-fluid-dispensing' },
-    { prefix: '5. ', text: 'Portfolio Website (HTML/CSS/JS)', href: '#project-portfolio-website' }
+    { prefix: '1. ', text: 'Road Learning Tool (React/TypeScript)', href: '#road-learning-tool' },
+    { prefix: '2. ', text: 'Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
+    { prefix: '3. ', text: 'Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '4. ', text: '911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '5. ', text: 'Fluid and Powder Dispensing Device (Arduino)', href: '#project-fluid-dispensing' }
   ];
 
   const PROJECT_LINKS_FR = [
-    { prefix: '1. ', text: 'Détection de course et de saut (Python)', href: '#project-running-jumping' },
-    { prefix: '2. ', text: 'Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
-    { prefix: '3. ', text: 'Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
-    { prefix: '4. ', text: 'Dispositif de distribution de liquide (Arduino)', href: '#project-fluid-dispensing' },
-    { prefix: '5. ', text: 'Site Web de portfolio (HTML/CSS/JS)', href: '#project-portfolio-website' }
+    { prefix: '1. ', text: 'Outil d\'apprentissage des routes (React/TypeScript)', href: '#road-learning-tool' },
+    { prefix: '2. ', text: 'Détection de course et de saut (Python)', href: '#project-running-jumping' },
+    { prefix: '3. ', text: 'Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '4. ', text: 'Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '5. ', text: 'Dispositif de distribution de fluide et de poudre (Arduino)', href: '#project-fluid-dispensing' }
   ];
 
   const SKILLS_OUTPUT_EN = [
