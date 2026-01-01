@@ -2309,9 +2309,9 @@ if (langButton) {
 
     const addPermanentHint = () => {
       if (!hintOverlay) return;
-      hintOverlay.textContent = activeLang === 'fr'
-        ? "# TERMINAL INTERACTIF: Tapez 'aide' pour voir les commandes disponibles"
-        : "# INTERACTIVE TERMINAL: Type 'help' to see available commands";
+      hintOverlay.innerHTML = activeLang === 'fr'
+        ? "# TERMINAL INTERACTIF: Tapez &apos;<span class=\"term-hint-keyword\">aide</span>&apos; pour voir les commandes disponibles"
+        : "# INTERACTIVE TERMINAL: Type &apos;<span class=\"term-hint-keyword\">help</span>&apos; to see available commands";
     };
 
     const createOutputLine = (line) => {
