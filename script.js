@@ -977,9 +977,15 @@ function updateLanguage(isFr) {
       : el.getAttribute('data-en');
   });
 
-  const params = new URLSearchParams(window.location.search);
-  params.set('lang', langCode);
-  history.replaceState(null, '', `?${params.toString()}`);
+  const url = new URL(window.location.href);
+  if (langCode === 'fr') {
+    url.searchParams.set('lang', 'fr');
+  } else {
+    url.searchParams.delete('lang');
+  }
+  const search = url.searchParams.toString();
+  const nextUrl = `${url.pathname}${search ? `?${search}` : ''}${url.hash}`;
+  history.replaceState(null, '', nextUrl);
 
   try {
     window.dispatchEvent(new CustomEvent('portfolio:languagechange', { detail: { lang: langCode } }));
@@ -1742,14 +1748,16 @@ if (langButton) {
         gradientMomentum: 0,
         gradientTarget: 0.5,
         gradientMix: 0.5,
-        paused: false
+        paused: false,
+        jitterSeed: Math.floor(Math.random() * 0x7fffffff),
+        pendingResize: null
       };
     };
 
     const states = Array.from(canvases, createState).filter(Boolean);
     if (!states.length) return;
 
-    const resizeState = (state, wrapperHeight, sideWidth) => {
+    const applyResizeState = (state, wrapperHeight, sideWidth) => {
       const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
       const cssWidth = Math.max(0, Math.round(sideWidth));
       const displayWidth = cssWidth || Math.max(1, Math.round(state.canvas.getBoundingClientRect().width));
@@ -1808,10 +1816,12 @@ if (langButton) {
       const lane = state.cols > 0 ? usableWidth / state.cols : usableWidth;
       for (let i = 0; i < state.cols; i++) {
         const jitterRange = lane * 0.28;
+        const jitterSeed = hash32(state.jitterSeed + (i + 1) * 2654435761);
+        const jitterUnit = (jitterSeed % 2001) / 1000 - 1; // [-1, 1]
         const candidate =
           minX +
           lane * (i + 0.5) +
-          (Math.random() - 0.5) * jitterRange;
+          jitterUnit * jitterRange;
         const clamped = Math.max(minX, Math.min(maxX - dpr, candidate));
         positions.push(clamped);
       }
@@ -1838,7 +1848,7 @@ if (langButton) {
       const targetHeight = Math.max(1, Math.round(wrapperRect.height || contentRect.height || window.innerHeight));
       states.forEach((state) => {
         const sideWidth = state.side === 'left' ? leftWidth : rightWidth;
-        resizeState(state, targetHeight, sideWidth);
+        state.pendingResize = { wrapperHeight: targetHeight, sideWidth };
       });
     };
 
@@ -1857,6 +1867,12 @@ if (langButton) {
       const globalScroll = window.scrollY || window.pageYOffset || 0;
 
       states.forEach((state) => {
+        if (state.pendingResize) {
+          const pending = state.pendingResize;
+          state.pendingResize = null;
+          applyResizeState(state, pending.wrapperHeight, pending.sideWidth);
+        }
+
         if (!state.cols || !state.rows || !state.width || !state.height) return;
 
         if (!isDark) {
