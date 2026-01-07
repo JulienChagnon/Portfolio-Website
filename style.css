@@ -687,6 +687,7 @@ section {
 
 /* Section headings */
 section h2 {
+  font-size:1.7rem;
   color:var(--primary);
   margin-bottom:0.5rem;
   border-bottom:2px solid var(--accent);
@@ -1166,9 +1167,8 @@ body.fr .sidebar-dropdown a:focus-visible {
 }
 
 .project-card:hover,
-.project-card:focus-within,
-.project-card.is-open {
-  transform: translateY(-1rem) scale(1.012);
+.project-card:focus-within {
+  transform: translateY(-0.5rem) scale(1.012);
   box-shadow: 0 30px 70px rgba(10, 12, 28, 0.23);
   border-color: rgba(83, 67, 104, 0.4);
   z-index: 10;
