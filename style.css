@@ -270,42 +270,6 @@ body.fr #headerTerminal .term-cursor-block {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
-/*Scroll hint arrow */
-.header-scroll-indicator {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.4rem;
-  pointer-events: auto;
-  cursor: pointer;
-  opacity: 1;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  animation: indicatorBounce 1.8s ease-in-out infinite;
-}
-
-.header-scroll-indicator.hidden {
-  opacity: 0;
-  transform: translate(-50%, 10px);
-  animation: none;
-  pointer-events: none;
-}
-
-.header-scroll-indicator span {
-  line-height: 1;
-}
-
-@keyframes indicatorBounce {
-  0%, 100% { transform: translate(-50%, 0); }
-  50% { transform: translate(-50%, 6px); }
-}
 
 /* Force JetBrains Mono on header terminal */
 header.header-flex h1,
@@ -1196,6 +1160,12 @@ body.fr .sidebar-dropdown a:focus-visible {
   line-height: 1.25;
 }
 
+.project-tech-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .project-tech {
   display: inline-flex;
   align-items: center;
@@ -1209,6 +1179,12 @@ body.fr .sidebar-dropdown a:focus-visible {
   font-weight: 700;
   letter-spacing: 0.01em;
   width: fit-content;
+}
+
+.project-tech--secondary {
+  border-color: rgba(74, 156, 100, 0.45);
+  background: rgba(74, 156, 100, 0.12);
+  color: #2f7d54;
 }
 
 .project-card-summary-thumb {
@@ -1803,7 +1779,7 @@ header {
   overflow: hidden; /* keep the rain clipped to header */
 }
 
-.header-flex > *:not(.header-scroll-indicator) {
+.header-flex > * {
   position: relative;
   z-index: 1;
   transition: filter 200ms ease;
@@ -1823,7 +1799,7 @@ header.header-flex .header-info {
 }
 
 
-header.header-rain-active .header-flex > *:not(.header-scroll-indicator) {
+header.header-rain-active .header-flex > * {
   filter: saturate(0.95) brightness(0.98);
 }
 
@@ -1856,7 +1832,6 @@ body.dark-mode header a.textBox {
 
 body.dark-mode header a.textBox:hover {
   background: rgba(213, 231, 255, 0.32);
-  color: #0b182d;
 }
 
 body.dark-mode .lang-button {
@@ -1907,7 +1882,7 @@ body.dark-mode .timeline li .icon {
 }
 
 body.dark-mode .project-card {
-  background: var(--light-bg);
+  background: #1c2743;
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
 }
@@ -1920,6 +1895,12 @@ body.dark-mode .project-tech {
   border-color: rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.1);
   color: var(--primary);
+}
+
+body.dark-mode .project-tech--secondary {
+  border-color: rgba(140, 220, 175, 0.5);
+  background: rgba(140, 220, 175, 0.18);
+  color: #d2f4e3;
 }
 
 body.dark-mode .project-card-details {

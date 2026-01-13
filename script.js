@@ -1194,96 +1194,6 @@ if (langButton) {
   window.__updateScrollbarOverlay = () => updateOverlay({ disableTransition: false });
 })();
 
-(() => {
-  const header = document.querySelector('header.header-flex');
-  if (!header) return;
-  let indicator = header.querySelector('.header-scroll-indicator');
-  if (!indicator) {
-    indicator = document.createElement('div');
-    indicator.className = 'header-scroll-indicator';
-    indicator.innerHTML = '<span>&#x2193;</span>';
-    header.appendChild(indicator);
-  }
-
-  indicator.removeAttribute('aria-hidden');
-  indicator.setAttribute('role', 'button');
-  indicator.setAttribute('tabindex', '0');
-
-  const LABELS = {
-    en: 'Scroll to main content',
-    fr: 'Faire defiler vers le contenu principal'
-  };
-
-  const applyLabel = (lang) => {
-    const nextLang = LABELS[lang] ? lang : 'en';
-    const label = LABELS[nextLang];
-    indicator.setAttribute('aria-label', label);
-    indicator.setAttribute('title', label);
-  };
-
-  const resolveLang = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
-  applyLabel(resolveLang());
-  window.addEventListener('portfolio:languagechange', (event) => {
-    const lang = event && event.detail && event.detail.lang ? event.detail.lang : resolveLang();
-    applyLabel(lang);
-  });
-
-  const findScrollTarget = () => {
-    const firstContent = header.nextElementSibling;
-    if (firstContent) return firstContent;
-    const main = document.querySelector('main');
-    if (main) return main;
-    return document.body;
-  };
-
-  const SCROLL_OFFSET_PX = 120;
-
-  const scrollToContent = () => {
-    const target = findScrollTarget();
-    if (!target) return;
-    const prefersReducedMotion = (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    const behavior = prefersReducedMotion ? 'auto' : 'smooth';
-    const baseTop = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0);
-    const desiredTop = Math.max(0, baseTop - SCROLL_OFFSET_PX);
-    if (typeof window.scrollTo === 'function') {
-      window.scrollTo({ top: desiredTop, behavior });
-    } else {
-      window.scroll(0, desiredTop);
-    }
-  };
-
-  const handleActivate = (event) => {
-    if (!event) {
-      scrollToContent();
-      return;
-    }
-
-    if (event.type === 'click') {
-      event.preventDefault();
-      scrollToContent();
-      return;
-    }
-
-    if (event.type === 'keydown') {
-      const key = event.key;
-      if (key === 'Enter' || key === ' ') {
-        event.preventDefault();
-        scrollToContent();
-      }
-    }
-  };
-
-  indicator.addEventListener('click', handleActivate);
-  indicator.addEventListener('keydown', handleActivate);
-
-  const update = () => {
-    const hidden = (window.scrollY || window.pageYOffset || 0) > 5;
-    indicator.classList.toggle('hidden', hidden);
-  };
-  update();
-  window.addEventListener('scroll', update, { passive: true });
-})();
-
 // Header Digital Rain
 
 (() => {
@@ -2143,7 +2053,7 @@ if (langButton) {
     },
     'git status': {
       output: [
-        'Seeking a 12-16 month co-op placement in Computer Engineering related fields',
+        'Seeking a 12-16 month internship placement in Computer Engineering related fields',
       ]
     },
     fortune: {
@@ -2195,7 +2105,7 @@ if (langButton) {
     },
     'git status': {
       output: [
-        'À la recherche de stages coop de 12 à 16 mois en génie informatique',
+        'À la recherche de stages de 12 à 16 mois en génie informatique',
       ]
     },
     fortune: {
