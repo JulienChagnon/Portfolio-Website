@@ -2224,6 +2224,30 @@ if (langButton) {
       });
     };
 
+    const focusWithoutScroll = (node) => {
+      if (!node || typeof node.focus !== 'function') return;
+      const prevX = window.scrollX || window.pageXOffset || 0;
+      const prevY = window.scrollY || window.pageYOffset || 0;
+      try {
+        node.focus({ preventScroll: true });
+      } catch (_) {
+        node.focus();
+      }
+      const nextX = window.scrollX || window.pageXOffset || 0;
+      const nextY = window.scrollY || window.pageYOffset || 0;
+      if (nextX !== prevX || nextY !== prevY) {
+        const htmlEl = document.documentElement;
+        const originalBehavior = htmlEl && htmlEl.style ? htmlEl.style.scrollBehavior : '';
+        if (htmlEl && htmlEl.style) {
+          htmlEl.style.scrollBehavior = 'auto';
+        }
+        window.scrollTo(prevX, prevY);
+        if (htmlEl && htmlEl.style) {
+          htmlEl.style.scrollBehavior = originalBehavior;
+        }
+      }
+    };
+
     const enforceMaxLines = () => {
       const lines = term.querySelectorAll('.term-line:not(.term-input-line):not(.term-hint)');
       while (lines.length > MAX_LINES) {
@@ -2360,7 +2384,7 @@ if (langButton) {
       if (activeInput) {
         activeInput.disabled = false;
         setTimeout(() => {
-          activeInput.focus();
+          focusWithoutScroll(activeInput);
           scrollTerminalToBottom();
         }, 0);
       }
@@ -2641,7 +2665,7 @@ if (langButton) {
       });
 
       if (!hidden) {
-        setTimeout(() => input.focus(), 100);
+        setTimeout(() => focusWithoutScroll(input), 100);
       }
     }
 
