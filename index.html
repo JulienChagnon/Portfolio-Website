@@ -320,6 +320,81 @@
           </div>
         </article>
 
+        <article id="project-cpu-risc" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="32-Bit RISC Processor Design"
+                      data-fr="Conception d'un processeur RISC 32 bits">
+                  32-Bit RISC Processor Design
+                </span>
+              </h3>
+              <div class="project-tech">Verilog, FPGA</div>
+              <button type="button"
+                      class="see-more project-see-more lang-text"
+                      data-en="See more"
+                      data-fr="Voir plus"
+                      aria-expanded="false"
+                      aria-controls="project-cpu-risc-details">
+                See more
+              </button>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/ELEC374.jpg" alt="" aria-hidden="true">
+            </div>
+          </div>
+
+          <div class="project-card-details" id="project-cpu-risc-details">
+            <div class="project-card-actions">
+              <a href="Media/ELEC374_FinalReport.pdf"
+                class="btn-report"
+                data-media-type="pdf">
+                📄
+                <span class="lang-text"
+                      data-en="Final Report"
+                      data-fr="Rapport final">
+                  Final Report
+                </span>
+              </a>
+              <a href="https://github.com/JulienChagnon/CPU-Design-Project"
+                 target="_blank" rel="noopener noreferrer"
+                 class="btn-code">
+                <p>&lt;/&gt;</p>
+                <span class="lang-text"
+                      data-en="See Code"
+                      data-fr="Voir le code">
+                  See Code
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <p>
+                  <span class="lang-text"
+                        data-en="Designed and implemented a custom 32-bit RISC processor in Verilog, deployed on an Altera DE0-CV FPGA development board. The processor features a single-bus datapath architecture with sixteen general-purpose registers, an ALU supporting arithmetic, logical, shift, and rotation operations, as well as multiplication and division with dedicated HI/LO registers."
+                        data-fr="Conception et implémentation d'un processeur RISC 32 bits personnalisé en Verilog, déployé sur une carte de développement FPGA Altera DE0-CV. Le processeur comprend un chemin de données à bus unique avec seize registres à usage général, une UAL supportant les opérations arithmétiques, logiques, de décalage et de rotation, ainsi que la multiplication et la division avec des registres HI/LO dédiés.">
+                    Designed and implemented a custom 32-bit RISC processor in Verilog, deployed on an Altera DE0-CV FPGA development board. The processor features a single-bus datapath architecture with sixteen general-purpose registers, an ALU supporting arithmetic, logical, shift, and rotation operations, as well as multiplication and division with dedicated HI/LO registers.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="The processor was developed incrementally, starting with the core datapath and register transfer mechanisms, then adding the memory subsystem with RAM, MAR, and MDR for load and store instructions, followed by a control unit implemented as a finite state machine to automate instruction fetch, decode, and execution cycles. The final stage deployed the complete processor onto a Cyclone V FPGA with I/O interfacing through switches, LEDs, and seven-segment displays."
+                        data-fr="Le processeur a été développé de manière incrémentale, en commençant par le chemin de données de base et les mécanismes de transfert de registres, puis en ajoutant le sous-système mémoire avec RAM, MAR et MDR pour les instructions de chargement et de stockage, suivi d'une unité de contrôle implémentée sous forme de machine à états finis pour automatiser les cycles de recherche, décodage et exécution des instructions. L'étape finale a déployé le processeur complet sur un FPGA Cyclone V avec interface E/S via des commutateurs, LEDs et afficheurs sept segments.">
+                    The processor was developed incrementally, starting with the core datapath and register transfer mechanisms, then adding the memory subsystem with RAM, MAR, and MDR for load and store instructions, followed by a control unit implemented as a finite state machine to automate instruction fetch, decode, and execution cycles. The final stage deployed the complete processor onto a Cyclone V FPGA with I/O interfacing through switches, LEDs, and seven-segment displays.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="The control unit FSM supports a complete instruction set including arithmetic, immediate, memory access, conditional branching, jump-and-link, and I/O operations. The processor was verified through simulation and operates at 1 MHz on the FPGA hardware."
+                        data-fr="La machine à états de l'unité de contrôle supporte un jeu d'instructions complet incluant les opérations arithmétiques, immédiates, d'accès mémoire, de branchement conditionnel, de saut avec lien et d'E/S. Le processeur a été vérifié par simulation et fonctionne à 1 MHz sur le matériel FPGA.">
+                    The control unit FSM supports a complete instruction set including arithmetic, immediate, memory access, conditional branching, jump-and-link, and I/O operations. The processor was verified through simulation and operates at 1 MHz on the FPGA hardware.
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
 
         <article id="project-running-jumping" class="project-card" tabindex="0">
           <div class="project-card-summary">
@@ -717,6 +792,19 @@
 .
     <figure class="timeline" style="margin-left:0; margin-right:auto;">
       <ul>
+        <li>
+          <div class="icon">
+            <img src="Media/EricssonLogo.jpg" alt="Ericsson Logo">
+          </div>
+          <div class="content">
+            <time>May 2026 – August 2027</time>
+            <h3 class="lang-text" data-en="Radio Software Developer Intern, Ericsson" data-fr="Stagiaire en développement logiciel radio, Ericsson">Radio Software Developer Intern, Ericsson</h3>
+            <p class="lang-text" data-en="As a Radio Software Developer Intern, I develop and execute manual and automated test strategies using Python to verify 5G/LTE Radio software functionality. I configure lab environments and operate analysis tools including Signal Analyzers, Oscilloscopes, IXIA, and VIAVI UE Simulators to support product verification. I collaborate with design and product support teams to align testing priorities and integrate new features, and document test results while tracking software, hardware, and procedural issues to support fault identification and resolution." data-fr="En tant que stagiaire en développement logiciel radio, je développe et exécute des stratégies de test manuelles et automatisées à l'aide de Python pour vérifier la fonctionnalité des logiciels radio 5G/LTE. Je configure les environnements de laboratoire et utilise des outils d'analyse, notamment des analyseurs de signal, des oscilloscopes, IXIA et des simulateurs UE VIAVI, pour soutenir la vérification des produits. Je collabore avec les équipes de conception et de support produit pour aligner les priorités de test et intégrer de nouvelles fonctionnalités, et je documente les résultats des tests tout en suivant les problèmes logiciels, matériels et procéduraux pour soutenir l'identification et la résolution des défauts.">
+              As a Radio Software Developer Intern, I develop and execute manual and automated test strategies using Python to verify 5G/LTE Radio software functionality. I configure lab environments and operate analysis tools including Signal Analyzers, Oscilloscopes, IXIA, and VIAVI UE Simulators to support product verification. I collaborate with design and product support teams to align testing priorities and integrate new features, and document test results while tracking software, hardware, and procedural issues to support fault identification and resolution.
+            </p>
+          </div>
+        </li>
+
         <li>
           <div class="icon">
             <img src="Media/OttawaLogo.jpg" alt="Ottawa City Logo">

@@ -760,17 +760,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const PROJECT_LINK_LABELS = {
     en: [
       'Road Learning Tool (React/TypeScript)',
+      '32-Bit RISC Processor Design (Verilog/FPGA)',
       'Running and Jumping Detection (Python ML)',
       'Dynamic Time Allocating Calendar (Qt/C++)',
       '911 Dispatcher Training Device (Web + Arduino)',
       'Fluid and Powder Dispensing Device (Arduino)',
+      'Portfolio Website',
     ],
     fr: [
       'Outil d\'apprentissage des routes (React/TypeScript)',
+      'Conception d\'un processeur RISC 32 bits (Verilog/FPGA)',
       'Détection de course et saut (Python)',
       'Calendrier dynamique (C++/Qt)',
       'Simulateur d\'opérateur 911 (Web + Arduino)',
       'Distributeur fluide et poudre (Arduino)',
+      'Site portfolio',
     ],
   };
 
@@ -1212,6 +1216,8 @@ if (langButton) {
     let dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
     let w = 0, h = 0, step = 14 * dpr, stepX = 14 * dpr, cols = 0, rows = 0;
     let heads = [];
+    let colRates = [];
+    const COLUMN_RATE_VARIANCE = 0.7; // 0 = uniform change rate, higher = more spread (e.g. 1.5 for extreme)
     let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     let isHeaderVisible = true;
     let pausedForVisibility = false;
@@ -1232,6 +1238,12 @@ if (langButton) {
       cols = Math.max(1, Math.floor(w / stepX));
       rows = Math.max(1, Math.floor(h / step));
       heads = new Array(cols).fill(0).map(() => Math.floor(Math.random() * rows));
+      colRates = new Array(cols);
+      for (let i = 0; i < cols; i++) {
+        const rateHash = hash32(i * 9876541 + 12345);
+        const rateRandom = (rateHash % 10001) / 10000;
+        colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
+      }
     }
 
     function cssVar(name, fallback) {
@@ -1367,20 +1379,22 @@ if (langButton) {
         lastChange = tnow;
       }
 
-      const featherPx = Math.round(6 * step);
-      const bleedPx   = Math.round(2 * step);
-      const jitterPx  = Math.round(2.5 * step);
+      const featherPx = Math.round(8 * step);
+      const bleedPx   = Math.round(3 * step);
+      const jitterPx  = Math.round(10 * step);
       const effectiveGradient = gradientMix;
 
       for (let c = 0; c < cols; c++) {
         const chainLen = 10 + (c % 9);
         const head = heads[c];
         const jitterSeed = hash32((c + 1) * 2654435761);
-        const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx; // [-jitterPx, +jitterPx]
+        const jitterUnit = (jitterSeed % 2001) / 1000 - 1; // [-1, 1]
+        const jitter = jitterUnit * Math.abs(jitterUnit) * jitterPx; // squared: clusters near center, sparse outliers
         const colTop = visibleTopY + jitter;
         for (let i = 0; i < chainLen; i++) {
           const r = (head + i) % rows;
-          const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (glyphPhase * 83492791);
+          const colPhase = Math.floor(glyphPhase * (colRates[c] || 1));
+          const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (colPhase * 83492791);
           const ch = (hash32(seed) & 1) ? '1' : '0';
           const x = c * stepX + Math.floor(stepX * 0.1);
           const y = r * step;
@@ -1443,9 +1457,11 @@ if (langButton) {
     let cols = 0;
     let rows = 0;
     let heads = [];
+    let colRates = [];
     let glyphPhase = 0;
     let lastGlyphChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const glyphInterval = 360;
+    const COLUMN_RATE_VARIANCE = 1;
     let lastScrollY = window.scrollY || window.pageYOffset || 0;
     let gradientMomentum = 0;
     let gradientTarget = 0.5;
@@ -1490,6 +1506,12 @@ if (langButton) {
       for (let i = 0; i < cols; i++) {
         const carry = previous && previous[i] !== undefined ? previous[i] : Math.floor(Math.random() * rows);
         heads[i] = ((carry % rows) + rows) % rows;
+      }
+      colRates = new Array(cols);
+      for (let i = 0; i < cols; i++) {
+        const rateHash = hash32(i * 9876541 + 12345);
+        const rateRandom = (rateHash % 10001) / 10000;
+        colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
       }
     }
 
@@ -1565,7 +1587,8 @@ if (langButton) {
           const y = row * step;
           if (y > h) continue;
 
-          const seed = ((c + 1) * 73856093) ^ ((row + 1) * 19349663) ^ ((glyphPhase + 1) * 83492791);
+          const colPhase = Math.floor(glyphPhase * (colRates[c] || 1));
+          const seed = ((c + 1) * 73856093) ^ ((row + 1) * 19349663) ^ ((colPhase + 1) * 83492791);
           const ch = (hash32(seed) & 1) ? '1' : '0';
           const x = c * step + step * 0.2;
           const gradientIndex = Math.max(
@@ -1615,6 +1638,7 @@ if (langButton) {
     if (!canvases.length) return;
     const contentArea = wrapper.querySelector('main');
     const GUTTER_BUFFER = 18; // keep a small gap between rain and readable content
+    const COLUMN_RATE_VARIANCE = 0.7;
 
     const hash32 = (x) => {
       x |= 0;
@@ -1650,6 +1674,7 @@ if (langButton) {
         rows: 0,
         colPositions: [],
         heads: [],
+        colRates: [],
         glyphPhase: 0,
         lastGlyphChange: now,
         changeInterval: 260 + Math.random() * 140,
@@ -1717,6 +1742,12 @@ if (langButton) {
           ? prevHeads[i]
           : Math.floor(Math.random() * state.rows);
         state.heads[i] = ((carry % state.rows) + state.rows) % state.rows;
+      }
+      state.colRates = new Array(state.cols);
+      for (let i = 0; i < state.cols; i++) {
+        const rateHash = hash32(i * 9876541 + 12345);
+        const rateRandom = (rateHash % 10001) / 10000;
+        state.colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
       }
 
       const minX = Math.max(4 * dpr, state.stepX * 0.7);
@@ -1853,7 +1884,8 @@ if (langButton) {
 
           for (let i = 0; i < chainLen; i++) {
             const r = (head + i) % state.rows;
-            const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (state.glyphPhase * 83492791);
+            const colPhase = Math.floor(state.glyphPhase * (state.colRates[c] || 1));
+            const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (colPhase * 83492791);
             const ch = (hash32(seed) & 1) ? '1' : '0';
             const x = baseX;
             const y = r * state.step;
@@ -1934,18 +1966,20 @@ if (langButton) {
 
   const PROJECT_LINKS_EN = [
     { prefix: '1. ', text: 'Road Learning Tool (React/TypeScript)', href: '#road-learning-tool' },
-    { prefix: '2. ', text: 'Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
-    { prefix: '3. ', text: 'Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
-    { prefix: '4. ', text: '911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
-    { prefix: '5. ', text: 'Fluid and Powder Dispensing Device (Arduino)', href: '#project-fluid-dispensing' }
+    { prefix: '2. ', text: '32-Bit RISC Processor Design (Verilog/FPGA)', href: '#project-cpu-risc' },
+    { prefix: '3. ', text: 'Running & Jumping Detection (Python ML)', href: '#project-running-jumping' },
+    { prefix: '4. ', text: 'Dynamic Time Allocating Calendar (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '5. ', text: '911 Dispatcher Training Device (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '6. ', text: 'Fluid and Powder Dispensing Device (Arduino)', href: '#project-fluid-dispensing' }
   ];
 
   const PROJECT_LINKS_FR = [
     { prefix: '1. ', text: 'Outil d\'apprentissage des routes (React/TypeScript)', href: '#road-learning-tool' },
-    { prefix: '2. ', text: 'Détection de course et de saut (Python)', href: '#project-running-jumping' },
-    { prefix: '3. ', text: 'Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
-    { prefix: '4. ', text: 'Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
-    { prefix: '5. ', text: 'Dispositif de distribution de fluide et de poudre (Arduino)', href: '#project-fluid-dispensing' }
+    { prefix: '2. ', text: 'Conception d\'un processeur RISC 32 bits (Verilog/FPGA)', href: '#project-cpu-risc' },
+    { prefix: '3. ', text: 'Détection de course et de saut (Python)', href: '#project-running-jumping' },
+    { prefix: '4. ', text: 'Calendrier à allocation dynamique du temps (C++/Qt)', href: '#project-dynamic-calendar' },
+    { prefix: '5. ', text: 'Appareil de formation pour opérateur 911 (Web + Arduino)', href: '#project-911-training' },
+    { prefix: '6. ', text: 'Dispositif de distribution de fluide et de poudre (Arduino)', href: '#project-fluid-dispensing' }
   ];
 
   const SKILLS_OUTPUT_EN = [
@@ -1964,6 +1998,13 @@ if (langButton) {
   ];
 
   const WORK_HISTORY_EN = [
+    'RADIO SOFTWARE DEVELOPER INTERN @ Ericsson\n(May 2026 - Aug 2027)',
+    '  -Develop and execute test strategies using Python',
+    '    for 5G/LTE Radio software verification',
+    '  -Configure lab environments and operate analysis',
+    '    tools (Signal Analyzer, Oscilloscope, IXIA, VIAVI)',
+    '  -Collaborate with design and product support teams',
+    '\n',
     'TRAFFIC SERVICES INTERN @ City of Ottawa\n(May - Aug 2025)',
     '  -Applied data analysis to pedestrian & vehicle',
     '    survey data',
@@ -1982,6 +2023,14 @@ if (langButton) {
   ];
 
   const WORK_HISTORY_FR = [
+    'STAGIAIRE EN DÉVELOPPEMENT LOGICIEL RADIO @ Ericsson\n(mai 2026 - août 2027)',
+    '  -Stratégies de test avec Python pour logiciels',
+    '    radio 5G/LTE',
+    '  -Configuration d\'environnements de laboratoire et',
+    '    outils d\'analyse (analyseur de signal, oscilloscope)',
+    '  -Collaboration avec les équipes de conception et',
+    '    de support produit',
+    '\n',
     'STAGIAIRE AUX SERVICES DE LA CIRCULATION @ Ville d\'Ottawa\n(mai - août 2025)',
     '  -Analyse de données piétonnes et routières',
     '  -Outils SIG pour cartographier les modèles de circulation',
@@ -1989,7 +2038,7 @@ if (langButton) {
     '\n',
     'ASSISTANT À LA GESTION DES GRAFFITIS @ Ville d\'Ottawa\n(mai - août 2024)',
     '  -Gestion de la base de données municipale de graffitis',
-    '  -Suivi des demandes de service et de l’avancement des tâches',
+    '  -Suivi des demandes de service et de l\'avancement des t\u00e2ches',
     '  -Utilisation d\'équipements spécialisés de nettoyage',
     '\n',
     'ANIMATEUR DE CAMP @ Mountain Bike Kids\n(juin - août 2022)',
@@ -2053,7 +2102,7 @@ if (langButton) {
     },
     'git status': {
       output: [
-        'Seeking a 12-16 month internship placement in Computer Engineering related fields',
+        'Currently working as a Radio Software Developer Intern at Ericsson, Ottawa. Verifying 5G/LTE radio software through manual and automated testing with Python',
       ]
     },
     fortune: {
@@ -2105,7 +2154,7 @@ if (langButton) {
     },
     'git status': {
       output: [
-        'À la recherche de stages de 12 à 16 mois en génie informatique',
+        'Pr\u00e9sentement en poste comme stagiaire en d\u00e9veloppement logiciel radio chez Ericsson, Ottawa. V\u00e9rification de logiciels radio 5G/LTE par tests manuels et automatis\u00e9s avec Python',
       ]
     },
     fortune: {
