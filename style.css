@@ -458,17 +458,17 @@ h1 {
 }
 
 .hover-card-text {
-  position: absolute; 
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: flex-start;
   text-align: left;
   z-index: 2;
   margin: 0;
-  padding: 1.75rem; 
+  padding: 1.75rem;
   font-size: 1.05rem;
   line-height: 1.55;
   opacity: 0;
@@ -790,15 +790,27 @@ figure.timeline {
   margin: 0;
   position: relative;
 }
-.timeline ul::before {
-  content: '';
+/* SVG timeline bar (replaces old ::before gradient) */
+.timeline-bar {
   position: absolute;
-  left: 32px;
+  left: 0;
   top: 0;
-  bottom: 118px;
-  width: 4px;
-  background: var(--primary);
+  pointer-events: none;
+  overflow: visible;
 }
+.timeline-bar-seg {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: d 0.3s ease, opacity 0.4s ease;
+}
+
+/* Per-job accent colour */
+.timeline li[data-job="1"] { --job-accent: var(--job-1-accent); }
+.timeline li[data-job="2"] { --job-accent: var(--job-2-accent); }
+.timeline li[data-job="3"] { --job-accent: var(--job-3-accent); }
+.timeline li[data-job="4"] { --job-accent: var(--job-4-accent); }
+.timeline li[data-job="5"] { --job-accent: var(--job-5-accent); }
 
 .timeline li {
   position: relative;
@@ -814,7 +826,7 @@ figure.timeline {
   height: 40px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid var(--primary);
+  border: 3px solid var(--job-accent, var(--primary));
   background: white;
 }
 .timeline li .icon img {
@@ -829,7 +841,7 @@ figure.timeline {
   display: block;
   font-size: 1.1rem;
   font-weight: bold;
-  color: var(--primary);
+  color: var(--job-accent, var(--primary));
   margin-bottom: 0.5rem;
 }
 .timeline .content {
@@ -917,7 +929,8 @@ footer {
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
-  padding: 0;
+  padding: 0.35rem 0.4rem;
+  margin: -0.35rem -0.4rem;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
@@ -968,7 +981,7 @@ footer {
   display: block;
   color: #ffffff;
   text-decoration: none;
-  padding: 0.45rem 0.35rem;
+  padding: 0.25rem 0.35rem;
   border-radius: 6px;
   font-weight: 700;
   font-size: 0.95rem;
@@ -1031,21 +1044,24 @@ body.fr .sidebar-dropdown a:focus-visible {
   position: relative;
   filter: blur(3px);
   opacity: 0.8;
-  transition: max-height 0.5s ease, filter 0.4s ease, opacity 0.4s ease;
+  transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.5s ease-out 0.05s,
+              opacity 0.5s ease-out 0.05s;
 }
 
 .more-jobs::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0;
-  width: 100%; height: 80px;
-  background: linear-gradient(rgba(248,249,250,0), var(--light) 60%);
+  width: 100%; height: 90px;
+  background: linear-gradient(rgba(248,249,250,0), var(--light) 55%);
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease-out;
 }
 
 .more-jobs.show {
-  max-height: 1000px; 
+  max-height: 1000px;
+  overflow: visible;
   filter: none;
   opacity: 1;
 }
@@ -1058,6 +1074,9 @@ body.fr .sidebar-dropdown a:focus-visible {
 .more-jobs > li:first-child {
   margin-top: 0;
 }
+.more-jobs.show > li:last-child {
+  margin-bottom: 0;
+}
 
 .see-more {
   margin: 0.1rem auto;
@@ -1067,7 +1086,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1rem 0 0.5rem;
+  margin: 0.75rem 0 0.5rem;
 }
 
 .see-more.see-more--less {
@@ -1329,7 +1348,8 @@ body.fr .sidebar-dropdown a:focus-visible {
   cursor: pointer;
   min-width: 150px;
   transform: scale(1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.3s ease,
+              background-color 0.35s ease, color 0.3s ease, border-color 0.3s ease;
   will-change: transform, box-shadow;
   box-shadow: 0 8px 18px rgba(87, 126, 132, 0.25);
   box-sizing: border-box;
@@ -1351,15 +1371,13 @@ body.fr .sidebar-dropdown a:focus-visible {
 .project-card .btn-video:focus-visible,
 .see-more:hover,
 .see-more:focus-visible {
-  transform: scale(1.05);
-  box-shadow: 0 14px 26px rgba(87, 126, 132, 0.35);
+  transform: scale(1.02);
+  box-shadow: 0 6px 14px rgba(87, 126, 132, 0.25);
 }
 
 .project-card .btn-code:hover,
 .project-card .btn-code:focus-visible {
-  transform: scale(1.05);
-  background: var(--accent);
-  color: #fff;
+  transform: scale(1.02);
 }
 
 /* Mobile responsiveness */
@@ -1891,7 +1909,7 @@ body.dark-mode .timeline .content {
 
 body.dark-mode .timeline li .icon {
   background: rgba(9, 12, 24, 0.9);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--job-accent, rgba(255, 255, 255, 0.4));
 }
 
 body.dark-mode .project-card {

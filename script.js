@@ -26,6 +26,177 @@
   });
 })();
 
+// Timeline vertical bar – SVG with smooth hover deviation
+(() => {
+  const ul = document.querySelector('.timeline ul');
+  if (!ul) return;
+  const jobs = Array.from(ul.querySelectorAll('li[data-job]'));
+  if (jobs.length < 2) return;
+
+  const moreEl = ul.querySelector('.more-jobs');
+  const VIS = 3;
+  const BX  = 34;
+  const DX  = 10;
+  const NS  = 'http://www.w3.org/2000/svg';
+
+  /* ---- build SVG ---- */
+  const svg = document.createElementNS(NS, 'svg');
+  svg.classList.add('timeline-bar');
+  svg.setAttribute('aria-hidden', 'true');
+  ul.prepend(svg);
+
+  const defs = document.createElementNS(NS, 'defs');
+  svg.appendChild(defs);
+
+  /* Fade-out mask for collapsed state */
+  const mask = document.createElementNS(NS, 'mask');
+  mask.id = 'tl-mask';
+  mask.setAttribute('maskUnits', 'userSpaceOnUse');
+  defs.appendChild(mask);
+
+  const fadeGrad = document.createElementNS(NS, 'linearGradient');
+  fadeGrad.id = 'tl-fade';
+  fadeGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+  const fgStops = ['white', 'white', 'black'].map(c => {
+    const s = document.createElementNS(NS, 'stop');
+    s.setAttribute('stop-color', c);
+    fadeGrad.appendChild(s);
+    return s;
+  });
+  defs.appendChild(fadeGrad);
+
+  const maskRect = document.createElementNS(NS, 'rect');
+  maskRect.setAttribute('fill', 'url(#tl-fade)');
+  mask.appendChild(maskRect);
+
+  function mkPath() {
+    const p = document.createElementNS(NS, 'path');
+    p.classList.add('timeline-bar-seg');
+    svg.appendChild(p);
+    return p;
+  }
+
+  /* ---- create segments (one per consecutive pair, no cap) ---- */
+  const segs = [];
+  for (let i = 0; i < jobs.length - 1; i++) {
+    const g = document.createElementNS(NS, 'linearGradient');
+    g.id = `tlg${i}`;
+    g.setAttribute('gradientUnits', 'userSpaceOnUse');
+    const s0 = document.createElementNS(NS, 'stop');
+    s0.setAttribute('offset', '0%');
+    const s1 = document.createElementNS(NS, 'stop');
+    s1.setAttribute('offset', '100%');
+    g.append(s0, s1);
+    defs.appendChild(g);
+
+    const el = mkPath();
+    el.setAttribute('stroke', `url(#tlg${i})`);
+    segs.push({ el, from: i, to: i + 1, g, s0, s1 });
+  }
+
+  /* ---- helpers ---- */
+  function offsetTo(el, ancestor) {
+    let y = 0;
+    while (el && el !== ancestor) { y += el.offsetTop; el = el.offsetParent; }
+    return y;
+  }
+
+  function yOf(li) {
+    const ic = li.querySelector('.icon');
+    return offsetTo(ic, ul) + ic.offsetHeight / 2;
+  }
+
+  function jobColors() {
+    const s = getComputedStyle(document.body);
+    return jobs.map((_, i) => s.getPropertyValue(`--job-${i + 1}-accent`).trim());
+  }
+
+  // always C so CSS d-transitions interpolate; asymmetric CPs for tight deviation
+  function curve(x1, y1, x2, y2) {
+    const dy = y2 - y1;
+    if (x1 === x2) {
+      const cp = dy / 3;
+      return `path("M ${x1} ${y1} C ${x1} ${y1 + cp}, ${x2} ${y2 - cp}, ${x2} ${y2}")`;
+    }
+    let cp1y, cp2y;
+    if (x1 > x2) {
+      cp1y = y1 + dy * 0.12;
+      cp2y = y2 - dy * 0.75;
+    } else {
+      cp1y = y1 + dy * 0.75;
+      cp2y = y2 - dy * 0.12;
+    }
+    return `path("M ${x1} ${y1} C ${x1} ${cp1y}, ${x2} ${cp2y}, ${x2} ${y2}")`;
+  }
+
+  /* ---- render ---- */
+  let hov = -1;
+
+  function render() {
+    const ys = jobs.map(yOf);
+    const cs = jobColors();
+    const collapsed = moreEl ? !moreEl.classList.contains('show') : false;
+
+    svg.setAttribute('width', ul.offsetWidth);
+    svg.setAttribute('height', ys[ys.length - 1] + 40);
+
+    segs.forEach(seg => {
+      const { from, to } = seg;
+      const x1 = hov === from ? BX + DX : BX;
+      const x2 = hov === to   ? BX + DX : BX;
+      seg.el.style.d = curve(x1, ys[from], x2, ys[to]);
+
+      seg.g.setAttribute('x1', x1); seg.g.setAttribute('y1', ys[from]);
+      seg.g.setAttribute('x2', x2); seg.g.setAttribute('y2', ys[to]);
+      seg.s0.setAttribute('stop-color', cs[from] || '#999');
+      seg.s1.setAttribute('stop-color', cs[to]   || '#999');
+    });
+
+    // Fade-out mask when collapsed — bar fades through the .more-jobs area
+    if (collapsed && moreEl) {
+      const mTop = offsetTo(moreEl, ul);
+      const fadeEnd = mTop;                  // bar disappears exactly at the more-jobs boundary
+      const fadeStart = Math.max(0, mTop - 145); // fade begins 120px above the cutoff
+      const pct = fadeEnd > 0 ? (fadeStart / fadeEnd * 100).toFixed(1) : '80';
+
+      fadeGrad.setAttribute('x1', '0');  fadeGrad.setAttribute('y1', '0');
+      fadeGrad.setAttribute('x2', '0');  fadeGrad.setAttribute('y2', String(fadeEnd));
+      fgStops[0].setAttribute('offset', '0%');
+      fgStops[1].setAttribute('offset', pct + '%');
+      fgStops[2].setAttribute('offset', '100%');
+
+      maskRect.setAttribute('x', '0');   maskRect.setAttribute('y', '0');
+      maskRect.setAttribute('width', String(ul.offsetWidth));
+      maskRect.setAttribute('height', String(fadeEnd));
+      mask.setAttribute('x', '0');       mask.setAttribute('y', '0');
+      mask.setAttribute('width', String(ul.offsetWidth));
+      mask.setAttribute('height', String(fadeEnd));
+
+      svg.setAttribute('mask', 'url(#tl-mask)');
+    } else {
+      svg.removeAttribute('mask');
+    }
+  }
+
+  /* ---- events ---- */
+  jobs.forEach((li, i) => {
+    li.addEventListener('mouseenter', () => { hov = i; render(); });
+    li.addEventListener('mouseleave', () => { hov = -1; render(); });
+  });
+
+  document.getElementById('toggleJobs')?.addEventListener('click', () => {
+    requestAnimationFrame(render);
+    setTimeout(render, 550);
+  });
+
+  new MutationObserver(() => requestAnimationFrame(render))
+    .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  new ResizeObserver(() => requestAnimationFrame(render)).observe(ul);
+  window.addEventListener('load', render);
+  render();
+})();
+
 // Performance preferences
 const portfolioPrefs = (() => {
   const root = document.documentElement;
@@ -211,8 +382,12 @@ window.__portfolioPrefs = portfolioPrefs;
     if (!skipScrollCompensation && !preserveInitialScroll) {
       if (singleOpenCard) {
         const rect = singleOpenCard.getBoundingClientRect();
-        anchor = singleOpenCard;
-        anchorTopBefore = rect.top;
+        // Only anchor to the single card if its top is still near the viewport.
+        // If it has scrolled past ANCHOR_TOP_BUFFER above, fall through to find the next visible card.
+        if (rect.top > -ANCHOR_TOP_BUFFER) {
+          anchor = singleOpenCard;
+          anchorTopBefore = rect.top;
+        }
       }
 
       // 1) Find the lowest open project in DOM order
@@ -759,21 +934,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const PROJECT_LINK_LABELS = {
     en: [
-      'Road Learning Tool (React/TypeScript)',
-      '32-Bit RISC Processor Design (Verilog/FPGA)',
-      'Running and Jumping Detection (Python ML)',
-      'Dynamic Time Allocating Calendar (Qt/C++)',
-      '911 Dispatcher Training Device (Web + Arduino)',
-      'Fluid and Powder Dispensing Device (Arduino)',
+      'Road Learning Tool',
+      '32-Bit RISC Processor Design',
+      'Running and Jumping Detection',
+      'Dynamic Time Allocating Calendar',
+      '911 Dispatcher Training Device',
+      'Fluid and Powder Dispensing Device',
       'Portfolio Website',
     ],
     fr: [
-      'Outil d\'apprentissage des routes (React/TypeScript)',
-      'Conception d\'un processeur RISC 32 bits (Verilog/FPGA)',
-      'Détection de course et saut (Python)',
-      'Calendrier dynamique (C++/Qt)',
-      'Simulateur d\'opérateur 911 (Web + Arduino)',
-      'Distributeur fluide et poudre (Arduino)',
+      'Outil d\'apprentissage des routes',
+      'Conception d\'un processeur RISC 32 bits',
+      'Détection de course et saut',
+      'Calendrier dynamique',
+      'Simulateur d\'opérateur 911',
+      'Distributeur fluide et poudre',
       'Site portfolio',
     ],
   };
