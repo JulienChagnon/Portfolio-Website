@@ -1632,11 +1632,16 @@ if (langButton) {
     let cols = 0;
     let rows = 0;
     let heads = [];
-    let colRates = [];
-    let glyphPhase = 0;
-    let lastGlyphChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-    const glyphInterval = 360;
-    const COLUMN_RATE_VARIANCE = 1;
+    let colFallPhases = [];
+    let colFallSpeeds = [];
+    let colActive = [];
+    let cellGlyphs = [];
+    const COLUMN_DENSITY = 0.7; // fraction of columns that render rain streams
+    let lastTick = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    // Idle fall tuning: speed is in "rows per millisecond" per column.
+    const FALL_BASE = 0.0035;       // ~1 row every ~285ms baseline
+    const FALL_VARIANCE = 0.7;      // multiplier range: 2^(-0.7) .. 2^(0.7)
+    const GLYPH_FLIPS_PER_CELL_PER_SEC = 0.25; // each cell randomly re-rolls ~once every 4s on average
     let lastScrollY = window.scrollY || window.pageYOffset || 0;
     let gradientMomentum = 0;
     let gradientTarget = 0.5;
@@ -1677,16 +1682,25 @@ if (langButton) {
       rows = Math.max(4, Math.ceil(h / step) + 2);
 
       const previous = heads;
+      const previousGlyphs = cellGlyphs;
       heads = new Array(cols);
+      colFallPhases = new Array(cols);
+      colFallSpeeds = new Array(cols);
+      colActive = new Array(cols);
+      cellGlyphs = new Array(cols);
       for (let i = 0; i < cols; i++) {
         const carry = previous && previous[i] !== undefined ? previous[i] : Math.floor(Math.random() * rows);
         heads[i] = ((carry % rows) + rows) % rows;
-      }
-      colRates = new Array(cols);
-      for (let i = 0; i < cols; i++) {
-        const rateHash = hash32(i * 9876541 + 12345);
-        const rateRandom = (rateHash % 10001) / 10000;
-        colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
+        colFallPhases[i] = Math.random();
+        colFallSpeeds[i] = FALL_BASE * Math.pow(2, (Math.random() - 0.5) * 2 * FALL_VARIANCE);
+        colActive[i] = Math.random() < COLUMN_DENSITY;
+        const colGlyphs = new Uint8Array(rows);
+        const prevCol = previousGlyphs && previousGlyphs[i];
+        for (let r = 0; r < rows; r++) {
+          if (prevCol && r < prevCol.length) colGlyphs[r] = prevCol[r];
+          else colGlyphs[r] = Math.random() < 0.5 ? 1 : 0;
+        }
+        cellGlyphs[i] = colGlyphs;
       }
     }
 
@@ -1714,6 +1728,12 @@ if (langButton) {
       }
       pausedForDark = false;
 
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      let dt = now - lastTick;
+      lastTick = now;
+      if (dt < 0) dt = 0;
+      else if (dt > 100) dt = 100; // clamp after tab-restore so fall doesn't jump
+
       const nowScrollY = window.scrollY || window.pageYOffset || 0;
       const dy = nowScrollY - lastScrollY;
       lastScrollY = nowScrollY;
@@ -1727,21 +1747,38 @@ if (langButton) {
       const effectiveGradient = gradientMix;
       const moveSteps = Math.min(6, Math.floor(absDy / 12));
       if (moveSteps > 0 && direction !== 0) {
+        const scrollAdvance = direction > 0 ? -moveSteps : moveSteps;
         for (let c = 0; c < cols; c++) {
-          let head = heads[c] + (direction > 0 ? -moveSteps : moveSteps);
+          let head = heads[c] + scrollAdvance;
           head %= rows;
           if (head < 0) head += rows;
           heads[c] = head;
+          // Refresh the glyph at the new head so scrolled-in cells aren't stale.
+          cellGlyphs[c][head] = Math.random() < 0.5 ? 1 : 0;
         }
       }
 
-      const activation = 1;
-
-      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-      if (now - lastGlyphChange >= glyphInterval) {
-        glyphPhase = (glyphPhase + 1) | 0;
-        lastGlyphChange = now;
+      // Idle slow fall: each column advances independently at its own rate.
+      for (let c = 0; c < cols; c++) {
+        colFallPhases[c] += dt * colFallSpeeds[c];
+        while (colFallPhases[c] >= 1) {
+          colFallPhases[c] -= 1;
+          let head = heads[c] + 1;
+          if (head >= rows) head -= rows;
+          heads[c] = head;
+          cellGlyphs[c][head] = Math.random() < 0.5 ? 1 : 0;
+        }
       }
+
+      // Random per-cell glyph flips to break any visible repetition.
+      const flipsThisTick = Math.max(1, Math.round(cols * rows * GLYPH_FLIPS_PER_CELL_PER_SEC * (dt / 1000)));
+      for (let f = 0; f < flipsThisTick; f++) {
+        const rc = (Math.random() * cols) | 0;
+        const rr = (Math.random() * rows) | 0;
+        cellGlyphs[rc][rr] = Math.random() < 0.5 ? 1 : 0;
+      }
+
+      const activation = 1;
 
       ctx.clearRect(0, 0, w, h);
 
@@ -1754,6 +1791,7 @@ if (langButton) {
       const minVisibleRow = Math.max(0, Math.floor((1 - activation) * rows));
 
       for (let c = 0; c < cols; c++) {
+        if (!colActive[c]) continue;
         const head = heads[c];
         const chainLen = 6 + (c % 5);
         for (let i = 0; i < chainLen; i++) {
@@ -1762,9 +1800,7 @@ if (langButton) {
           const y = row * step;
           if (y > h) continue;
 
-          const colPhase = Math.floor(glyphPhase * (colRates[c] || 1));
-          const seed = ((c + 1) * 73856093) ^ ((row + 1) * 19349663) ^ ((colPhase + 1) * 83492791);
-          const ch = (hash32(seed) & 1) ? '1' : '0';
+          const ch = cellGlyphs[c][row] ? '1' : '0';
           const x = c * step + step * 0.2;
           const gradientIndex = Math.max(
             0,
