@@ -1373,6 +1373,10 @@ if (langButton) {
   window.__updateScrollbarOverlay = () => updateOverlay({ disableTransition: false });
 })();
 
+// Shared glyph set for all digital rain (header, sidebar, content gutters).
+// Printable ASCII excluding space so columns stay visually dense.
+const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
 // Header Digital Rain
 
 (() => {
@@ -1389,10 +1393,23 @@ if (langButton) {
     const ctx = canvas.getContext('2d');
 
     let dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
-    let w = 0, h = 0, step = 14 * dpr, stepX = 14 * dpr, cols = 0, rows = 0;
+    let w = 0, h = 0, step = 14 * dpr, stepX = 14 * dpr, stepY = 14 * dpr, cols = 0, rows = 0;
     let heads = [];
     let colRates = [];
+    let colFadeRates = [];   // per-column alpha falloff per step in chain
+    let colChainLens = [];   // per-column chain length
+    let colWhiteHead = [];   // some columns get a near-white leading character
+    let colSpeeds = [];      // per-column scroll-response multiplier (~0.5x..1.5x)
+    let colScrollAccums = []; // per-column scroll-driven movement accumulator
+    let cellRowOffsets = []; // per-cell stable phase offset (0..1) so rows in a col stagger
+    let cellPhases = [];     // per-cell current phase
+    let cellPrevPhases = []; // per-cell previous phase (for crossfade)
+    let cellTransitionAt = []; // per-cell timestamp when current phase took over
     const COLUMN_RATE_VARIANCE = 0.7; // 0 = uniform change rate, higher = more spread (e.g. 1.5 for extreme)
+    const COLUMN_RATE_SHIFT = 0.45;   // bias all column rates slower (in 2^stops); lowers cap and floor together
+    const WHITE_HEAD_FRACTION = 0.4; // ~40% of columns get a nearly-white leading char
+    const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
+    const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
     let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     let isHeaderVisible = true;
     let pausedForVisibility = false;
@@ -1410,14 +1427,55 @@ if (langButton) {
       w = canvas.width; h = canvas.height;
       step = Math.max(8, Math.round((cw > 600 ? 10 : 9) * dpr));
       stepX = Math.max(6, Math.round(step * 0.8));
+      stepY = Math.max(step + 1, Math.round(step * 1.18));
       cols = Math.max(1, Math.floor(w / stepX));
-      rows = Math.max(1, Math.floor(h / step));
+      rows = Math.max(1, Math.floor(h / stepY));
       heads = new Array(cols).fill(0).map(() => Math.floor(Math.random() * rows));
       colRates = new Array(cols);
+      colFadeRates = new Array(cols);
+      colChainLens = new Array(cols);
+      colWhiteHead = new Array(cols);
+      colSpeeds = new Array(cols);
+      colScrollAccums = new Array(cols);
+      cellRowOffsets = new Array(cols);
+      cellPhases = new Array(cols);
+      cellPrevPhases = new Array(cols);
+      cellTransitionAt = new Array(cols);
       for (let i = 0; i < cols; i++) {
         const rateHash = hash32(i * 9876541 + 12345);
         const rateRandom = (rateHash % 10001) / 10000;
-        colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
+        colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE - COLUMN_RATE_SHIFT);
+        // Per-column fade rate so not every strand fades at the same length.
+        // Spread roughly from 0.045 (long, gentle fade) to 0.16 (short, abrupt fade).
+        const fadeHash = hash32(i * 2246822519 + 7919);
+        const fadeRandom = (fadeHash % 10001) / 10000;
+        colFadeRates[i] = 0.045 + fadeRandom * 0.115;
+        // Per-column chain length spread (was constant 10 + (c % 9)).
+        const lenHash = hash32(i * 374761393 + 2654435761);
+        const lenRandom = (lenHash % 10001) / 10000;
+        colChainLens[i] = 8 + Math.floor(lenRandom * 16); // 8..23
+        const whiteHash = hash32(i * 1597334677 + 374761);
+        colWhiteHead[i] = ((whiteHash % 10000) / 10000) < WHITE_HEAD_FRACTION;
+        // Per-column scroll-response multiplier (0.5x .. 1.5x).
+        const speedHash = hash32(i * 2654435761 + 17);
+        const speedRandom = (speedHash % 10001) / 10000;
+        colSpeeds[i] = 1 + (speedRandom - 0.5) * 2 * COLUMN_SPEED_VARIANCE;
+        colScrollAccums[i] = 0;
+        const rowOffsets = new Float32Array(rows);
+        const phases = new Int32Array(rows);
+        const prevPhases = new Int32Array(rows);
+        const transAt = new Float32Array(rows);
+        for (let r = 0; r < rows; r++) {
+          const offHash = hash32((i + 1) * 374761393 ^ (r + 1) * 668265263);
+          rowOffsets[r] = (offHash % 100000) / 100000; // 0..1
+          phases[r] = 0;
+          prevPhases[r] = 0;
+          transAt[r] = -1e9;
+        }
+        cellRowOffsets[i] = rowOffsets;
+        cellPhases[i] = phases;
+        cellPrevPhases[i] = prevPhases;
+        cellTransitionAt[i] = transAt;
       }
     }
 
@@ -1515,19 +1573,27 @@ if (langButton) {
       if (gradientMix < 0) gradientMix = 0;
       else if (gradientMix > 1) gradientMix = 1;
 
-      // Speed of rain chains while scrolling.
-      accum += dy / 25;
-      // Clamp accumulator to prevent excessive buildup
-      accum = Math.max(-3, Math.min(3, accum));
-      const sign = accum === 0 ? 0 : (accum > 0 ? 1 : -1);
-      let moveSteps = Math.floor(Math.min(1, Math.abs(accum)));
-      if (moveSteps > 0) {
+      // Per-column scroll response so strands move at slightly different speeds.
+      if (dy !== 0) {
         for (let c = 0; c < cols; c++) {
-          let head = heads[c] + (sign < 0 ? moveSteps : -moveSteps); // up when scrolling down, down when scrolling up
+          colScrollAccums[c] += (dy / 25) * (colSpeeds[c] || 1);
+          if (colScrollAccums[c] > 3) colScrollAccums[c] = 3;
+          else if (colScrollAccums[c] < -3) colScrollAccums[c] = -3;
+        }
+      }
+      for (let c = 0; c < cols; c++) {
+        const a = colScrollAccums[c];
+        let steps = 0;
+        if (a >= 1) steps = Math.floor(a);
+        else if (a <= -1) steps = Math.ceil(a);
+        if (steps !== 0) {
+          // Scrolling down (positive accum) shifts heads up (matrix-style),
+          // scrolling up shifts heads down — so subtract steps from the head.
+          let head = heads[c] - steps;
           head %= rows; if (head < 0) head += rows;
           heads[c] = head;
+          colScrollAccums[c] -= steps;
         }
-        accum -= sign * moveSteps;
       }
 
       //Clear and draw every frame so digits change even when idle
@@ -1544,8 +1610,12 @@ if (langButton) {
       ctx.font = Math.floor(step * 1.3) + 'px monospace';
       ctx.textBaseline = 'top';
       ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
-      ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.25)');
-      ctx.shadowBlur = Math.round(step * 0.35);
+      const greenGlow = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
+      const greenBlur = Math.round(step * 1.4); // ambient green haze around each glyph
+      const whiteGlow = 'rgba(200, 255, 220, 0.95)';
+      const whiteBlur = Math.round(step * 2.6); // CRT-style bloom on leading char
+      ctx.shadowColor = greenGlow;
+      ctx.shadowBlur = greenBlur;
 
       // Advance glyph phase on a slower timer so values change less frequently
       const tnow = nowTs;
@@ -1554,32 +1624,73 @@ if (langButton) {
         lastChange = tnow;
       }
 
+      // Detect per-cell phase transitions so chars within a column stagger.
+      // Driven by continuous time (not the global glyphPhase counter) so the
+      // per-row offsets shift WHEN each cell ticks, not just its starting value.
+      const baseUnit = tnow / changeInterval;
+      for (let c = 0; c < cols; c++) {
+        const rate = colRates[c] || 1;
+        const base = baseUnit * rate;
+        const offsets = cellRowOffsets[c];
+        const phases = cellPhases[c];
+        const prevPhases = cellPrevPhases[c];
+        const transAt = cellTransitionAt[c];
+        for (let r = 0; r < rows; r++) {
+          const newPhase = Math.floor(base + offsets[r]);
+          if (newPhase !== phases[r]) {
+            prevPhases[r] = phases[r];
+            phases[r] = newPhase;
+            transAt[r] = tnow;
+          }
+        }
+      }
+
       const featherPx = Math.round(8 * step);
       const bleedPx   = Math.round(3 * step);
       const jitterPx  = Math.round(10 * step);
       const effectiveGradient = gradientMix;
 
+      const baseFill = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
+      const whiteFill = 'rgba(225, 255, 235, 0.98)';
+
       for (let c = 0; c < cols; c++) {
-        const chainLen = 10 + (c % 9);
+        const chainLen = colChainLens[c] || (10 + (c % 9));
+        const fadeRate = colFadeRates[c] || 0.1;
         const head = heads[c];
         const jitterSeed = hash32((c + 1) * 2654435761);
         const jitterUnit = (jitterSeed % 2001) / 1000 - 1; // [-1, 1]
-        const jitter = jitterUnit * Math.abs(jitterUnit) * jitterPx; // squared: clusters near center, sparse outliers
+        // Always non-negative so columns can only trail the reveal line, never lead it
+        // (otherwise the white tip pokes above visibleTopY at scroll start).
+        const jitter = jitterUnit * jitterUnit * jitterPx;
         const colTop = visibleTopY + jitter;
+        // Leading character is the one with gradientIndex == 0 — depends on scroll direction.
+        // gradientIndex = g*i + (1-g)*(chainLen-1-i); zero at i=0 when g=1, at i=chainLen-1 when g=0.
+        const leadingI = effectiveGradient >= 0.5 ? 0 : (chainLen - 1);
+        const phasesCol = cellPhases[c];
+        const prevPhasesCol = cellPrevPhases[c];
+        const transAtCol = cellTransitionAt[c];
         for (let i = 0; i < chainLen; i++) {
           const r = (head + i) % rows;
-          const colPhase = Math.floor(glyphPhase * (colRates[c] || 1));
-          const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (colPhase * 83492791);
-          const ch = (hash32(seed) & 1) ? '1' : '0';
+          const phaseNow = phasesCol[r];
+          const phasePrev = prevPhasesCol[r];
+          const transAge = tnow - transAtCol[r];
+          const tBlend = transAge >= GLYPH_FADE_MS ? 1 : Math.max(0, transAge) / GLYPH_FADE_MS;
+          const seedNow = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (phaseNow * 83492791);
+          const ch = RAIN_ASCII_GLYPHS.charAt(hash32(seedNow) % RAIN_ASCII_GLYPHS.length);
+          let prevCh = ch;
+          if (tBlend < 1) {
+            const seedPrev = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (phasePrev * 83492791);
+            prevCh = RAIN_ASCII_GLYPHS.charAt(hash32(seedPrev) % RAIN_ASCII_GLYPHS.length);
+          }
           const x = c * stepX + Math.floor(stepX * 0.1);
-          const y = r * step;
+          const y = r * stepY;
           if (y < colTop - bleedPx) continue;
 
           const gradientIndex = Math.max(
             0,
             effectiveGradient * i + (1 - effectiveGradient) * ((chainLen - 1) - i)
           );
-          const baseAlpha = gradientIndex <= 0.01 ? 0.95 : Math.max(0.25, 0.9 - gradientIndex * 0.1);
+          const baseAlpha = gradientIndex <= 0.01 ? 0.95 : Math.max(0.18, 0.9 - gradientIndex * fadeRate);
           const delta = y - colTop;
           let colAlpha;
           if (delta < 0) {
@@ -1594,8 +1705,34 @@ if (langButton) {
 
           const drawAlpha = baseAlpha * colAlpha;
           if (drawAlpha <= 0.02) continue;
-          ctx.globalAlpha = drawAlpha;
-          ctx.fillText(ch, x, y);
+
+          const isLeading = i === leadingI && colWhiteHead[c];
+          if (isLeading) {
+            ctx.fillStyle = whiteFill;
+            ctx.shadowColor = whiteGlow;
+            ctx.shadowBlur = whiteBlur;
+            if (tBlend < 1 && prevCh !== ch) {
+              ctx.globalAlpha = colAlpha * (1 - tBlend);
+              ctx.fillText(prevCh, x, y);
+            }
+            ctx.globalAlpha = colAlpha * (tBlend < 1 ? tBlend : 1);
+            ctx.fillText(ch, x, y);
+            // Second pass for extra CRT bloom on the tip
+            ctx.fillText(ch, x, y);
+            ctx.fillStyle = baseFill;
+            ctx.shadowColor = greenGlow;
+            ctx.shadowBlur = greenBlur;
+          } else {
+            if (tBlend < 1 && prevCh !== ch) {
+              ctx.globalAlpha = drawAlpha * (1 - tBlend);
+              ctx.fillText(prevCh, x, y);
+              ctx.globalAlpha = drawAlpha * tBlend;
+              ctx.fillText(ch, x, y);
+            } else {
+              ctx.globalAlpha = drawAlpha;
+              ctx.fillText(ch, x, y);
+            }
+          }
         }
       }
       ctx.globalAlpha = 1;
@@ -1634,21 +1771,19 @@ if (langButton) {
     let heads = [];
     let colFallPhases = [];
     let colFallSpeeds = [];
+    let colScrollAccums = [];
     let colActive = [];
     let cellGlyphs = [];
+    let cellPrevGlyphs = []; // for the brief crossfade after a glyph flip
+    let cellTransitionAt = []; // timestamp of last flip per cell
     const COLUMN_DENSITY = 0.7; // fraction of columns that render rain streams
     let lastTick = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     // Idle fall tuning: speed is in "rows per millisecond" per column.
     const FALL_BASE = 0.0035;       // ~1 row every ~285ms baseline
-    const FALL_VARIANCE = 0.7;      // multiplier range: 2^(-0.7) .. 2^(0.7)
+    const FALL_VARIANCE = 0.55;     // multiplier range: 2^(-0.55) .. 2^(0.55) ≈ 0.68x..1.46x
     const GLYPH_FLIPS_PER_CELL_PER_SEC = 0.25; // each cell randomly re-rolls ~once every 4s on average
+    const GLYPH_FADE_MS = 200; // crossfade window when a cell changes glyph
     let lastScrollY = window.scrollY || window.pageYOffset || 0;
-    let gradientMomentum = 0;
-    let gradientTarget = 0.5;
-    let gradientMix = 0.5;
-    const GRADIENT_DECAY = 0.9;
-    const GRADIENT_MAX = 40;
-    const GRADIENT_LERP = 0.2;
     let pausedForDark = false;
 
     function cssVar(name, fallback) {
@@ -1686,30 +1821,32 @@ if (langButton) {
       heads = new Array(cols);
       colFallPhases = new Array(cols);
       colFallSpeeds = new Array(cols);
+      colScrollAccums = new Array(cols);
       colActive = new Array(cols);
       cellGlyphs = new Array(cols);
+      cellPrevGlyphs = new Array(cols);
+      cellTransitionAt = new Array(cols);
       for (let i = 0; i < cols; i++) {
         const carry = previous && previous[i] !== undefined ? previous[i] : Math.floor(Math.random() * rows);
         heads[i] = ((carry % rows) + rows) % rows;
         colFallPhases[i] = Math.random();
         colFallSpeeds[i] = FALL_BASE * Math.pow(2, (Math.random() - 0.5) * 2 * FALL_VARIANCE);
+        colScrollAccums[i] = 0;
         colActive[i] = Math.random() < COLUMN_DENSITY;
         const colGlyphs = new Uint8Array(rows);
+        const colPrev = new Uint8Array(rows);
+        const colTrans = new Float64Array(rows);
         const prevCol = previousGlyphs && previousGlyphs[i];
         for (let r = 0; r < rows; r++) {
           if (prevCol && r < prevCol.length) colGlyphs[r] = prevCol[r];
           else colGlyphs[r] = Math.random() < 0.5 ? 1 : 0;
+          colPrev[r] = colGlyphs[r];
+          colTrans[r] = -1e9; // far in the past so no transition is active
         }
         cellGlyphs[i] = colGlyphs;
+        cellPrevGlyphs[i] = colPrev;
+        cellTransitionAt[i] = colTrans;
       }
-    }
-
-    function updateGradientTrend(deltaY) {
-      if (!deltaY) return;
-      gradientMomentum = gradientMomentum * GRADIENT_DECAY + deltaY;
-      gradientMomentum = Math.max(-GRADIENT_MAX, Math.min(GRADIENT_MAX, gradientMomentum));
-      gradientTarget = 0.5 + 0.5 * (gradientMomentum / GRADIENT_MAX);
-      gradientTarget = Math.max(0, Math.min(1, gradientTarget));
     }
 
     function tick() {
@@ -1737,24 +1874,33 @@ if (langButton) {
       const nowScrollY = window.scrollY || window.pageYOffset || 0;
       const dy = nowScrollY - lastScrollY;
       lastScrollY = nowScrollY;
-      updateGradientTrend(dy);
-      gradientMix += (gradientTarget - gradientMix) * GRADIENT_LERP;
-      if (gradientMix < 0) gradientMix = 0;
-      else if (gradientMix > 1) gradientMix = 1;
 
-      const absDy = Math.abs(dy);
-      const direction = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
-      const effectiveGradient = gradientMix;
-      const moveSteps = Math.min(6, Math.floor(absDy / 12));
-      if (moveSteps > 0 && direction !== 0) {
-        const scrollAdvance = direction > 0 ? -moveSteps : moveSteps;
+      // Update a glyph cell, recording the previous value + timestamp for the crossfade.
+      const setGlyph = (c, r, nextIdx) => {
+        const curr = cellGlyphs[c][r] | 0;
+        if (curr === nextIdx) return;
+        cellPrevGlyphs[c][r] = curr;
+        cellGlyphs[c][r] = nextIdx;
+        cellTransitionAt[c][r] = now;
+      };
+
+      // Per-column scroll-driven movement so strands respond to scroll at different rates.
+      if (dy !== 0) {
         for (let c = 0; c < cols; c++) {
-          let head = heads[c] + scrollAdvance;
-          head %= rows;
-          if (head < 0) head += rows;
-          heads[c] = head;
-          // Refresh the glyph at the new head so scrolled-in cells aren't stale.
-          cellGlyphs[c][head] = Math.random() < 0.5 ? 1 : 0;
+          const speedMult = colFallSpeeds[c] / FALL_BASE; // ~0.68x..1.46x
+          colScrollAccums[c] += (dy / 12) * speedMult;
+          let steps = 0;
+          if (colScrollAccums[c] >= 1) steps = Math.min(8, Math.floor(colScrollAccums[c]));
+          else if (colScrollAccums[c] <= -1) steps = Math.max(-8, Math.ceil(colScrollAccums[c]));
+          if (steps !== 0) {
+            const scrollAdvance = -steps; // matrix-style: scrolling down moves chain up
+            let head = heads[c] + scrollAdvance;
+            head %= rows;
+            if (head < 0) head += rows;
+            heads[c] = head;
+            setGlyph(c, head, Math.random() < 0.5 ? 1 : 0);
+            colScrollAccums[c] -= steps;
+          }
         }
       }
 
@@ -1766,7 +1912,7 @@ if (langButton) {
           let head = heads[c] + 1;
           if (head >= rows) head -= rows;
           heads[c] = head;
-          cellGlyphs[c][head] = Math.random() < 0.5 ? 1 : 0;
+          setGlyph(c, head, (Math.random() * RAIN_ASCII_GLYPHS.length) | 0);
         }
       }
 
@@ -1775,7 +1921,7 @@ if (langButton) {
       for (let f = 0; f < flipsThisTick; f++) {
         const rc = (Math.random() * cols) | 0;
         const rr = (Math.random() * rows) | 0;
-        cellGlyphs[rc][rr] = Math.random() < 0.5 ? 1 : 0;
+        setGlyph(rc, rr, (Math.random() * RAIN_ASCII_GLYPHS.length) | 0);
       }
 
       const activation = 1;
@@ -1785,8 +1931,8 @@ if (langButton) {
       ctx.font = Math.floor(step * 0.9) + 'px monospace';
       ctx.textBaseline = 'top';
       ctx.fillStyle = cssVar('--sidebar-rain-color', 'rgba(0,255,140,0.55)');
-      ctx.shadowColor = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.25)');
-      ctx.shadowBlur = Math.round(step * 0.25);
+      ctx.shadowColor = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.40)');
+      ctx.shadowBlur = Math.round(step * 1.2); // ambient green haze around each glyph
 
       const minVisibleRow = Math.max(0, Math.floor((1 - activation) * rows));
 
@@ -1800,18 +1946,30 @@ if (langButton) {
           const y = row * step;
           if (y > h) continue;
 
-          const ch = cellGlyphs[c][row] ? '1' : '0';
           const x = c * step + step * 0.2;
-          const gradientIndex = Math.max(
-            0,
-            effectiveGradient * i + (1 - effectiveGradient) * ((chainLen - 1) - i)
-          );
+          // Lower part of the chain is always the brighter ("lighter") green;
+          // gradientIndex is 0 at the bottom (i = chainLen-1) and grows upward.
+          const gradientIndex = (chainLen - 1) - i;
           const baseAlpha = gradientIndex <= 0.01 ? 0.9 : Math.max(0.25, 0.8 - gradientIndex * 0.08);
           const fade = Math.max(0.6, 1 - (y / Math.max(1, h)) * 0.22);
           const drawAlpha = baseAlpha * fade * activation;
           if (drawAlpha <= 0.02) continue;
-          ctx.globalAlpha = drawAlpha;
-          ctx.fillText(ch, x, y);
+
+          const transAge = now - cellTransitionAt[c][row];
+          const t = transAge >= GLYPH_FADE_MS ? 1 : Math.max(0, transAge) / GLYPH_FADE_MS;
+          const ch = RAIN_ASCII_GLYPHS.charAt(cellGlyphs[c][row] | 0);
+          if (t < 1) {
+            const prevCh = RAIN_ASCII_GLYPHS.charAt(cellPrevGlyphs[c][row] | 0);
+            if (prevCh !== ch) {
+              ctx.globalAlpha = drawAlpha * (1 - t);
+              ctx.fillText(prevCh, x, y);
+            }
+            ctx.globalAlpha = drawAlpha * t;
+            ctx.fillText(ch, x, y);
+          } else {
+            ctx.globalAlpha = drawAlpha;
+            ctx.fillText(ch, x, y);
+          }
         }
       }
 
@@ -1850,6 +2008,9 @@ if (langButton) {
     const contentArea = wrapper.querySelector('main');
     const GUTTER_BUFFER = 18; // keep a small gap between rain and readable content
     const COLUMN_RATE_VARIANCE = 0.7;
+    const COLUMN_RATE_SHIFT = 0.45; // bias all column rates slower (in 2^stops); lowers cap and floor together
+    const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
+    const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
 
     const hash32 = (x) => {
       x |= 0;
@@ -1886,6 +2047,12 @@ if (langButton) {
         colPositions: [],
         heads: [],
         colRates: [],
+        colSpeeds: [],
+        colScrollAccums: [],
+        cellRowOffsets: [],
+        cellPhases: [],
+        cellPrevPhases: [],
+        cellTransitionAt: [],
         glyphPhase: 0,
         lastGlyphChange: now,
         changeInterval: 260 + Math.random() * 140,
@@ -1955,10 +2122,35 @@ if (langButton) {
         state.heads[i] = ((carry % state.rows) + state.rows) % state.rows;
       }
       state.colRates = new Array(state.cols);
+      state.colSpeeds = new Array(state.cols);
+      state.colScrollAccums = new Array(state.cols);
+      state.cellRowOffsets = new Array(state.cols);
+      state.cellPhases = new Array(state.cols);
+      state.cellPrevPhases = new Array(state.cols);
+      state.cellTransitionAt = new Array(state.cols);
       for (let i = 0; i < state.cols; i++) {
         const rateHash = hash32(i * 9876541 + 12345);
         const rateRandom = (rateHash % 10001) / 10000;
-        state.colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE);
+        state.colRates[i] = Math.pow(2, (rateRandom - 0.5) * 2 * COLUMN_RATE_VARIANCE - COLUMN_RATE_SHIFT);
+        const speedHash = hash32(i * 2654435761 + 17);
+        const speedRandom = (speedHash % 10001) / 10000;
+        state.colSpeeds[i] = 1 + (speedRandom - 0.5) * 2 * COLUMN_SPEED_VARIANCE;
+        state.colScrollAccums[i] = 0;
+        const rowOffsets = new Float32Array(state.rows);
+        const phases = new Int32Array(state.rows);
+        const prevPhases = new Int32Array(state.rows);
+        const transAt = new Float32Array(state.rows);
+        for (let r = 0; r < state.rows; r++) {
+          const offHash = hash32((i + 1) * 374761393 ^ (r + 1) * 668265263);
+          rowOffsets[r] = (offHash % 100000) / 100000;
+          phases[r] = 0;
+          prevPhases[r] = 0;
+          transAt[r] = -1e9;
+        }
+        state.cellRowOffsets[i] = rowOffsets;
+        state.cellPhases[i] = phases;
+        state.cellPrevPhases[i] = prevPhases;
+        state.cellTransitionAt[i] = transAt;
       }
 
       const minX = Math.max(4 * dpr, state.stepX * 0.7);
@@ -2047,18 +2239,26 @@ if (langButton) {
         if (state.gradientMix < 0) state.gradientMix = 0;
         else if (state.gradientMix > 1) state.gradientMix = 1;
 
-        state.accum += dy / 25;
-        state.accum = Math.max(-3, Math.min(3, state.accum));
-        const sign = state.accum === 0 ? 0 : (state.accum > 0 ? 1 : -1);
-        const moveSteps = Math.floor(Math.min(1, Math.abs(state.accum)));
-        if (moveSteps > 0) {
+        // Per-column scroll response so strands move at slightly different speeds.
+        if (dy !== 0) {
           for (let c = 0; c < state.cols; c++) {
-            let head = state.heads[c] + (sign < 0 ? moveSteps : -moveSteps);
+            state.colScrollAccums[c] += (dy / 25) * (state.colSpeeds[c] || 1);
+            if (state.colScrollAccums[c] > 3) state.colScrollAccums[c] = 3;
+            else if (state.colScrollAccums[c] < -3) state.colScrollAccums[c] = -3;
+          }
+        }
+        for (let c = 0; c < state.cols; c++) {
+          const a = state.colScrollAccums[c];
+          let steps = 0;
+          if (a >= 1) steps = Math.floor(a);
+          else if (a <= -1) steps = Math.ceil(a);
+          if (steps !== 0) {
+            let head = state.heads[c] - steps;
             head %= state.rows;
             if (head < 0) head += state.rows;
             state.heads[c] = head;
+            state.colScrollAccums[c] -= steps;
           }
-          state.accum -= sign * moveSteps;
         }
 
         if (now - state.lastGlyphChange >= state.changeInterval) {
@@ -2066,13 +2266,34 @@ if (langButton) {
           state.lastGlyphChange = now;
         }
 
+        // Detect per-cell glyph-phase transitions so chars within a column stagger.
+        // Driven by continuous time so the per-row offsets shift WHEN each cell
+        // ticks, not just its starting value.
+        const baseUnit = now / state.changeInterval;
+        for (let c = 0; c < state.cols; c++) {
+          const rate = state.colRates[c] || 1;
+          const base = baseUnit * rate;
+          const offsets = state.cellRowOffsets[c];
+          const phases = state.cellPhases[c];
+          const prevPhases = state.cellPrevPhases[c];
+          const transAt = state.cellTransitionAt[c];
+          for (let r = 0; r < state.rows; r++) {
+            const newPhase = Math.floor(base + offsets[r]);
+            if (newPhase !== phases[r]) {
+              prevPhases[r] = phases[r];
+              phases[r] = newPhase;
+              transAt[r] = now;
+            }
+          }
+        }
+
         const ctx = state.ctx;
         ctx.clearRect(0, 0, state.width, state.height);
         ctx.font = Math.floor(state.step * 1.3) + 'px monospace';
         ctx.textBaseline = 'top';
         ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
-        ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.25)');
-        ctx.shadowBlur = Math.round(state.step * 0.35);
+        ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
+        ctx.shadowBlur = Math.round(state.step * 1.4); // ambient green haze around each glyph
 
         const featherPx = Math.round(6 * state.step);
         const bleedPx = Math.round(2 * state.step);
@@ -2092,12 +2313,23 @@ if (langButton) {
           const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx;
           const colTop = jitter;
           const baseX = colPositions[c] !== undefined ? colPositions[c] : (state.width * (c / Math.max(1, state.cols)));
+          const phasesCol = state.cellPhases[c];
+          const prevPhasesCol = state.cellPrevPhases[c];
+          const transAtCol = state.cellTransitionAt[c];
 
           for (let i = 0; i < chainLen; i++) {
             const r = (head + i) % state.rows;
-            const colPhase = Math.floor(state.glyphPhase * (state.colRates[c] || 1));
-            const seed = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (colPhase * 83492791);
-            const ch = (hash32(seed) & 1) ? '1' : '0';
+            const phaseNow = phasesCol[r];
+            const phasePrev = prevPhasesCol[r];
+            const transAge = now - transAtCol[r];
+            const tBlend = transAge >= GLYPH_FADE_MS ? 1 : Math.max(0, transAge) / GLYPH_FADE_MS;
+            const seedNow = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (phaseNow * 83492791);
+            const ch = RAIN_ASCII_GLYPHS.charAt(hash32(seedNow) % RAIN_ASCII_GLYPHS.length);
+            let prevCh = ch;
+            if (tBlend < 1) {
+              const seedPrev = ((c + 1) * 73856093) ^ ((r + 1) * 19349663) ^ (phasePrev * 83492791);
+              prevCh = RAIN_ASCII_GLYPHS.charAt(hash32(seedPrev) % RAIN_ASCII_GLYPHS.length);
+            }
             const x = baseX;
             const y = r * state.step;
             if (y < colTop - bleedPx || y > state.height + featherPx) continue;
@@ -2120,8 +2352,15 @@ if (langButton) {
             }
             const drawAlpha = baseAlpha * colAlpha;
             if (drawAlpha <= 0.02) continue;
-            ctx.globalAlpha = drawAlpha;
-            ctx.fillText(ch, x, y);
+            if (tBlend < 1 && prevCh !== ch) {
+              ctx.globalAlpha = drawAlpha * (1 - tBlend);
+              ctx.fillText(prevCh, x, y);
+              ctx.globalAlpha = drawAlpha * tBlend;
+              ctx.fillText(ch, x, y);
+            } else {
+              ctx.globalAlpha = drawAlpha;
+              ctx.fillText(ch, x, y);
+            }
           }
         }
 
@@ -2289,7 +2528,7 @@ if (langButton) {
         '  ls\t\t- List files',
         '  cat <file>\t- View file contents',
         '  git status\t- Show my status',
-        '  whois\t\t- My contact information',
+        '  ifconfig\t- My contact information',
         '  fortune\t- Random programming joke',
         '  help\t\t- Show this help message',
         '  clear\t\t- Clear the terminal',
@@ -2301,7 +2540,7 @@ if (langButton) {
         FILE_LIST_EN.join('  ')
       ]
     },
-    whois: {
+    ifconfig: {
       output: [
         'Email: julienchagnon9@gmail.com',
         'LinkedIn: linkedin.com/in/julienjchagnon',
@@ -2341,7 +2580,7 @@ if (langButton) {
         '  ls\t\t- Lister les fichiers',
         '  cat <fichier>\t- Lire un fichier',
         '  git status\t- Afficher mon statut',
-        '  whois\t\t- Mes contacts',
+        '  ifconfig\t- Mes contacts',
         '  fortune\t- Blague de programmation',
         '  aide\t\t- Afficher ce message d\'aide',
         '  clear\t\t- Effacer le terminal',
@@ -2353,7 +2592,7 @@ if (langButton) {
         FILE_LIST_FR.join('  ')
       ]
     },
-    whois: {
+    ifconfig: {
       output: [
         'Courriel : julienchagnon9@gmail.com',
         'LinkedIn : linkedin.com/in/julienjchagnon',
@@ -2520,8 +2759,8 @@ if (langButton) {
     const addPermanentHint = () => {
       if (!hintOverlay) return;
       hintOverlay.innerHTML = activeLang === 'fr'
-        ? "# TERMINAL INTERACTIF: Tapez &apos;<span class=\"term-hint-keyword\">aide</span>&apos; pour voir les commandes disponibles"
-        : "# INTERACTIVE TERMINAL: Type &apos;<span class=\"term-hint-keyword\">help</span>&apos; to see available commands";
+        ? "# EMULATEUR de TERMINAL: Tapez &apos;<span class=\"term-hint-keyword\">aide</span>&apos; pour voir les commandes disponibles"
+        : "# TERMINAL EMULATOR: Type &apos;<span class=\"term-hint-keyword\">help</span>&apos; to see available commands";
     };
 
     const createOutputLine = (line) => {

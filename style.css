@@ -158,6 +158,50 @@ header.header-flex::after {
   opacity: 1;
 }
 
+/* CRT scanlines on terminal text only (clipped to glyphs, leaves background untouched).
+   Applied to leaf text spans only — never to the .term-line parent, otherwise the
+   parent's clipped gradient paints over child spans like .typed and washes them out. */
+#headerTerminal .prompt,
+#headerTerminal .typed,
+#headerTerminal .term-output,
+#headerTerminal .term-output a.term-link {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    currentColor 0,
+    currentColor 1px,
+    color-mix(in srgb, currentColor 81%, black) 1px,
+    color-mix(in srgb, currentColor 81%, black) 2px
+  );
+  background-size: 100% 3px;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* CRT-style hue around each glyph, tinted by the element's own text color */
+  text-shadow:
+    0 0 3px color-mix(in srgb, currentColor 40%, transparent),
+    0 0 8px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+/* The blinking cursor is a solid block — paint a scanline gradient on it directly
+   (no background-clip:text since there's no text). The --cursor-col variable lets
+   the per-language overrides change the hue without redefining the gradient. */
+#headerTerminal .term-cursor-block {
+  -webkit-text-fill-color: initial;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--cursor-col, var(--primary)) 0,
+    var(--cursor-col, var(--primary)) 1px,
+    color-mix(in srgb, var(--cursor-col, var(--primary)) 83%, black) 1px,
+    color-mix(in srgb, var(--cursor-col, var(--primary)) 83%, black) 2px
+  );
+  background-size: 100% 3px;
+  background-repeat: repeat;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+}
+
 #headerTerminal .term-line       { white-space: pre-wrap; word-wrap: break-word; margin-bottom: 2px; }
 #headerTerminal .prompt          { color: #34d26d; font-weight: bold; white-space: nowrap; }
 #headerTerminal .typed           { color: var(--primary); font-weight: bold; }
@@ -252,18 +296,18 @@ body.fr #headerTerminal .term-input {
   display: inline-block;
   width: 8px;
   height: 1em;
-  background: var(--primary);
+  --cursor-col: var(--primary);
   vertical-align: text-bottom;
   margin-left: -1ch;
   animation: cursorBlink 1s steps(1, end) infinite;
 }
 
 body:not(.fr) #headerTerminal .term-cursor-block {
-  background: #d5bcff;
+  --cursor-col: #d5bcff;
 }
 
 body.fr #headerTerminal .term-cursor-block {
-  background: #9bc9ff;
+  --cursor-col: #9bc9ff;
 }
 
 @keyframes cursorBlink {
@@ -1800,9 +1844,9 @@ html { scrollbar-width: none; }
 /*Digital Rain */
 :root {
   --rain-color: rgba(0, 255, 140, 0.75);
-  --rain-glow: rgba(0, 255, 140, 0.25);
+  --rain-glow: rgba(0, 255, 140, 0.45);
   --sidebar-rain-color: rgba(0, 255, 140, 0.5);
-  --sidebar-rain-glow: rgba(0, 255, 140, 0.20);
+  --sidebar-rain-glow: rgba(0, 255, 140, 0.40);
 }
 
 header {
