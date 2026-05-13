@@ -207,10 +207,10 @@
     </p>
 
     <p class="lang-text"
-      data-en="In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for the 2024–2025 academic session, an honour given to top-performing students in the Faculty of Engineering and Applied Science."
-      data-fr="En reconnaissance de mes performances académiques, j’ai reçu la distinction Dean’s Scholar (liste du doyen) à l’Université Queen’s pour l’année universitaire 2024–2025, une distinction accordée aux meilleurs étudiants de la Faculté de génie et des sciences appliquées."
+      data-en="In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for both the 2024–2025 and 2025–2026 academic sessions, an honour given to top-performing students in the Faculty of Engineering and Applied Science."
+      data-fr="En reconnaissance de mes performances académiques, j’ai reçu la distinction Dean’s Scholar (liste du doyen) à l’Université Queen’s pour les années universitaires 2024–2025 et 2025–2026, une distinction accordée aux meilleurs étudiants de la Faculté de génie et des sciences appliquées."
       style="margin-bottom: 1em;">
-      In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for the 2024–2025 academic session, an honour given to top-performing students in the Faculty of Engineering and Applied Science.
+      In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for both the 2024–2025 and 2025–2026 academic sessions, an honour given to top-performing students in the Faculty of Engineering and Applied Science.
     </p>
 
     <div class="about-highlight-grid">
@@ -442,14 +442,6 @@
           </div>
           <div class="project-card-details" id="project-running-jumping-details">
             <div class="project-card-actions">
-              <button class="btn-video" type="button" data-media-type="video" data-media-src="Media/ELEC292Demo.mp4">
-                ▶ 
-                <span class="lang-text"
-                      data-en="Watch Video"
-                      data-fr="Voir la vidéo">
-                  Watch Video
-                </span>
-              </button>
               <a href="https://github.com/JulienChagnon/Running-and-Jumping-Detection---scikit-learn"
                 target="_blank" rel="noopener noreferrer"
                 class="btn-code">
@@ -471,7 +463,14 @@
                   </span>
                 </p>
                 <div class="content-float float-left">
-                  <img src="Media/ELEC292.jpg" alt="Tkinter dashboard highlighting classified windows" class="float-bigimg">
+                  <button type="button"
+                          class="float-bigimg video-thumb"
+                          data-media-type="video"
+                          data-media-src="Media/ELEC292Demo.mp4"
+                          aria-label="Play running and jumping detection demo video">
+                    <video src="Media/ELEC292Demo.mp4" poster="Media/ELEC292.jpg" preload="metadata" muted playsinline aria-hidden="true"></video>
+                    <span class="video-thumb-play" aria-hidden="true">▶</span>
+                  </button>
                   <p>
                     <span class="lang-text"
                           data-en="A function segments incoming CSV data into time-based windows and feeds them through the trained logistic-regression model and normalization scaler (loaded via joblib), allowing the classify_csv routine to generate real-time predictions on user data. On the GUI side, the user interface was built using Tkinter, with classification results visualized using matplotlib. Colour coded overlays indicate detected activity types alongside timestamped labels."
@@ -480,6 +479,107 @@
                     </span>
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article id="project-autonomous-car" class="project-card" tabindex="0">
+          <div class="project-card-summary">
+            <div class="project-card-summary-info">
+              <h3 class="project-card-title">
+                <span class="lang-text"
+                      data-en="Autonomous Taxi Car – ELEC 392 Competition"
+                      data-fr="Voiture-taxi autonome – Compétition ELEC 392">
+                  Autonomous Taxi Car – ELEC 392 Competition
+                </span>
+              </h3>
+              <div class="project-tech-row">
+                <div class="project-tech">Python, YOLOv5</div>
+                <div class="project-tech project-tech--gold">
+                  <span class="lang-text"
+                        data-en="1st in Competition"
+                        data-fr="1ʳᵉ place en compétition">
+                    1st in Competition
+                  </span>
+                </div>
+              </div>
+              <button type="button" class="see-more project-see-more lang-text" data-en="See more" data-fr="Voir plus" aria-expanded="false" aria-controls="project-autonomous-car-details">
+                See more
+              </button>
+            </div>
+            <div class="project-card-summary-thumb">
+              <img src="Media/Quackston_icon.jpg" alt="" aria-hidden="true">
+            </div>
+          </div>
+          <div class="project-card-details" id="project-autonomous-car-details">
+            <div class="project-card-actions">
+              <button class="btn-video" type="button" data-media-type="video" data-media-src="Media/ELEC392_Demo.mp4">
+                ▶
+                <span class="lang-text"
+                      data-en="Watch Video"
+                      data-fr="Voir la vidéo">
+                  Watch Video
+                </span>
+              </button>
+              <a href="Media/ELEC392_FinalReport.pdf"
+                class="btn-report"
+                data-media-type="pdf">
+                📄
+                <span class="lang-text"
+                      data-en="Final Report"
+                      data-fr="Rapport final">
+                  Final Report
+                </span>
+              </a>
+            </div>
+            <div class="project-card-body">
+              <div class="project-card-text">
+                <div class="content-float float-right">
+                  <button type="button"
+                          class="float-bigimg video-thumb"
+                          data-media-type="video"
+                          data-media-src="Media/ELEC392_Demo.mp4"
+                          aria-label="Play autonomous car competition video">
+                    <video src="Media/ELEC392_Demo.mp4" preload="metadata" muted playsinline aria-hidden="true"></video>
+                    <span class="video-thumb-play" aria-hidden="true">▶</span>
+                  </button>
+                  <p>
+                    <span class="lang-text"
+                          data-en="As part of a semester-long ELEC 392 design project, our three-person team designed and built an autonomous taxi car that competed against other teams in a simulated urban environment called Quackston. The car was tasked with picking up and dropping off fares around a 20ft x 16ft course while obeying intersections, stop lines, and crosswalks. Our vehicle placed first overall in the competition, also winning best in fare scoring (reputation) and best in safety (lowest violation count)."
+                          data-fr="Dans le cadre d’un projet de conception d’un semestre en ELEC 392, notre équipe de trois a conçu et construit une voiture-taxi autonome qui a affronté d’autres équipes dans un environnement urbain simulé appelé Quackston. La voiture devait prendre en charge et déposer des courses sur un circuit de 20 pi x 16 pi tout en respectant les intersections, les lignes d’arrêt et les passages piétons. Notre véhicule a terminé premier au classement général, remportant aussi la meilleure note en pointage de courses (réputation) et la meilleure note en sécurité (moins d’infractions).">
+                      As part of a semester-long ELEC 392 design project, our three-person team designed and built an autonomous taxi car that competed against other teams in a simulated urban environment called Quackston. The car was tasked with picking up and dropping off fares around a 20ft x 16ft course while obeying intersections, stop lines, and crosswalks. Our vehicle placed first overall in the competition, also winning best in fare scoring (reputation) and best in safety (lowest violation count).
+                    </span>
+                  </p>
+                </div>
+                <p>
+                  <span class="lang-text"
+                        data-en="Built on a Sunfounder PiCar-X base with a Raspberry Pi 4B, the car used its three onboard greyscale sensors to identify the road tape, intersections, stop lines, and crosswalks. A PID line-following controller (Kp=17, Kd=1) consumed the normalized greyscale error to compute steering angles, achieving a line-following success rate above 95% during competition. Tank-turn pivots using opposing rear wheel directions handled intersection turns at roughly 80% reliability."
+                        data-fr="Construite sur une base Sunfounder PiCar-X avec un Raspberry Pi 4B, la voiture utilisait ses trois capteurs en niveaux de gris embarqués pour identifier le ruban de la route, les intersections, les lignes d’arrêt et les passages piétons. Un contrôleur PID de suivi de ligne (Kp=17, Kd=1) consommait l’erreur normalisée des capteurs pour calculer les angles de braquage, atteignant un taux de réussite de suivi de ligne supérieur à 95 % en compétition. Les virages en mode 'tank turn' avec roues arrière opposées géraient les intersections avec une fiabilité d’environ 80 %.">
+                    Built on a Sunfounder PiCar-X base with a Raspberry Pi 4B, the car used its three onboard greyscale sensors to identify the road tape, intersections, stop lines, and crosswalks. A PID line-following controller (Kp=17, Kd=1) consumed the normalized greyscale error to compute steering angles, achieving a line-following success rate above 95% during competition. Tank-turn pivots using opposing rear wheel directions handled intersection turns at roughly 80% reliability.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="The car traversed a finite state machine built from a yEd GraphML map of the entire course, parsed at runtime with xml.etree.ElementTree. The GraphNavigator class advanced one node each time the greyscale sensors detected an intersection, and used breadth-first search to compute the shortest path between any two nodes. Per-edge flags embedded in the graph (PIVOT_MIN_SPIN, BRANCH_OVERSHOOT_TIME, INTERSECTION_HOLD, HUG, SPEED, etc.) allowed individual intersections to be tuned without code changes, which proved essential during the late-stage on-mat tuning week."
+                        data-fr="La voiture parcourait une machine à états finis construite à partir d’une carte GraphML yEd du circuit complet, analysée à l’exécution avec xml.etree.ElementTree. La classe GraphNavigator avançait d’un nœud chaque fois que les capteurs en niveaux de gris détectaient une intersection, et utilisait un parcours en largeur (BFS) pour calculer le plus court chemin entre deux nœuds. Des indicateurs spécifiques à chaque arête intégrés dans le graphe (PIVOT_MIN_SPIN, BRANCH_OVERSHOOT_TIME, INTERSECTION_HOLD, HUG, SPEED, etc.) permettaient d’ajuster individuellement les intersections sans modification de code, ce qui s’est avéré essentiel lors de la semaine finale d’ajustement sur le tapis.">
+                    The car traversed a finite state machine built from a yEd GraphML map of the entire course, parsed at runtime with xml.etree.ElementTree. The GraphNavigator class advanced one node each time the greyscale sensors detected an intersection, and used breadth-first search to compute the shortest path between any two nodes. Per-edge flags embedded in the graph (PIVOT_MIN_SPIN, BRANCH_OVERSHOOT_TIME, INTERSECTION_HOLD, HUG, SPEED, etc.) allowed individual intersections to be tuned without code changes, which proved essential during the late-stage on-mat tuning week.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="Pickup and dropoff locations had no tape markings, so the car interfaced with the course-wide Vehicle Positioning and Fare System (VPFS) over an HTTP/SocketIO REST API to receive fare assignments and poll its overhead-tracked position. A background thread polled the /whereami endpoint at 0.1s intervals to detect proximity to fare endpoints without blocking the main 50 Hz control loop, while a fare-scoring function ranked candidate fares by payout / (turns + 1) to favour high-paying, low-turn routes."
+                        data-fr="Les emplacements de prise en charge et de dépôt n’avaient pas de ruban au sol, donc la voiture s’interfaçait avec le Vehicle Positioning and Fare System (VPFS) du circuit via une API REST HTTP/SocketIO pour recevoir les assignations de courses et interroger sa position suivie par caméra aérienne. Un thread d’arrière-plan interrogeait le point d’accès /whereami toutes les 0,1 s pour détecter la proximité des points de course sans bloquer la boucle principale à 50 Hz, tandis qu’une fonction de notation des courses classait les courses candidates selon paiement / (virages + 1) afin de favoriser les courses bien payées avec peu de virages.">
+                    Pickup and dropoff locations had no tape markings, so the car interfaced with the course-wide Vehicle Positioning and Fare System (VPFS) over an HTTP/SocketIO REST API to receive fare assignments and poll its overhead-tracked position. A background thread polled the /whereami endpoint at 0.1s intervals to detect proximity to fare endpoints without blocking the main 50 Hz control loop, while a fare-scoring function ranked candidate fares by payout / (turns + 1) to favour high-paying, low-turn routes.
+                  </span>
+                </p>
+                <p>
+                  <span class="lang-text"
+                        data-en="While not used in the final competition implementation, I also trained a custom YOLOv5 vision model on six traffic-sign categories (Stop, Yield, No-Entry, Duck, Left-Oneway, Right-Oneway) using a self-collected dataset annotated in Roboflow. The model was quantized to INT8 and compiled for the Google Coral Edge TPU USB accelerator, running inference live on the Pi camera feed. It was ultimately disabled for competition because deterministic greyscale sensing proved more reliable than camera-based detection under variable lighting, a tradeoff that directly contributed to our top safety and overall scores."
+                        data-fr="Bien qu’il n’ait pas été utilisé dans l’implémentation finale de compétition, j’ai aussi entraîné un modèle de vision YOLOv5 personnalisé sur six catégories de panneaux routiers (Stop, Yield, No-Entry, Duck, Sens unique gauche, Sens unique droit) à l’aide d’un jeu de données collecté et annoté dans Roboflow. Le modèle a été quantifié en INT8 et compilé pour l’accélérateur USB Google Coral Edge TPU, exécutant l’inférence en direct sur le flux de la caméra du Pi. Il a finalement été désactivé pour la compétition car le suivi déterministe en niveaux de gris s’est avéré plus fiable que la détection par caméra dans des conditions d’éclairage variables, un compromis qui a directement contribué à nos meilleurs pointages en sécurité et au général.">
+                    While not used in the final competition implementation, I also trained a custom YOLOv5 vision model on six traffic-sign categories (Stop, Yield, No-Entry, Duck, Left-Oneway, Right-Oneway) using a self-collected dataset annotated in Roboflow. The model was quantized to INT8 and compiled for the Google Coral Edge TPU USB accelerator, running inference live on the Pi camera feed. It was ultimately disabled for competition because deterministic greyscale sensing proved more reliable than camera-based detection under variable lighting, a tradeoff that directly contributed to our top safety and overall scores.
+                  </span>
+                </p>
               </div>
             </div>
           </div>
@@ -929,9 +1029,9 @@
         <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px;">
           <li>
             <span class="lang-text"
-                  data-en="Granted distinction of Dean’s Scholar (2024–2025 Academic Year) – Stephen J.R. Smith Faculty of Engineering and Applied Science; awarded for outstanding performance."
-                  data-fr="Distinction du doyen 'Dean’s Scholar' (année universitaire 2024–2025) – Faculté de génie et des sciences appliquées Stephen J.R. Smith; remise pour performance académique exceptionnelle.">
-              Granted distinction of Dean’s Scholar (2024–2025 Academic Year) – Stephen J.R. Smith Faculty of Engineering and Applied Science; awarded for outstanding performance.
+                  data-en="Granted distinction of Dean’s Scholar (2024–2025 and 2025–2026 Academic Years) – Stephen J.R. Smith Faculty of Engineering and Applied Science; awarded for outstanding performance."
+                  data-fr="Distinction du doyen 'Dean’s Scholar' (années universitaires 2024–2025 et 2025–2026) – Faculté de génie et des sciences appliquées Stephen J.R. Smith; remise pour performance académique exceptionnelle.">
+              Granted distinction of Dean’s Scholar (2024–2025 and 2025–2026 Academic Years) – Stephen J.R. Smith Faculty of Engineering and Applied Science; awarded for outstanding performance.
             </span>
           </li>
           <li>

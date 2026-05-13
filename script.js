@@ -937,6 +937,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'Road Learning Tool',
       '32-Bit RISC Processor Design',
       'Running and Jumping Detection',
+      'Autonomous Taxi Car',
       'Dynamic Time Allocating Calendar',
       '911 Dispatcher Training Device',
       'Fluid and Powder Dispensing Device',
@@ -946,6 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'Outil d\'apprentissage des routes',
       'Conception d\'un processeur RISC 32 bits',
       'Détection de course et saut',
+      'Voiture-taxi autonome',
       'Calendrier dynamique',
       'Simulateur d\'opérateur 911',
       'Distributeur fluide et poudre',
@@ -1521,7 +1523,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     let gradientMix = 0.5;
     const GRADIENT_DECAY = 0.9;
     const GRADIENT_MAX = 50;
-    const GRADIENT_LERP = 0.2;
+    const GRADIENT_LERP = 0.6;
 
     //Only toggles the subtle header style while actively scrolling
 
@@ -1663,9 +1665,10 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         // (otherwise the white tip pokes above visibleTopY at scroll start).
         const jitter = jitterUnit * jitterUnit * jitterPx;
         const colTop = visibleTopY + jitter;
-        // Leading character is the one with gradientIndex == 0 — depends on scroll direction.
-        // gradientIndex = g*i + (1-g)*(chainLen-1-i); zero at i=0 when g=1, at i=chainLen-1 when g=0.
-        const leadingI = effectiveGradient >= 0.5 ? 0 : (chainLen - 1);
+        // Leading position slides continuously through the chain as scroll direction flips,
+        // so the white tip travels end-to-end instead of snapping between the two ends.
+        // g=1 → leadingPos=0 (top of chain); g=0 → leadingPos=chainLen-1 (bottom); g=0.5 → middle.
+        const leadingPos = (1 - effectiveGradient) * (chainLen - 1);
         const phasesCol = cellPhases[c];
         const prevPhasesCol = cellPrevPhases[c];
         const transAtCol = cellTransitionAt[c];
@@ -1706,30 +1709,36 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
           const drawAlpha = baseAlpha * colAlpha;
           if (drawAlpha <= 0.02) continue;
 
-          const isLeading = i === leadingI && colWhiteHead[c];
-          if (isLeading) {
+          // Whiteness peaks at the leading position and falls off over ~1 cell on each side,
+          // so as leadingPos slides through the column the tip smoothly hands off cell-to-cell.
+          const whiteness = colWhiteHead[c] ? Math.max(0, 1 - Math.abs(i - leadingPos)) : 0;
+          if (whiteness > 0.01) {
+            const wAlpha = colAlpha * whiteness;
             ctx.fillStyle = whiteFill;
             ctx.shadowColor = whiteGlow;
             ctx.shadowBlur = whiteBlur;
             if (tBlend < 1 && prevCh !== ch) {
-              ctx.globalAlpha = colAlpha * (1 - tBlend);
+              ctx.globalAlpha = wAlpha * (1 - tBlend);
               ctx.fillText(prevCh, x, y);
             }
-            ctx.globalAlpha = colAlpha * (tBlend < 1 ? tBlend : 1);
+            ctx.globalAlpha = wAlpha * (tBlend < 1 ? tBlend : 1);
             ctx.fillText(ch, x, y);
-            // Second pass for extra CRT bloom on the tip
+            // Second pass for extra CRT bloom on the tip, scaled by whiteness
+            ctx.globalAlpha = wAlpha * (tBlend < 1 ? tBlend : 1);
             ctx.fillText(ch, x, y);
             ctx.fillStyle = baseFill;
             ctx.shadowColor = greenGlow;
             ctx.shadowBlur = greenBlur;
-          } else {
+          }
+          if (whiteness < 0.99) {
+            const gAlpha = drawAlpha * (1 - whiteness);
             if (tBlend < 1 && prevCh !== ch) {
-              ctx.globalAlpha = drawAlpha * (1 - tBlend);
+              ctx.globalAlpha = gAlpha * (1 - tBlend);
               ctx.fillText(prevCh, x, y);
-              ctx.globalAlpha = drawAlpha * tBlend;
+              ctx.globalAlpha = gAlpha * tBlend;
               ctx.fillText(ch, x, y);
             } else {
-              ctx.globalAlpha = drawAlpha;
+              ctx.globalAlpha = gAlpha;
               ctx.fillText(ch, x, y);
             }
           }
