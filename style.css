@@ -28,6 +28,10 @@
   letter-spacing: -0.01em;
   max-width: 600px;
   position: relative;
+  text-shadow:
+    0 0 14px rgba(255, 255, 255, 0.18),
+    0 0 34px rgba(255, 255, 255, 0.12),
+    0 0 70px rgba(255, 255, 255, 0.08);
 }
 
 .header-info h3 {
@@ -35,6 +39,10 @@
   white-space: nowrap;
   max-width: 650px;
   position: relative;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.15),
+    0 0 28px rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(255, 255, 255, 0.07);
 }
 
 .header-info h3 + h3 {
@@ -116,7 +124,11 @@ header.header-flex::after {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   scrollbar-gutter: stable both-edges;
-  overscroll-behavior: contain;
+  /* 'auto' (not 'contain') so that when the terminal is at its scroll boundary
+     the leftover wheel scroll chains through to the page. With 'contain' the
+     terminal — which is pinned to its bottom and covers most of the header —
+     became a dead zone where scrolling down at the top never reached the page. */
+  overscroll-behavior: auto;
   scroll-padding-top: 1.55rem;
 }
 
@@ -179,9 +191,9 @@ header.header-flex::after {
   -webkit-text-fill-color: transparent;
   /* CRT-style hue around each glyph, tinted by the element's own text color */
   text-shadow:
-    0 0 6px color-mix(in srgb, currentColor 32%, transparent),
-    0 0 14px color-mix(in srgb, currentColor 24%, transparent),
-    0 0 24px color-mix(in srgb, currentColor 14%, transparent);
+    0 0 6px color-mix(in srgb, currentColor 22%, transparent),
+    0 0 14px color-mix(in srgb, currentColor 16%, transparent),
+    0 0 24px color-mix(in srgb, currentColor 9%, transparent);
 }
 
 /* The blinking cursor is a solid block — paint a scanline gradient on it directly
@@ -208,7 +220,7 @@ header.header-flex::after {
 #headerTerminal .typed           { color: var(--primary); font-weight: bold; }
 body:not(.fr) #headerTerminal .typed { color: #c8a4ff; }
 body.fr #headerTerminal .typed { color: #7fb8ff; }
-#headerTerminal .term-output     { color: #fff; }
+#headerTerminal .term-output     { color: #d3d8e2; }
 #headerTerminalHint {
   color: #e8ecff;
   font-style: italic;
@@ -374,12 +386,16 @@ h1 {
 
 /* Profile image styling */
 .headshot {
-  width:220px;       
-  height:auto;         
-  border-radius:8px;   
+  width:220px;
+  height:auto;
+  border-radius:8px;
   object-fit:cover;
   border:4px solid #fff;
   background:#fff;
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.09),
+    0 0 70px rgba(255, 255, 255, 0.06),
+    0 0 130px rgba(255, 255, 255, 0.035);
 }
 
 /* Flex container for content rows */
@@ -421,7 +437,7 @@ button.float-bigimg.video-thumb {
   display: block;
   overflow: hidden;
   line-height: 0;
-  width: 420px;
+  width: 300px;
   max-width: 100%;
 }
 button.float-bigimg.video-thumb video {
@@ -690,15 +706,23 @@ header a.textBox {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   -webkit-font-smoothing: antialiased;
   margin-top:0.5rem;
-  transition:background 0.2s ease-in-out;
+  transition: background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  box-shadow:
+    0 0 18px rgba(255, 255, 255, 0.16),
+    0 0 42px rgba(255, 255, 255, 0.1),
+    0 0 80px rgba(255, 255, 255, 0.06);
 }
 
 header a.textBox:hover {
   background:#e2e6ea;
+  box-shadow:
+    0 0 22px rgba(255, 255, 255, 0.22),
+    0 0 50px rgba(255, 255, 255, 0.14),
+    0 0 95px rgba(255, 255, 255, 0.08);
 }
 .textBox-icon {
   width:20px;

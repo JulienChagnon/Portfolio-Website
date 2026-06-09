@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node -c script.js)",
-      "Bash(xxd)"
-    ]
-  }
-}

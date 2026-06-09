@@ -1732,6 +1732,9 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
           }
           if (whiteness < 0.99) {
             const gAlpha = drawAlpha * (1 - whiteness);
+            // Glow only on the bright leading glyphs; dim trailing glyphs draw flat (no blur).
+            ctx.shadowColor = greenGlow;
+            ctx.shadowBlur = Math.abs(i - leadingPos) < 1.5 ? greenBlur : 0;
             if (tBlend < 1 && prevCh !== ch) {
               ctx.globalAlpha = gAlpha * (1 - tBlend);
               ctx.fillText(prevCh, x, y);
@@ -1786,6 +1789,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     let cellPrevGlyphs = []; // for the brief crossfade after a glyph flip
     let cellTransitionAt = []; // timestamp of last flip per cell
     const COLUMN_DENSITY = 0.7; // fraction of columns that render rain streams
+    const FRAME_INTERVAL = 1000 / 30; // limit to 30fps (matches header rain)
+    let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     let lastTick = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     // Idle fall tuning: speed is in "rows per millisecond" per column.
     const FALL_BASE = 0.0035;       // ~1 row every ~285ms baseline
@@ -1812,7 +1817,10 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 
     function resize() {
       const rect = sidebar.getBoundingClientRect();
-      const dpr = typeof window.devicePixelRatio === 'number' ? window.devicePixelRatio : 1;
+      // Cap DPR (matches header rain) so high-DPI / Windows display scaling
+      // doesn't render this canvas at 2-4x the pixels every frame.
+      const rawDpr = typeof window.devicePixelRatio === 'number' ? window.devicePixelRatio : 1;
+      const dpr = Math.max(1, Math.min(1.25, rawDpr));
       w = Math.max(1, Math.floor(rect.width));
       h = Math.max(1, Math.floor(rect.height));
       canvas.width = Math.floor(w * dpr);
@@ -1863,6 +1871,13 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         requestAnimationFrame(tick);
         return;
       }
+
+      const frameNow = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      if (frameNow - lastFrameTime < FRAME_INTERVAL) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      lastFrameTime = frameNow;
 
       if (document.body.classList.contains('dark-mode')) {
         if (!pausedForDark) {
@@ -1941,7 +1956,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       ctx.textBaseline = 'top';
       ctx.fillStyle = cssVar('--sidebar-rain-color', 'rgba(0,255,140,0.55)');
       ctx.shadowColor = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.40)');
-      ctx.shadowBlur = Math.round(step * 1.2); // ambient green haze around each glyph
+      const rainBlur = Math.round(step * 1.2); // green haze, applied only to bright chain tips
+      ctx.shadowBlur = 0;
 
       const minVisibleRow = Math.max(0, Math.floor((1 - activation) * rows));
 
@@ -1963,6 +1979,9 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
           const fade = Math.max(0.6, 1 - (y / Math.max(1, h)) * 0.22);
           const drawAlpha = baseAlpha * fade * activation;
           if (drawAlpha <= 0.02) continue;
+
+          // Glow only on the bright leading glyphs of the chain; trailing glyphs flat.
+          ctx.shadowBlur = (i >= chainLen - 2) ? rainBlur : 0;
 
           const transAge = now - cellTransitionAt[c][row];
           const t = transAge >= GLYPH_FADE_MS ? 1 : Math.max(0, transAge) / GLYPH_FADE_MS;
@@ -2020,6 +2039,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     const COLUMN_RATE_SHIFT = 0.45; // bias all column rates slower (in 2^stops); lowers cap and floor together
     const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
     const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
+    const FRAME_INTERVAL = 1000 / 30; // limit to 30fps (matches header rain)
+    let lastFrameTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
     const hash32 = (x) => {
       x |= 0;
@@ -2216,6 +2237,11 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 
     const tick = () => {
       const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (now - lastFrameTime < FRAME_INTERVAL) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      lastFrameTime = now;
       const isDark = document.body.classList.contains('dark-mode');
       const globalScroll = window.scrollY || window.pageYOffset || 0;
 
@@ -2302,7 +2328,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         ctx.textBaseline = 'top';
         ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
         ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
-        ctx.shadowBlur = Math.round(state.step * 1.4); // ambient green haze around each glyph
+        const rainBlur = Math.round(state.step * 1.4); // green haze, applied only to bright chain tips
+        ctx.shadowBlur = 0;
 
         const featherPx = Math.round(6 * state.step);
         const bleedPx = Math.round(2 * state.step);
@@ -2317,6 +2344,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 
         for (let c = 0; c < state.cols; c++) {
           const chainLen = 12 + (c % 7);
+          const leadingPos = (1 - effectiveGradient) * (chainLen - 1);
           const head = state.heads[c];
           const jitterSeed = hash32((c + 1) * 2654435761);
           const jitter = ((jitterSeed % 2001) / 1000 - 1) * jitterPx;
@@ -2361,6 +2389,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
             }
             const drawAlpha = baseAlpha * colAlpha;
             if (drawAlpha <= 0.02) continue;
+            // Glow only on the bright leading glyphs; dim trailing glyphs draw flat (no blur).
+            ctx.shadowBlur = Math.abs(i - leadingPos) < 1.5 ? rainBlur : 0;
             if (tBlend < 1 && prevCh !== ch) {
               ctx.globalAlpha = drawAlpha * (1 - tBlend);
               ctx.fillText(prevCh, x, y);
