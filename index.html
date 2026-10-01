@@ -15,105 +15,11 @@
   <title>Julien Chagnon | Portfolio</title>
   <link rel="icon" type="image/png" href="Media/JC_logo.png">
 
-  <!-- External stylesheet link -->
   <link rel="stylesheet" href="style.css">
-  
-  <!-- Inline CSS variables and basic reset -->
-  <style>
-    :root {
-      --primary: #534368;
-      --light: #eff1f3;
-      --dark: #212529;
-      --accent: #577e84;
-      --link-blue: #3c70bc;
-      --light-bg: #ffffff;
-
-      /* Work history job accent colours — change these to match each company logo */
-      --job-1-accent: #9966db; /* Ericsson */
-      --job-2-accent: #44766b; /* City of Ottawa – Traffic */
-      --job-3-accent: #44766b; /* City of Ottawa – Graffiti */
-      --job-4-accent: #bbb24b; /* Mountain Bike Kids */
-      --job-5-accent: #2c7ec0; /* PedalHeads */
-    }
-
-    body.fr {
-      --primary:   #32617d;
-      --light:     #eff1f3;
-      --dark:      #1F1F1F;
-      --accent:    #6798a1;
-      --link-blue: #3c70bc;
-      --light-bg:  #ffffff;
-
-      --job-1-accent: #32617d;
-      --job-2-accent: #32617d;
-      --job-3-accent: #32617d;
-      --job-4-accent: #32617d;
-      --job-5-accent: #32617d;
-    }
-
-    body.dark-mode {
-      --primary:   #d8cdf3;
-      --light:     #0c1324;
-      --dark:      #f6f9ff;
-      --accent:    #8badb7;
-      --link-blue: #85b4d2;
-      --light-bg:  #111729;
-      color-scheme: dark;
-
-      --job-1-accent: #d8cdf3;
-      --job-2-accent: #d8cdf3;
-      --job-3-accent: #d8cdf3;
-      --job-4-accent: #d8cdf3;
-      --job-5-accent: #d8cdf3;
-    }
-
-    body.fr.dark-mode {
-      --primary:   #d3edff;
-      --light:     #0c1324;
-      --dark:      #f6f9ff;
-      --accent:    #8badb7;
-      --link-blue: #a8ddff;
-      --light-bg:  #151d33;
-
-      --job-1-accent: #d3edff;
-      --job-2-accent: #d3edff;
-      --job-3-accent: #d3edff;
-      --job-4-accent: #d3edff;
-      --job-5-accent: #d3edff;
-    }
-
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Calibri, Arial, Helvetica, sans-serif;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background: var(--light);
-      color: var(--dark);
-      line-height: 1.4;
-      font-size: 1.1rem;
-    }
-
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 5rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-  </style>
 </head>
 <body>
   <!-- Sidebar navigation -->
+  <div id="sidebarTrack">
   <aside id="sidebar">
     <nav>
       <a class="lang-text" data-en="About Me" data-fr="À propos de moi" href="#About-Me">About Me</a>
@@ -138,10 +44,11 @@
       <a class="lang-text" data-en="Certifications" data-fr="Certifications" href="#certifications">Certifications</a>
     </nav>
   </aside>
+  </div>
 
 <!-- Page header with headshot and links -->
 <header class="header-flex">
-  <img src="Media/headshot_Photo.jpeg" alt="Headshot placeholder" class="headshot">
+  <img src="Media/headshot_Photo.jpeg" alt="Portrait of Julien Chagnon" class="headshot">
   <div class="header-info">
     <h1>Julien Chagnon</h1>
     <h3 class="lang-text"
@@ -174,6 +81,17 @@
 
   </div>
 
+  <!-- Mobile only: nudges visitors to scroll, which is what drives the header rain -->
+  <a class="scroll-cue" href="#content" aria-label="Scroll to content">
+    <span class="lang-text" data-en="scroll" data-fr="défiler">scroll</span>
+    <span class="scroll-cue__chevron" aria-hidden="true"></span>
+  </a>
+
+  <!-- Live CRT layers: flicker and signal grain -->
+  <div class="crt-fx" aria-hidden="true">
+    <div class="crt-fx__grain"></div>
+  </div>
+
   </header>
 
   <div class="content-rain-wrapper">
@@ -183,7 +101,7 @@
       aria-hidden="true">
     </canvas>
 
-    <main>
+    <main id="content">
   <!-- Introduction text -->
   <p class="lang-text" data-en="Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year." data-fr="Bonjour ! Je me nomme Julien Chagnon. Je suis étudiant bilingue (français/anglais) présentement en troisième année du programme de génie informatique à l’Université Queen’s à Kingston, en Ontario." style="margin-bottom: 1em;">
     Hello! I’m Julien Chagnon, a bilingual (French/English) computer engineering student at Queen’s University in my 3rd year.
@@ -194,22 +112,19 @@
     <h2 class="lang-text" data-en="About Me" data-fr="À propos de moi">About Me</h2>
     <p class="lang-text"
       data-en="Through my coursework, labs, and independent projects, I have built strong programming experience across C/C++, Python, Java, JavaScript, Assembly (Nios II), with proficiency in both Windows and Linux development environments. I frequently work with libraries and tools such as Scikit-learn, Pandas, and Matplotlib for machine learning, data analysis, and visualization."
-      data-fr="Dans le cadre de mes cours, de mes laboratoires et de mes projets indépendants, j’ai développé de solides compétences en programmation en C/C++, Python, Java, JavaScript, et en Assembleur (Nios II), tout en travaillant aisément dans des environnements Windows et Linux. J’utilise régulièrement des bibliothèques et outils tels que Scikit-learn, Pandas et Matplotlib pour l’apprentissage automatique, l’analyse de données et la visualisation."
-      style="margin-bottom: 1em;">
+      data-fr="Dans le cadre de mes cours, de mes laboratoires et de mes projets indépendants, j’ai développé de solides compétences en programmation en C/C++, Python, Java, JavaScript, et en Assembleur (Nios II), tout en travaillant aisément dans des environnements Windows et Linux. J’utilise régulièrement des bibliothèques et outils tels que Scikit-learn, Pandas et Matplotlib pour l’apprentissage automatique, l’analyse de données et la visualisation.">
       Through my coursework, labs, and independent projects, I have built strong programming experience across C/C++, Python, Java, JavaScript, Assembly (Nios II), with proficiency in both Windows and Linux development environments. I frequently work with libraries and tools such as Scikit-learn, Pandas, and Matplotlib for machine learning, data analysis, and visualization.
     </p>
 
     <p class="lang-text"
       data-en="My interests also extend into hardware systems and embedded design. I have applied VHDL, LTspice, and Arduino-based prototyping in hands-on labs and team design projects, as well as CAD modeling using SolidWorks. I also have experience in data management using SQL and spatial mapping using GeoJSON format."
-      data-fr="Mes intérêts s’étendent également aux systèmes matériels et à la conception embarquée. J’ai travaillé avec le VHDL, LTspice et des prototypes basés sur Arduino dans des laboratoires pratiques et des projets d’équipe, ainsi qu’en modélisation CAO avec SolidWorks. Je possède également de l’expérience en gestion de données avec SQL et en cartographie spatiale à l’aide du format GeoJSON."
-      style="margin-bottom: 1em;">
+      data-fr="Mes intérêts s’étendent également aux systèmes matériels et à la conception embarquée. J’ai travaillé avec le VHDL, LTspice et des prototypes basés sur Arduino dans des laboratoires pratiques et des projets d’équipe, ainsi qu’en modélisation CAO avec SolidWorks. Je possède également de l’expérience en gestion de données avec SQL et en cartographie spatiale à l’aide du format GeoJSON.">
       My interests also extend into hardware systems and embedded design. I have applied VHDL, LTspice, and Arduino-based prototyping in hands-on labs and team design projects, as well as CAD modeling using SolidWorks. I also have experience in data management using SQL and spatial mapping using GeoJSON format.
     </p>
 
     <p class="lang-text"
       data-en="In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for both the 2024–2025 and 2025–2026 academic sessions, an honour given to top-performing students in the Faculty of Engineering and Applied Science."
-      data-fr="En reconnaissance de mes performances académiques, j’ai reçu la distinction Dean’s Scholar (liste du doyen) à l’Université Queen’s pour les années universitaires 2024–2025 et 2025–2026, une distinction accordée aux meilleurs étudiants de la Faculté de génie et des sciences appliquées."
-      style="margin-bottom: 1em;">
+      data-fr="En reconnaissance de mes performances académiques, j’ai reçu la distinction Dean’s Scholar (liste du doyen) à l’Université Queen’s pour les années universitaires 2024–2025 et 2025–2026, une distinction accordée aux meilleurs étudiants de la Faculté de génie et des sciences appliquées.">
       In recognition of my academic performance, I was awarded the Dean’s Scholar Distinction at Queen’s University for both the 2024–2025 and 2025–2026 academic sessions, an honour given to top-performing students in the Faculty of Engineering and Applied Science.
     </p>
 
@@ -217,7 +132,7 @@
       <div class="about-highlight-card" tabindex="0">
         <img src="Media/FRECpicture.jpeg" alt="Me (Left) in my FREC attire">
         <div class="hover-card-prompt">
-          <span class="hover-card-hint lang-text" data-en="HOVER OR CLICK" data-fr="Survolez ou cliquez pour lire">Hover or tap to read</span>
+          <span class="hover-card-hint lang-text" data-en="HOVER OR CLICK" data-fr="Survolez ou cliquez pour lire">HOVER OR CLICK</span>
           <span class="hover-card-subhint lang-text" data-en="Pictured on the left" data-fr="Présent sur la photo de gauche">Pictured on the left</span>
         </div>
         <p class="hover-card-text lang-text" data-en="I'm involved in extracurricular activities at Queen’s, for instance I was a member of the First-Year Engineering Committee (FREC) where I helped organize events and initiatives for incoming engineering students as a means to get involved within the Queen's Engineering community. As part of the role, I wore the iconic FREC outfit and dyed my body purple." data-fr="Je participe également à des activités parascolaires à Queen’s, notamment j'ai été membre du First-Year Engineering Committee (FREC), où j'ai aidé à organiser des événements et initiatives pour les étudiants de première année. Dans ce rôle, je portais la tenue emblématique du FREC et me suis teint le corps en mauve. Cette expérience a renforcé mes compétences en leadership et en travail d’équipe, tout en favorisant un accueil chaleureux pour les nouveaux étudiants et en me connectant davantage à la communauté du génie de Queen’s.">
@@ -228,7 +143,7 @@
       <div class="about-highlight-card" tabindex="0">
         <img src="Media/BikingPicture.jpeg" alt="Biking with my brother and dad">
         <div class="hover-card-prompt">
-          <span class="hover-card-hint lang-text" data-en="HOVER OR CLICK" data-fr="Survolez ou cliquez pour lire">Hover or tap to read</span>
+          <span class="hover-card-hint lang-text" data-en="HOVER OR CLICK" data-fr="Survolez ou cliquez pour lire">HOVER OR CLICK</span>
           <span class="hover-card-subhint lang-text" data-en="Pictured on the right" data-fr="Présent sur la photo de droite">Pictured on the right</span>
         </div>
         <p class="hover-card-text lang-text" data-en="Outside of computer engineering, I’m passionate about outdoor sports like mountain biking, skiing, and kiteboarding, which are activities I enjoy regularly in and around my hometown of Ottawa with my family. The photo attached shows my dad, brother, and me at Mont Tremblant bike resort in Québec." data-fr="Au-delà du génie informatique, je suis passionné par les sports de plein air comme le vélo de montagne, le ski et le kitesurf, que je pratique régulièrement à Ottawa et ses environs avec ma famille. La photo ci-contre me montre à vélo, en compagine de mon père et de mon frère, au Mont Tremblant au Québec.">
@@ -248,11 +163,16 @@
           Projects
         </span>
       </h2>
-      <p>
-        <span class="lang-text"
+      <p class="projects-hint">
+        <span class="projects-hint--pointer lang-text"
               data-en="Hover to expand window size, click to keep open."
               data-fr="Survolez ou cliquez pour agrandir la fenêtre des projets.">
-          Hover to expand window size, click to keep open. 
+          Hover to expand window size, click to keep open.
+        </span>
+        <span class="projects-hint--touch lang-text"
+              data-en="Tap “See more” on a project to read the details."
+              data-fr="Touchez « Voir plus » sur un projet pour lire les détails.">
+          Tap “See more” on a project to read the details.
         </span>
       </p>
       <br>
@@ -295,14 +215,14 @@
                   class="btn-icon" />
                 <span class="lang-text"
                       data-en="See Website"
-                      data-fr="Voir le code">
+                      data-fr="Voir le site">
                   See Website
                 </span>
               </a>
               <a href="https://github.com/JulienChagnon/Road-Learning-Tool"
                  target="_blank" rel="noopener noreferrer"
                  class="btn-code">
-                <p>&lt;/&gt;</p>
+                <span class="btn-glyph" aria-hidden="true">&lt;/&gt;</span>
                 <span class="lang-text"
                       data-en="See Code"
                       data-fr="Voir le code">
@@ -340,6 +260,7 @@
                           Data is processed via a SQL pipeline that streams large GeoJSON inputs to extract road features. A specialized shell script wraps Tippecanoe to generate local vector tiles (.pbf). Specifically for the tiling process, I used an AI-assisted IDE to optimize Tippecanoe’s CLI configuration, refining normalization and feature-dropping behavior to preserve road detail while keeping tile sizes performant across zoom levels.
                         </span>
                       </p>
+                </div>
               </div>
             </div>
           </div>
@@ -385,7 +306,7 @@
               <a href="https://github.com/JulienChagnon/CPU-Design-Project"
                  target="_blank" rel="noopener noreferrer"
                  class="btn-code">
-                <p>&lt;/&gt;</p>
+                <span class="btn-glyph" aria-hidden="true">&lt;/&gt;</span>
                 <span class="lang-text"
                       data-en="See Code"
                       data-fr="Voir le code">
@@ -445,7 +366,7 @@
               <a href="https://github.com/JulienChagnon/Running-and-Jumping-Detection---scikit-learn"
                 target="_blank" rel="noopener noreferrer"
                 class="btn-code">
-                <p>&lt;/&gt;</p>
+                <span class="btn-glyph" aria-hidden="true">&lt;/&gt;</span>
                 <span class="lang-text"
                       data-en="See Code"
                       data-fr="Voir le code">
@@ -593,7 +514,7 @@
               <a href="https://github.com/JulienChagnon/Dynamic-Time-Allocating-Calendar"
                 target="_blank" rel="noopener noreferrer"
                 class="btn-code">
-                <p>&lt;/&gt;</p>
+                <span class="btn-glyph" aria-hidden="true">&lt;/&gt;</span>
                 <span class="lang-text"
                       data-en="See Code"
                       data-fr="Voir le code">
@@ -618,6 +539,7 @@
                         data-en="The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members."
                         data-fr="Le projet a suivi la méthodologie Agile Scrum, avec un développement organisé en sprints de deux semaines. Notre programmation a également été gérée via GitLab, chaque fonctionnalité étant suivie à l’aide de jalons, d’issues et de merge requests entre les membres de l’équipe.">
                     The project followed the Agile Scrum methodology, with development structured around two-week sprints. Our programming was also managed through GitLab, with each feature tracked through milestones, issues, and merge requests across team members.
+                  </span>
                 </p>
               </div>
             </div>
@@ -685,6 +607,7 @@
                         data-en="On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report."
                         data-fr="Du côté Web, j'ai également aidé notre équipe à développer une interface Web en HTML, CSS et JavaScript qui a remplacé tous les modules de test sur papier par une expérience interactive moderne. Les invites audio sont diffusées à l'aide de l'API Web Audio, et les réponses vocales sont enregistrées dans le navigateur à l'aide de MediaRecorder. Pour les modules interactifs tels que l'indexation de carte et la transcription, le site valide les réponses en temps réel par rapport aux entrées attendues et calcule à la fois la précision et les temps de réaction. Une fois tous les modules terminés, les résultats sont envoyés à un serveur Node.js qui stocke les données et génère un rapport PDF téléchargeable.">
                     On the web side, I also aided our team to develop an HTML, CSS, and JavaScript web interface that replaced all paper testing modules with a modern interactive experience. Audio prompts are streamed using the Web Audio API, and spoken responses are recorded in-browser using MediaRecorder. For interactive modules like map indexing and transcription, the website validates answers in real time against expected inputs and calculates both accuracy and reaction times. Once all modules are complete, results are sent to a Node.js server which stores the data and generates a downloadable PDF report.
+                  </span>
                 </p>
               </div>
             </div>
@@ -755,6 +678,8 @@
                       Beyond programming, I contributed to designing a full SolidWorks sketch of the final assembly for 3D printed components, ensuring the gearbox, limit switch system, and test tube platform met both functional and dimensional requirements. As well as authored sections of our extensive design reports.
                     </span>
                   </p>
+                </div>
+              </div>
             </div>
           </div>
         </article>
@@ -784,7 +709,7 @@
               <a href="https://github.com/JulienChagnon/Portfolio-Website"
                 target="_blank" rel="noopener noreferrer"
                 class="btn-code">
-                <p>&lt;/&gt;</p>
+                <span class="btn-glyph" aria-hidden="true">&lt;/&gt;</span>
                 <span class="lang-text"
                       data-en="See Code"
                       data-fr="Voir le code">
@@ -799,6 +724,7 @@
                         data-en="As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain."
                         data-fr="Dans le cadre d'un projet personnel de développement Web, j'ai conçu et réalisé ce site portfolio de A à Z en HTML, CSS et JavaScript pour présenter mes compétences, projets et expériences de manière interactive. Le site est hébergé sur GitHub Pages et configuré avec un domaine personnalisé.">
                     As a personal web development project, I designed and built this portfolio website from the ground up using HTML, CSS, and JavaScript to showcase my skills, projects, and experience in an interactive format. The website is hosted on GitHub Pages and configured to use a custom domain.
+                  </span>
                 </p>
                 <p>
                   <span class="lang-text"
@@ -811,6 +737,7 @@
                         data-en="I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events."
                         data-fr="J'ai développé la logique JavaScript qui alimente tous les comportements dynamiques du site. Principalement un terminal interactif qui prend en charge l'autocomplétion par tabulation, le rappel d'historique par touches fléchées à l'aide d'un tampon d'historique basé sur un tableau, et des ensembles de commandes localisés en anglais et en français. Le terminal ajuste dynamiquement sa position d'absolue à fixe en fonction de la profondeur de défilement, avec des transitions fluides empêchant les sauts visuels. J'ai également intégré une version française de l'ensemble du site Web en basculant la classe lang sur l'élément &lt;body&gt; et en échangeant dynamiquement tout le contenu visible à l'aide d'attributs de données. Un autre élément important est l'animation de pluie binaire inspirée de Matrix qui réagit à la vélocité de défilement ; se déplaçant vers le haut lors du défilement vers le bas et vice versa, avec des changements de chiffres à intervalle programmé pour l'intérêt visuel. D'autres éléments dynamiques comprennent une barre de défilement personnalisée qui interpole la couleur du blanc à la couleur du thème principal en fonction de la position de défilement, et une barre latérale avec des transitions de position fluides déclenchées par les événements de défilement.">
                     I developed JavaScript logic that powers all dynamic behaviors across the site. Mainly an interactive terminal that supports tab autocompletion, arrow key history recall using an array-based history buffer, and localized English and French command sets. The terminal dynamically adjusts its position from absolute to fixed based on scroll depth, with smooth transitions preventing visual jumps. I also included a French version of the entire website by toggling the lang class on the &lt;body&gt; element and dynamically swapping all visible content using data attributes. Another significant element is the matrix-inspired binary rain animation that responds to scroll velocity; moving upward when scrolling down and vice versa, with digit changes on a timed interval for visual interest. Other dynamic elements include a custom scrollbar that interpolates color from white to the primary theme color based on scroll position, and a sidebar with smooth position transitions triggered by scroll events.
+                  </span>
                 </p>
               </div>
             </div>
@@ -880,12 +807,12 @@
           <span class="collapse-projects-arrow" aria-hidden="true">↑</span>
         </button>
       </div>
-      
+      </div>
     </section>
 
     <section id="work-history">
     <h2 class="lang-text" data-en="Work History" data-fr="Historique de Travail">Work History</h2>
-    <figure class="timeline" style="margin-left:0; margin-right:auto;">
+    <figure class="timeline">
       <ul>
         <li data-job="1">
           <div class="icon">
@@ -926,10 +853,10 @@
           </div>
         </li>
 
-        <div class="more-jobs">
+        <div class="more-jobs" id="moreJobs">
           <li data-job="4">
             <div class="icon">
-              <img src="Media/MBKlogo.png" alt="Mountain Bike Kids Logo" style="background:black; border-radius:50%;">
+              <img src="Media/MBKlogo.png" alt="Mountain Bike Kids Logo" class="icon-dark">
             </div>
             <div class="content">
               <time>June – August 2022</time>
@@ -958,7 +885,10 @@
     <div class="work-history-cta">
       <button
         id="toggleJobs"
-        class="see-more"
+        class="jobs-toggle"
+        type="button"
+        aria-controls="moreJobs"
+        aria-expanded="false"
         data-en-show="See More"
         data-en-hide="See Less"
         data-fr-show="Voir plus"
@@ -969,6 +899,7 @@
           data-fr="Voir plus">
         See More
         </span>
+        <span class="jobs-toggle__chevron" aria-hidden="true"></span>
       </button>
     </div>
 
@@ -983,7 +914,7 @@
           Education
         </span>
       </h2>
-      <p class="content-text">
+      <div class="content-text">
         <strong>
           <span class="lang-text"
                 data-en="Bachelor of Applied Science in Computer Engineering, "
@@ -996,8 +927,7 @@
               data-fr="Université Queen’s à Kingston (2023–27)">
         Queen’s University in Kingston (2023–2027)
         </span>
-        <br>
-        <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px;">
+        <ul class="education-list">
           <li>
             <span class="lang-text"
                   data-en="Granted distinction of Dean’s Scholar (2024–2025 and 2025–2026 Academic Years) – Stephen J.R. Smith Faculty of Engineering and Applied Science; awarded for outstanding performance."
@@ -1013,7 +943,7 @@
             </span>
           </li>
         </ul>
-      </p>
+      </div>
 
     </section>
 
@@ -1085,7 +1015,6 @@
       <div id="mediaModalContent" class="media-modal__content" role="document"></div>
     </div>
   </div>
-  <br>
 
   <!-- External JavaScript -->
   <script src="script.js" defer></script>

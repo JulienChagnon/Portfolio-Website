@@ -11,14 +11,77 @@
     const attr = `data-${lang}-${key}`;
     const baseLabel = btn.getAttribute(attr);
     if (baseLabel) {
-      labelSpan.textContent = isOpen ? `${baseLabel} ↑` : baseLabel;
+      labelSpan.textContent = baseLabel;
     }
-    btn.classList.toggle('see-more--less', isOpen);
     btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   };
+
+  // Animate the real height (max-height tricks make the timing uneven), scaling the
+  // duration with the distance so short and long lists feel the same speed.
+  const COLLAPSED_HEIGHT = moreJobs.getBoundingClientRect().height;
+  const EXPAND_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+  const COLLAPSE_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  const durationFor = (distance) => Math.min(750, Math.max(420, distance * 1.2));
+  let anchorFrame = 0;
+
+  const stopAnchoring = () => cancelAnimationFrame(anchorFrame);
+
+  const settle = () => {
+    stopAnchoring();
+    if (moreJobs.classList.contains('show')) {
+      moreJobs.style.height = 'auto'; // follow content changes (language switch, resize)
+      moreJobs.classList.add('is-settled');
+    } else {
+      moreJobs.style.height = '';
+    }
+  };
+
+  moreJobs.addEventListener('transitionend', (event) => {
+    if (event.target === moreJobs && event.propertyName === 'height') settle();
+  });
+
+  // When collapsing from inside the hidden jobs, hold the button still on screen so the
+  // page doesn't yank the reader upward; any manual scroll hands control back.
+  const anchorButton = () => {
+    const anchorTop = btn.getBoundingClientRect().top;
+    const keep = () => {
+      const drift = btn.getBoundingClientRect().top - anchorTop;
+      if (Math.abs(drift) > 0.5) {
+        window.scrollTo({ top: window.scrollY + drift, behavior: 'instant' });
+      }
+      anchorFrame = requestAnimationFrame(keep);
+    };
+    anchorFrame = requestAnimationFrame(keep);
+    window.addEventListener('wheel', stopAnchoring, { once: true, passive: true });
+    window.addEventListener('touchstart', stopAnchoring, { once: true, passive: true });
+  };
+
+  const setOpen = (open) => {
+    stopAnchoring();
+    const from = moreJobs.getBoundingClientRect().height;
+    moreJobs.classList.remove('is-settled');
+    moreJobs.style.height = from + 'px';
+    moreJobs.classList.toggle('show', open);
+    updateToggleLabel(open);
+
+    const to = open ? moreJobs.scrollHeight : COLLAPSED_HEIGHT;
+    const lite = document.documentElement.classList.contains('lite-mode');
+    if (lite || Math.abs(to - from) < 1) {
+      settle();
+      return;
+    }
+
+    if (!open && moreJobs.getBoundingClientRect().top < 0) {
+      anchorButton();
+    }
+    moreJobs.style.transitionDuration = durationFor(Math.abs(to - from)) + 'ms';
+    moreJobs.style.transitionTimingFunction = open ? EXPAND_EASE : COLLAPSE_EASE;
+    void moreJobs.offsetHeight; // commit the start height before animating
+    moreJobs.style.height = to + 'px';
+  };
+
   btn.addEventListener('click', () => {
-    const isOpen = moreJobs.classList.toggle('show');
-    updateToggleLabel(isOpen);
+    setOpen(!moreJobs.classList.contains('show'));
   });
   updateToggleLabel(moreJobs.classList.contains('show'));
   window.addEventListener('portfolio:languagechange', () => {
@@ -179,15 +242,14 @@
   }
 
   /* ---- events ---- */
-  jobs.forEach((li, i) => {
-    li.addEventListener('mouseenter', () => { hov = i; render(); });
-    li.addEventListener('mouseleave', () => { hov = -1; render(); });
-  });
-
-  document.getElementById('toggleJobs')?.addEventListener('click', () => {
-    requestAnimationFrame(render);
-    setTimeout(render, 550);
-  });
+  // Touch screens fire mouseenter on tap with no matching leave, which would leave the
+  // bar bent, so the hover deviation is only wired up where real hover exists.
+  if (window.matchMedia('(hover: hover)').matches) {
+    jobs.forEach((li, i) => {
+      li.addEventListener('mouseenter', () => { hov = i; render(); });
+      li.addEventListener('mouseleave', () => { hov = -1; render(); });
+    });
+  }
 
   new MutationObserver(() => requestAnimationFrame(render))
     .observe(document.body, { attributes: true, attributeFilter: ['class'] });
@@ -197,37 +259,22 @@
   render();
 })();
 
-// Performance preferences
-const portfolioPrefs = (() => {
+// Performance preferences: "lite mode" (reduced motion, data saver, or ?lite=1) turns off
+// the heavier effects. ?lite=0 forces it off.
+(() => {
   const root = document.documentElement;
-  const params = new URLSearchParams(window.location.search || '');
-  const forceLiteOn = params.get('lite') === '1';
-  const forceLiteOff = params.get('lite') === '0';
-  const motionQuery = (typeof window !== 'undefined' && typeof window.matchMedia === 'function')
-    ? window.matchMedia('(prefers-reduced-motion: reduce)')
-    : null;
-  const prefersReduce = motionQuery && motionQuery.matches;
-  const saveData = typeof navigator !== 'undefined' &&
-    navigator.connection &&
-    navigator.connection.saveData === true;
+  const liteParam = new URLSearchParams(window.location.search).get('lite');
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const saveData = navigator.connection?.saveData === true;
+  const setLite = (enabled) => root.classList.toggle('lite-mode', enabled);
 
-  const setLite = (enabled) => {
-    root.classList.toggle('lite-mode', !!enabled);
-  };
-
-  const initialLite = forceLiteOn || (!forceLiteOff && (prefersReduce || saveData));
-  setLite(initialLite);
-
-  if (motionQuery && typeof motionQuery.addEventListener === 'function' && !forceLiteOn && !forceLiteOff) {
-    motionQuery.addEventListener('change', (event) => setLite(event.matches));
+  if (liteParam === '1' || liteParam === '0') {
+    setLite(liteParam === '1');
+    return;
   }
-
-  return {
-    isLite: () => root.classList.contains('lite-mode'),
-    setLite,
-  };
+  setLite(motionQuery.matches || saveData);
+  motionQuery.addEventListener('change', (event) => setLite(event.matches || saveData));
 })();
-window.__portfolioPrefs = portfolioPrefs;
 
 // Default lazy loading for non-critical images
 (() => {
@@ -266,7 +313,7 @@ window.__portfolioPrefs = portfolioPrefs;
   const startOpenSession = () => {
     if (hasOpenCards) return;
     hasOpenCards = true;
-    openSessionScrollY = window.scrollY || window.pageYOffset || 0;
+    openSessionScrollY = window.scrollY;
     scrolledDuringOpen = false;
   };
 
@@ -327,19 +374,18 @@ window.__portfolioPrefs = portfolioPrefs;
     const preserveInitialScroll = hasOpenCards && !scrolledDuringOpen && openSessionScrollY !== null;
     const desiredScrollY = preserveInitialScroll ? openSessionScrollY : null;
 
-    if (recentlyScrolled) {
+    const collapseNow = () => {
       openCards.forEach((card) => card.classList.remove('is-open'));
       syncToggleButtons();
-      if (typeof window.__updateScrollbarOverlay === 'function') {
-        requestAnimationFrame(() => {
-          window.__updateScrollbarOverlay();
-        });
-      }
       resetOpenSession();
+    };
+
+    if (recentlyScrolled) {
+      collapseNow();
       return;
     }
 
-    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const scrollY = window.scrollY;
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
     const viewportTop = scrollY;
     const viewportBottom = scrollY + viewportHeight;
@@ -351,14 +397,7 @@ window.__portfolioPrefs = portfolioPrefs;
     });
 
     if (!hasContentAboveScroll) {
-      openCards.forEach((card) => card.classList.remove('is-open'));
-      syncToggleButtons();
-      if (typeof window.__updateScrollbarOverlay === 'function') {
-        requestAnimationFrame(() => {
-          window.__updateScrollbarOverlay();
-        });
-      }
-      resetOpenSession();
+      collapseNow();
       return;
     }
 
@@ -451,28 +490,8 @@ window.__portfolioPrefs = portfolioPrefs;
       }
     }
 
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.add('collapsing-projects');
-    }
-
-    // Trigger collapse
-    openCards.forEach((card) => card.classList.remove('is-open'));
-    syncToggleButtons();
-    resetOpenSession();
-
-    // If we should skip scroll compensation, just do a simple collapse
-    if (skipScrollCompensation) {
-      setTimeout(() => {
-        if (sidebar) {
-          sidebar.classList.remove('collapsing-projects');
-        }
-        if (typeof window.__updateScrollbarOverlay === 'function') {
-          window.__updateScrollbarOverlay();
-        }
-      }, 700);
-      return;
-    }
+    collapseNow();
+    if (skipScrollCompensation) return;
 
     // Continuously adjust scroll to keep the chosen anchor's top border fixed
     const htmlEl = document.documentElement;
@@ -486,21 +505,13 @@ window.__portfolioPrefs = portfolioPrefs;
     const finishCollapse = () => {
       animating = false;
       htmlEl.style.scrollBehavior = originalScrollBehavior;
-      if (sidebar) {
-        setTimeout(() => {
-          sidebar.classList.remove('collapsing-projects');
-        }, 100);
-      }
-      if (typeof window.__updateScrollbarOverlay === 'function') {
-        window.__updateScrollbarOverlay();
-      }
     };
 
     const maintainPosition = () => {
       if (!animating) return;
 
       if (preserveInitialScroll && desiredScrollY !== null) {
-        const currentScroll = window.scrollY || window.pageYOffset || 0;
+        const currentScroll = window.scrollY;
         if (Math.abs(currentScroll - desiredScrollY) > 0.5) {
           window.scrollTo(0, Math.max(0, desiredScrollY));
         }
@@ -508,7 +519,7 @@ window.__portfolioPrefs = portfolioPrefs;
         const currentTop = anchor.getBoundingClientRect().top;
         if (Math.abs(currentTop - anchorTopBefore) > 0.5) {
           const shift = currentTop - anchorTopBefore;
-          const currentScroll = window.scrollY || window.pageYOffset || 0;
+          const currentScroll = window.scrollY;
           window.scrollTo(0, Math.max(0, currentScroll + shift));
         }
       } else {
@@ -558,26 +569,7 @@ window.__portfolioPrefs = portfolioPrefs;
       card.classList.add('is-open');
       syncToggleButtons();
       clearPending();
-      // Update scrollbar immediately when project opens
-      if (typeof window.__updateScrollbarOverlay === 'function') {
-        requestAnimationFrame(() => {
-          window.__updateScrollbarOverlay();
-        });
-      }
     };
-
-    // Update scrollbar after expansion animation completes
-    const details = card.querySelector('.project-card-details');
-    if (details) {
-      details.addEventListener('transitionend', (event) => {
-        // Only update for the max-height transition (not other properties)
-        if (event.propertyName === 'max-height' && card.classList.contains('is-open')) {
-          if (typeof window.__updateScrollbarOverlay === 'function') {
-            window.__updateScrollbarOverlay();
-          }
-        }
-      });
-    }
 
     if (!isMobileProjects) {
       card.addEventListener('mouseenter', markOpen);
@@ -603,11 +595,6 @@ window.__portfolioPrefs = portfolioPrefs;
         syncToggleButtons();
         if (!cards.some((entry) => entry.classList.contains('is-open'))) {
           resetOpenSession();
-        }
-        if (typeof window.__updateScrollbarOverlay === 'function') {
-          requestAnimationFrame(() => {
-            window.__updateScrollbarOverlay();
-          });
         }
       });
     }
@@ -659,90 +646,44 @@ window.__portfolioPrefs = portfolioPrefs;
   window.addEventListener('portfolio:languagechange', syncToggleButtons);
 })();
 
-//Set the footer year dynamically
-(() => {
-  const yearEl = document.getElementById('year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
-})();
-
 // Sidebar - sticky positioning
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
-  const header  = document.querySelector('header.header-flex');
-  if (!sidebar || !header) return;
+  const track = document.getElementById('sidebarTrack');
+  const header = document.querySelector('header.header-flex');
+  if (!sidebar || !track || !header) return;
 
-  const STICK_OFFSET = 100; // px from top when it becomes sticky
-
-  // Set up sticky positioning - hide initially to prevent flash
-  sidebar.style.position = 'absolute';
-  sidebar.style.visibility = 'hidden';
-  sidebar.style.opacity = '0';
-  sidebar.style.willChange = 'top';
-
-  let isSticky = false;
-  let lastScrollY = window.scrollY || window.pageYOffset;
-  let initialized = false;
-
-  const updatePosition = () => {
-    const scrollY = window.scrollY || window.pageYOffset;
-    const headerBottom = header.offsetTop + header.offsetHeight;
-    const sidebarTop = headerBottom + 10; // 10px margin under header
-
-    // Calculate when sidebar should stick
-    const stickPoint = sidebarTop - STICK_OFFSET;
-
-    // Check if we're in the middle of a project collapse animation
-    const isCollapsing = sidebar.classList.contains('collapsing-projects');
-
-    if (scrollY >= stickPoint) {
-      // Stick to viewport
-      if (!isSticky) {
-        // Prevent flash by ensuring smooth transition
-        const currentTop = sidebar.getBoundingClientRect().top;
-        sidebar.style.position = 'fixed';
-        sidebar.style.top = currentTop + 'px';
-        // Force reflow then animate to target position
-        void sidebar.offsetHeight;
-        // Use longer transition during collapse for smoothness
-        sidebar.style.transition = isCollapsing
-          ? 'top 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
-          : 'top 0.1s ease-out';
-        sidebar.style.top = STICK_OFFSET + 'px';
-        isSticky = true;
-      }
-    } else {
-      // Flow with page
-      if (isSticky) {
-        // During collapse, use smooth transition instead of 'none'
-        sidebar.style.transition = isCollapsing
-          ? 'top 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
-          : 'none';
-        sidebar.style.position = 'absolute';
-        sidebar.style.top = sidebarTop + 'px';
-        isSticky = false;
-      } else if (!initialized) {
-        // Initial positioning
-        sidebar.style.top = sidebarTop + 'px';
-      }
-    }
-
-    // Show sidebar after first position is set
-    if (!initialized) {
-      sidebar.style.visibility = 'visible';
-      sidebar.style.opacity = '1';
-      initialized = true;
-    }
-
-    lastScrollY = scrollY;
+  // The sidebar is position: sticky inside #sidebarTrack (see style.css), so the browser
+  // moves it on the compositor with no scroll-event lag. JS only sizes the track: it starts
+  // just under the header and ends at the bottom of the page content.
+  const updateTrack = () => {
+    const scrollY = window.scrollY;
+    const trackTop = header.getBoundingClientRect().bottom + scrollY + 10; // 10px margin under header
+    const pageBottom = document.body.getBoundingClientRect().bottom + scrollY;
+    track.style.top = trackTop + 'px';
+    track.style.height = Math.max(0, Math.floor(pageBottom - trackTop)) + 'px';
   };
 
-  // Use scroll event for immediate updates
-  window.addEventListener('scroll', updatePosition, { passive: true });
-  window.addEventListener('resize', updatePosition);
-  updatePosition(); // Initial position
+  updateTrack();
+  sidebar.style.visibility = 'visible';
+  sidebar.style.opacity = '1';
+
+  // Body height excludes the absolutely positioned track, so observing it can't feed back.
+  const ro = new ResizeObserver(updateTrack);
+  ro.observe(header);
+  ro.observe(document.body);
+  window.addEventListener('resize', updateTrack);
 });
 
 
+// Header CRT - pause the live layers while the header is off screen
+(() => {
+  const header = document.querySelector('header.header-flex');
+  if (!header) return;
+  new IntersectionObserver(([entry]) => {
+    header.classList.toggle('crt-offscreen', !entry.isIntersecting);
+  }).observe(header);
+})();
 
 // Inline media modal (videos + PDFs)
 (() => {
@@ -775,16 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.toggle('is-open', open);
     modal.setAttribute('aria-hidden', open ? 'false' : 'true');
     document.body.classList.toggle('media-modal-open', open);
-    const detail = { open };
-    try {
-      window.dispatchEvent(new CustomEvent('portfolio:media-modal', { detail }));
-    } catch (err) {
-      try {
-        const legacy = document.createEvent('CustomEvent');
-        legacy.initCustomEvent('portfolio:media-modal', false, false, detail);
-        window.dispatchEvent(legacy);
-      } catch (_) {}
-    }
+    window.dispatchEvent(new CustomEvent('portfolio:media-modal', { detail: { open } }));
   };
 
   const clearContent = () => {
@@ -822,11 +754,11 @@ document.addEventListener('DOMContentLoaded', () => {
       autoPlayIfVideo(node);
     }
     setOpenState(true);
+    // Focus the video so keyboard controls work. Never focus the PDF iframe: key presses inside
+    // it don't reach this document, so Escape would stop closing the viewer.
     requestAnimationFrame(() => {
-      const focusTarget = content.querySelector('video, iframe, embed') || dialog.querySelector('.media-modal__close');
-      if (focusTarget && typeof focusTarget.focus === 'function') {
-        try { focusTarget.focus(); } catch (_) {}
-      }
+      const focusTarget = content.querySelector('video') || dialog.querySelector('.media-modal__close');
+      focusTarget.focus();
     });
   };
 
@@ -918,60 +850,28 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
-//Sidebar projects dropdown
+// Sidebar projects dropdown
 (() => {
-  const slugify = (text) => {
-    if (!text) return '';
-    let normalized = text;
-    try {
-      normalized = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    } catch (_) {}
-    return normalized
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
+  // Short sidebar labels, keyed by project card id. Cards without an entry use their title.
   const PROJECT_LINK_LABELS = {
-    en: [
-      'Road Learning Tool',
-      '32-Bit RISC Processor Design',
-      'Running and Jumping Detection',
-      'Autonomous Taxi Car',
-      'Dynamic Time Allocating Calendar',
-      '911 Dispatcher Training Device',
-      'Fluid and Powder Dispensing Device',
-      'Portfolio Website',
-    ],
-    fr: [
-      'Outil d\'apprentissage des routes',
-      'Conception d\'un processeur RISC 32 bits',
-      'Détection de course et saut',
-      'Voiture-taxi autonome',
-      'Calendrier dynamique',
-      'Simulateur d\'opérateur 911',
-      'Distributeur fluide et poudre',
-      'Site portfolio',
-    ],
+    'road-learning-tool':        { en: 'Road Learning Tool', fr: 'Outil d\'apprentissage des routes' },
+    'project-cpu-risc':          { en: '32-Bit RISC Processor Design', fr: 'Conception d\'un processeur RISC 32 bits' },
+    'project-running-jumping':   { en: 'Running and Jumping Detection', fr: 'Détection de course et saut' },
+    'project-autonomous-car':    { en: 'Autonomous Taxi Car', fr: 'Voiture-taxi autonome' },
+    'project-dynamic-calendar':  { en: 'Dynamic Time Allocating Calendar', fr: 'Calendrier dynamique' },
+    'project-911-training':      { en: '911 Dispatcher Training Device', fr: 'Simulateur d\'opérateur 911' },
+    'project-fluid-dispensing':  { en: 'Fluid and Powder Dispensing Device', fr: 'Distributeur fluide et poudre' },
+    'project-portfolio-website': { en: 'Portfolio Website', fr: 'Site portfolio' },
   };
 
-  const labelFor = (lang, index, fallback = '') => {
-    const list = PROJECT_LINK_LABELS[lang];
-    if (!Array.isArray(list)) return fallback;
-    const value = list[index];
-    if (typeof value !== 'string') return fallback;
-    const trimmed = value.trim();
-    return trimmed || fallback;
-  };
+  const currentLang = () => (document.body.classList.contains('fr') ? 'fr' : 'en');
 
-  const applyToggleLabel = (toggle) => {
-    if (!toggle) return;
-    const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
-    const attr = lang === 'fr' ? 'data-fr-label' : 'data-en-label';
-    let label = toggle.getAttribute(attr) || toggle.getAttribute('aria-label') || '';
-    if (label) {
-      toggle.setAttribute('aria-label', label);
-    }
+  const labelFor = (card) => {
+    const lang = currentLang();
+    const short = PROJECT_LINK_LABELS[card.id];
+    if (short) return short[lang];
+    const title = card.querySelector('.project-card-title .lang-text');
+    return title ? (title.getAttribute(`data-${lang}`) || title.textContent).trim() : card.id;
   };
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -985,99 +885,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let closeTimer = null;
 
     const setOpen = (open) => {
-      const expanded = !!open;
-      toggle.classList.toggle('open', expanded);
-      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      sidebar.classList.toggle('sidebar-expanded', expanded);
-      // Update arrow direction
-      toggle.textContent = expanded ? '🠅' : '🠇';
-      if (expanded) {
-        if (closeTimer) {
-          clearTimeout(closeTimer);
-          closeTimer = null;
-        }
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      sidebar.classList.toggle('sidebar-expanded', open);
+      toggle.textContent = open ? '🠅' : '🠇';
+      clearTimeout(closeTimer);
+      if (open) {
         dropdown.hidden = false;
         dropdown.setAttribute('aria-hidden', 'false');
         requestAnimationFrame(() => dropdown.classList.add('open'));
       } else {
         dropdown.classList.remove('open');
         dropdown.setAttribute('aria-hidden', 'true');
-        if (closeTimer) clearTimeout(closeTimer);
+        // Hide once the close transition has finished
         closeTimer = setTimeout(() => {
-          if (!dropdown.classList.contains('open')) {
-            dropdown.hidden = true;
-          }
+          if (!dropdown.classList.contains('open')) dropdown.hidden = true;
         }, 360);
       }
     };
 
     const isOpen = () => dropdown.classList.contains('open');
 
-    const ensureAnchor = (box, title, index) => {
-      let existing = box.getAttribute('id');
-      if (existing) return existing;
-      const baseSlug = slugify(title) || `project-${index + 1}`;
-      let candidate = baseSlug;
-      let suffix = 1;
-      while (document.getElementById(candidate)) {
-        suffix += 1;
-        candidate = `${baseSlug}-${suffix}`;
-      }
-      box.id = candidate;
-      return candidate;
+    const applyToggleLabel = () => {
+      const label = toggle.getAttribute(`data-${currentLang()}-label`);
+      if (label) toggle.setAttribute('aria-label', label);
+    };
+
+    // Collapse whatever is open, scroll to the card, then open it once the scroll has settled
+    const openProject = (card) => {
+      document.querySelectorAll('.project-card.is-open').forEach((open) => open.classList.remove('is-open'));
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => card.classList.add('is-open'), 500);
+      }, 700);
     };
 
     const buildList = () => {
-      const cards = projectsSection.querySelectorAll('.project-card');
       list.innerHTML = '';
-      cards.forEach((box, index) => {
-        const titleNode = box.querySelector('.project-card-title .lang-text') || box.querySelector('.lang-text');
-        if (!titleNode) return;
-        const englishBase = labelFor('en', index, (titleNode.getAttribute('data-en') || titleNode.textContent || '').trim());
-        if (!englishBase) return;
-        const langKey = document.body.classList.contains('fr') ? 'fr' : 'en';
-        const displayTitle = labelFor(
-          langKey,
-          index,
-          langKey === 'fr'
-            ? (titleNode.getAttribute('data-fr') || englishBase)
-            : englishBase
-        ).trim();
-        const anchor = ensureAnchor(box, englishBase, index);
+      projectsSection.querySelectorAll('.project-card[id]').forEach((card) => {
         const li = document.createElement('li');
         const link = document.createElement('a');
-        link.href = `#${anchor}`;
-        link.textContent = displayTitle;
-
-        // Handle click to properly open project card and scroll
+        link.href = `#${card.id}`;
+        link.textContent = labelFor(card);
         link.addEventListener('click', (event) => {
           event.preventDefault();
-
-          const targetElement = document.getElementById(anchor);
-          if (!targetElement) return;
-
-          const stack = document.querySelector('.project-stack');
-          if (stack) {
-            const openCards = stack.querySelectorAll('.project-card.is-open');
-            openCards.forEach((card) => card.classList.remove('is-open'));
-          }
-
-          setTimeout(() => {
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            setTimeout(() => {
-              targetElement.classList.add('is-open');
-
-  
-              if (typeof window.__updateScrollbarOverlay === 'function') {
-                requestAnimationFrame(() => {
-                  window.__updateScrollbarOverlay();
-                });
-              }
-            }, 500); 
-          }, 700); 
+          openProject(card);
         });
-
         li.appendChild(link);
         list.appendChild(li);
       });
@@ -1087,23 +940,13 @@ document.addEventListener('DOMContentLoaded', () => {
       event.preventDefault();
       const nextState = !isOpen();
       setOpen(nextState);
-      if (nextState) {
-        const firstLink = list.querySelector('a');
-        if (firstLink) {
-          firstLink.focus();
-        }
-      }
+      if (nextState) list.querySelector('a')?.focus();
     });
 
     document.addEventListener('click', (event) => {
-      if (!isOpen()) return;
-      if (sidebar.contains(event.target)) {
-        if (dropdown.contains(event.target) || toggle.contains(event.target)) return;
-      } else {
+      if (isOpen() && !dropdown.contains(event.target) && !toggle.contains(event.target)) {
         setOpen(false);
-        return;
       }
-      setOpen(false);
     });
 
     document.addEventListener('keydown', (event) => {
@@ -1113,239 +956,144 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    const handleLanguageChange = () => {
-      buildList();
-      applyToggleLabel(toggle);
-    };
-
     buildList();
-    applyToggleLabel(toggle);
+    applyToggleLabel();
     setOpen(false);
 
-    window.addEventListener('portfolio:languagechange', handleLanguageChange);
+    window.addEventListener('portfolio:languagechange', () => {
+      buildList();
+      applyToggleLabel();
+    });
   });
 })();
 
-
-
-//language + theme switch
-const langButton = document.getElementById('langButton');
-const body = document.body;
-const texts = document.querySelectorAll('.lang-text');
-const resumeLink = document.getElementById('resumeLink');
-
-function updateLanguage(isFr) {
-  const langCode = isFr ? 'fr' : 'en';
-  body.classList.toggle('fr', isFr);
-  if (langButton) {
-    const toggleLabel = isFr ? 'Switch to English' : 'Passer en français';
-    langButton.setAttribute('aria-label', toggleLabel);
-    langButton.setAttribute('aria-pressed', isFr ? 'true' : 'false');
-    langButton.dataset.lang = langCode;
-  }
-
-  if (resumeLink) {
-    const targetHref = resumeLink.getAttribute(isFr ? 'data-fr-href' : 'data-en-href');
-    if (targetHref) {
-      resumeLink.setAttribute('href', targetHref);
-    }
-    resumeLink.setAttribute('hreflang', langCode);
-  }
-
-  texts.forEach(el => {
-    el.textContent = isFr
-      ? el.getAttribute('data-fr')
-      : el.getAttribute('data-en');
-  });
-
-  const url = new URL(window.location.href);
-  if (langCode === 'fr') {
-    url.searchParams.set('lang', 'fr');
-  } else {
-    url.searchParams.delete('lang');
-  }
-  const search = url.searchParams.toString();
-  const nextUrl = `${url.pathname}${search ? `?${search}` : ''}${url.hash}`;
-  history.replaceState(null, '', nextUrl);
-
-  try {
-    window.dispatchEvent(new CustomEvent('portfolio:languagechange', { detail: { lang: langCode } }));
-  } catch (err) {
-    try {
-      const legacy = document.createEvent('CustomEvent');
-      legacy.initCustomEvent('portfolio:languagechange', false, false, { lang: langCode });
-      window.dispatchEvent(legacy);
-    } catch (_) {}
-  }
-
-  try { window.dispatchEvent(new Event('scroll')); } catch (_) {}
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const isFr = params.get('lang') === 'fr';
-  updateLanguage(isFr);
-});
-
-if (langButton) {
-  langButton.addEventListener('click', () => {
-    const isCurrentlyFr = body.classList.contains('fr');
-    updateLanguage(!isCurrentlyFr);
-  });
-}
-
-// Scrollbar contrast color: white over the dark header, smoothly blending to black over light content
+// Language switch (English / French)
 (() => {
-  const doc = document.documentElement;
-  if (!doc) return;
+  const langButton = document.getElementById('langButton');
+  const resumeLink = document.getElementById('resumeLink');
+  const texts = document.querySelectorAll('.lang-text');
+
+  const updateLanguage = (isFr) => {
+    const langCode = isFr ? 'fr' : 'en';
+    document.body.classList.toggle('fr', isFr);
+
+    if (langButton) {
+      langButton.setAttribute('aria-label', isFr ? 'Switch to English' : 'Passer en français');
+      langButton.setAttribute('aria-pressed', isFr ? 'true' : 'false');
+      langButton.dataset.lang = langCode;
+    }
+
+    if (resumeLink) {
+      const targetHref = resumeLink.getAttribute(`data-${langCode}-href`);
+      if (targetHref) resumeLink.setAttribute('href', targetHref);
+      resumeLink.setAttribute('hreflang', langCode);
+    }
+
+    texts.forEach((el) => {
+      el.textContent = el.getAttribute(`data-${langCode}`);
+    });
+
+    // Keep the choice in the URL (?lang=fr) so shared links open in the same language
+    const url = new URL(window.location.href);
+    if (isFr) url.searchParams.set('lang', 'fr');
+    else url.searchParams.delete('lang');
+    history.replaceState(null, '', url);
+
+    window.dispatchEvent(new CustomEvent('portfolio:languagechange', { detail: { lang: langCode } }));
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateLanguage(new URLSearchParams(window.location.search).get('lang') === 'fr');
+  });
+
+  langButton?.addEventListener('click', () => {
+    updateLanguage(!document.body.classList.contains('fr'));
+  });
+})();
+
+// Scrollbar colour: white over the dark header, blending to grey over the light content
+(() => {
   const header = document.querySelector('header.header-flex');
+  if (!header) return;
   const COLOR_LIGHT = [255, 255, 255];
   const COLOR_DARK = [150, 150, 150];
   const COLOR_DARK_MODE = 'rgb(245, 245, 245)';
   const TRANSITION_RANGE = 220; // px window around the header bottom
 
-  const setColor = (value) => doc.style.setProperty('--scrollbar-color', value);
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const mixChannel = (start, end, t) => Math.round(start + (end - start) * t);
-  const mixColor = (start, end, t) => (
-    `rgb(${mixChannel(start[0], end[0], t)}, ${mixChannel(start[1], end[1], t)}, ${mixChannel(start[2], end[2], t)})`
-  );
+  const mix = (t) => `rgb(${COLOR_LIGHT.map((c, i) => Math.round(c + (COLOR_DARK[i] - c) * t)).join(', ')})`;
 
   const updateScrollbarColor = () => {
-    if ((typeof window !== 'undefined' && window.__overlayDragging) || !doc) return;
-    const body = document.body;
-    const isDarkMode = body && body.classList.contains('dark-mode');
-    if (isDarkMode) {
-      setColor(COLOR_DARK_MODE);
-      return;
+    let color = COLOR_DARK_MODE;
+    if (!document.body.classList.contains('dark-mode')) {
+      const headerBottom = header.offsetTop + header.offsetHeight;
+      const transitionStart = Math.max(0, headerBottom - TRANSITION_RANGE);
+      color = mix(Math.min(1, Math.max(0, (window.scrollY - transitionStart) / TRANSITION_RANGE)));
     }
-
-    if (!header) {
-      setColor('rgb(255, 255, 255)');
-      return;
-    }
-
-    const headerBottom = header.offsetTop + header.offsetHeight;
-    const scrollTop = window.scrollY || window.pageYOffset || 0;
-    const transitionStart = Math.max(0, headerBottom - TRANSITION_RANGE);
-    const t = clamp(
-      (scrollTop - transitionStart) / Math.max(1, TRANSITION_RANGE),
-      0,
-      1
-    );
-    setColor(mixColor(COLOR_LIGHT, COLOR_DARK, t));
+    document.documentElement.style.setProperty('--scrollbar-color', color);
   };
 
-  // Initialize and keep updated
   window.addEventListener('scroll', updateScrollbarColor, { passive: true });
   window.addEventListener('resize', updateScrollbarColor);
   window.addEventListener('load', updateScrollbarColor);
-  document.addEventListener('DOMContentLoaded', updateScrollbarColor);
   updateScrollbarColor();
 })();
 
-// Overlay scrollbar: draws a draggable thumb over the page
+// Overlay scrollbar: draws a draggable thumb over the page (the native one is hidden in CSS)
 (() => {
-  const isLiteMode = window.__portfolioPrefs && typeof window.__portfolioPrefs.isLite === 'function'
-    ? window.__portfolioPrefs.isLite
-    : () => document.documentElement.classList.contains('lite-mode');
-  if (isLiteMode()) return;
-
   const docEl = document.documentElement;
   const overlay = document.createElement('div');
   overlay.id = 'scrollbarOverlay';
   const thumb = document.createElement('div');
   thumb.id = 'scrollbarThumb';
   overlay.appendChild(thumb);
-  function ensureAttached() {
-    if (!overlay.isConnected) {
-      if (document.body) document.body.appendChild(overlay);
-      else document.addEventListener('DOMContentLoaded', () => document.body.appendChild(overlay), { once: true });
-    }
-  }
-  ensureAttached();
-  const minThumb = 32;
+  document.body.appendChild(overlay);
 
-  let trackTop = 0, trackHeight = 0, thumbHeight = 0, maxThumbTop = 0, maxScroll = 1;
-
-  function computeMetrics() {
-    const rect = overlay.getBoundingClientRect();
-    trackTop = rect.top;
-    trackHeight = Math.max(0, rect.height || (window.innerHeight - 16));
-    const scrollHeight = docEl.scrollHeight;
-    const viewport = window.innerHeight;
-    maxScroll = Math.max(1, scrollHeight - viewport);
-    const ratio = Math.min(1, viewport / Math.max(1, scrollHeight));
-    thumbHeight = Math.max(minThumb, Math.round(trackHeight * ratio));
-    maxThumbTop = Math.max(0, trackHeight - thumbHeight);
-    thumb.style.height = `${thumbHeight}px`;
-  }
-
-  function updateOverlay(options = {}) {
-    const { disableTransition = false } = options;
-    // Skip scroll-driven updates while dragging
-    if (dragging) return;
-    computeMetrics();
-    const y = window.scrollY || window.pageYOffset || 0;
-    const t = Math.min(1, Math.max(0, y / maxScroll));
-    const top = Math.round(maxThumbTop * t);
-
-    // Disable transition temporarily during scroll events for immediate feedback
-    if (disableTransition) {
-      thumb.classList.add('dragging');
-      thumb.style.transform = `translateY(${top}px)`;
-      // Re-enable transition after a brief delay
-      setTimeout(() => {
-        thumb.classList.remove('dragging');
-      }, 50);
-    } else {
-      thumb.style.transform = `translateY(${top}px)`;
-    }
-  }
-
+  const MIN_THUMB = 32;
+  let trackTop = 0;
+  let maxThumbTop = 0;
+  let maxScroll = 1;
   let dragging = false;
   let dragOffset = 0;
+  let scrollIdleTimer = null;
 
-  function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+  const computeMetrics = () => {
+    const rect = overlay.getBoundingClientRect();
+    const viewport = window.innerHeight;
+    const scrollHeight = docEl.scrollHeight;
+    const thumbHeight = Math.max(MIN_THUMB, Math.round(rect.height * Math.min(1, viewport / scrollHeight)));
+    trackTop = rect.top;
+    maxScroll = Math.max(1, scrollHeight - viewport);
+    maxThumbTop = Math.max(0, rect.height - thumbHeight);
+    thumb.style.height = `${thumbHeight}px`;
+  };
 
-  let savedScrollBehavior = '';
-  let scrollBehaviorPatched = false;
-
-  function startDrag(e) {
-    e.preventDefault();
+  const updateOverlay = () => {
+    if (dragging) return;
     computeMetrics();
-    const thumbRect = thumb.getBoundingClientRect();
-    const y = getClientY(e);
-    dragging = true;
-    dragOffset = Math.max(0, Math.min(y - thumbRect.top, thumbRect.height));
-    savedScrollBehavior = docEl.style.scrollBehavior;
-    docEl.style.scrollBehavior = 'auto';
-    scrollBehaviorPatched = true;
-    try { window.__overlayDragging = true; } catch (_) {}
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchmove', onDrag, { passive: false });
-    document.addEventListener('touchend', endDrag);
-    document.body.style.userSelect = 'none';
-    thumb.classList.add('dragging');
-  }
+    const t = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+    thumb.style.transform = `translateY(${Math.round(maxThumbTop * t)}px)`;
+  };
 
-  function onDrag(e) {
-    if (!dragging) return;
-    e.preventDefault();
-    const y = getClientY(e);
-    let thumbTop = y - trackTop - dragOffset;
-    if (thumbTop < 0) thumbTop = 0;
-    else if (thumbTop > maxThumbTop) thumbTop = maxThumbTop;
+  // Track scrolling immediately; layout-driven changes (cards opening) keep the eased transition
+  const onScroll = () => {
+    if (dragging) return;
+    thumb.classList.add('is-scrolling');
+    updateOverlay();
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = setTimeout(() => thumb.classList.remove('is-scrolling'), 50);
+  };
+
+  const clientY = (event) => (event.touches ? event.touches[0].clientY : event.clientY);
+
+  const onDrag = (event) => {
+    event.preventDefault();
+    const thumbTop = Math.min(maxThumbTop, Math.max(0, clientY(event) - trackTop - dragOffset));
     thumb.style.transform = `translateY(${Math.round(thumbTop)}px)`;
-    const t = maxThumbTop ? (thumbTop / maxThumbTop) : 0;
-    const scrollY = t * maxScroll;
-    docEl.scrollTop = scrollY;
-    document.body.scrollTop = scrollY;
-  }
+    const t = maxThumbTop ? thumbTop / maxThumbTop : 0;
+    window.scrollTo({ top: t * maxScroll, behavior: 'instant' });
+  };
 
-  function endDrag() {
+  const endDrag = () => {
     dragging = false;
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', endDrag);
@@ -1353,31 +1101,50 @@ if (langButton) {
     document.removeEventListener('touchend', endDrag);
     document.body.style.userSelect = '';
     thumb.classList.remove('dragging');
-    if (scrollBehaviorPatched) {
-      docEl.style.scrollBehavior = savedScrollBehavior;
-      scrollBehaviorPatched = false;
-    }
-    try { window.__overlayDragging = false; } catch (_) {}
     updateOverlay();
-    try { window.dispatchEvent(new Event('scroll')); } catch (_) {}
-  }
+  };
 
-  // Click/drag on overlay
+  const startDrag = (event) => {
+    event.preventDefault();
+    computeMetrics();
+    const thumbRect = thumb.getBoundingClientRect();
+    dragOffset = Math.max(0, Math.min(clientY(event) - thumbRect.top, thumbRect.height));
+    dragging = true;
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+    document.body.style.userSelect = 'none';
+    thumb.classList.add('dragging');
+  };
+
   overlay.addEventListener('mousedown', startDrag);
   overlay.addEventListener('touchstart', startDrag, { passive: false });
-
-  window.addEventListener('scroll', () => { ensureAttached(); updateOverlay({ disableTransition: true }); }, { passive: true });
-  window.addEventListener('resize', () => { ensureAttached(); updateOverlay(); });
-  window.addEventListener('load', () => { ensureAttached(); updateOverlay(); });
-  document.addEventListener('DOMContentLoaded', () => { ensureAttached(); updateOverlay(); });
-
-  // Expose updateOverlay globally so project cards can trigger updates (with transition enabled)
-  window.__updateScrollbarOverlay = () => updateOverlay({ disableTransition: false });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', updateOverlay);
+  // Page height changes (cards opening, work history expanding) resize the thumb
+  new ResizeObserver(updateOverlay).observe(document.body);
+  updateOverlay();
 })();
 
 // Shared glyph set for all digital rain (header, sidebar, content gutters).
 // Printable ASCII excluding space so columns stay visually dense.
 const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+// Integer hash used by the rain effects for stable per-column / per-cell randomness
+const hash32 = (x) => {
+  x |= 0;
+  x = (x ^ 61) ^ (x >>> 16);
+  x = x + (x << 3);
+  x = x ^ (x >>> 4);
+  x = Math.imul(x, 0x27d4eb2d);
+  x = x ^ (x >>> 15);
+  return x >>> 0;
+};
+
+const cssVar = (name, fallback) => (
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+);
 
 // Header Digital Rain
 
@@ -1387,7 +1154,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     const header = document.querySelector('header');
     if (!header) return;
 
-    const MAX_DPR = 1.25; // cap resolution 
+    const MAX_DPR = 1.25; // cap resolution
     const FRAME_INTERVAL = 1000 / 30; //limit to 30fps
     const canvas = document.createElement('canvas');
     canvas.id = 'headerRainCanvas';
@@ -1412,22 +1179,36 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     const WHITE_HEAD_FRACTION = 0.4; // ~40% of columns get a nearly-white leading char
     const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
     const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
-    let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    let lastFrameTime = performance.now();
     let isHeaderVisible = true;
     let pausedForVisibility = false;
 
-    const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    // Scroll distance over which the rain climbs from the bottom of the header to the top.
+    // On the mobile layout the header is one screen tall, so a fixed 1100px would finish
+    // the reveal after the header has already left the screen; there it tracks the header
+    // height instead, so the rain fills the part of the header still in view.
+    const compactQuery = window.matchMedia('(max-width: 768px)');
+    let revealScrollRange = 1100;
+    let sizedFor = '';
 
     function size() {
       const cw = Math.max(1, header.clientWidth);
       const ch = Math.max(1, header.clientHeight);
-      dpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
+      const nextDpr = Math.max(1, Math.min(MAX_DPR, window.devicePixelRatio || 1));
+      // Mobile browsers fire resize whenever the URL bar slides; skip the rebuild (which
+      // re-randomises every column) unless the header itself changed size.
+      const key = cw + 'x' + ch + '@' + nextDpr;
+      if (key === sizedFor) return;
+      sizedFor = key;
+      dpr = nextDpr;
+      revealScrollRange = compactQuery.matches ? Math.max(240, ch * 0.55) : 1100;
       canvas.width = Math.floor(cw * dpr);
       canvas.height = Math.floor(ch * dpr);
       canvas.style.width = cw + 'px';
       canvas.style.height = ch + 'px';
       w = canvas.width; h = canvas.height;
-      step = Math.max(8, Math.round((cw > 600 ? 10 : 9) * dpr));
+      // Slightly larger glyphs on phones so the rain still reads at arm's length
+      step = Math.max(8, Math.round((compactQuery.matches ? 11 : 10) * dpr));
       stepX = Math.max(6, Math.round(step * 0.8));
       stepY = Math.max(step + 1, Math.round(step * 1.18));
       cols = Math.max(1, Math.floor(w / stepX));
@@ -1481,58 +1262,25 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       }
     }
 
-    function cssVar(name, fallback) {
-      const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return val || fallback;
-    }
-
     size();
     window.addEventListener('resize', size);
     window.addEventListener('load', size);
-    document.addEventListener('DOMContentLoaded', size);
 
-    const updateVisibilityFallback = () => {
-      const rect = header.getBoundingClientRect();
-      const viewport = window.innerHeight || document.documentElement.clientHeight || 0;
-      isHeaderVisible = rect.bottom > 0 && rect.top < viewport * 1.1;
-    };
+    new IntersectionObserver(([entry]) => {
+      isHeaderVisible = entry.isIntersecting;
+    }).observe(header);
 
-    if (typeof IntersectionObserver !== 'undefined') {
-      const io = new IntersectionObserver((entries) => {
-        if (!entries || !entries.length) return;
-        const entry = entries[0];
-        isHeaderVisible = entry.isIntersecting || entry.intersectionRatio > 0.05;
-      }, { threshold: [0, 0.05, 0.2, 0.4, 0.6] });
-      io.observe(header);
-    } else {
-      window.addEventListener('scroll', updateVisibilityFallback, { passive: true });
-      window.addEventListener('resize', updateVisibilityFallback, { passive: true });
-      updateVisibilityFallback();
-    }
-
-    let lastY = window.scrollY || window.pageYOffset || 0;
-    let accum = 0;
-    let glyphPhase = 0;
-    let lastChange = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const RAIN_FILL = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
+    const RAIN_GLOW = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
+    let lastY = window.scrollY;
     const changeInterval = 280; // ms between digit changes (increase for slower)
-    const REVEAL_SCROLL_RANGE = 1100;
     const RAIN_RAMP_EXPONENT = 0.75; // < 1 brightens sooner while still letting top be dark
-    let scrollClassTimer;
     let gradientMomentum = 0;
     let gradientTarget = 0.5;
     let gradientMix = 0.5;
     const GRADIENT_DECAY = 0.9;
     const GRADIENT_MAX = 50;
     const GRADIENT_LERP = 0.6;
-
-    //Only toggles the subtle header style while actively scrolling
-
-    function onUserScroll() {
-      header.classList.add('header-rain-active');
-      clearTimeout(scrollClassTimer);
-      scrollClassTimer = setTimeout(() => header.classList.remove('header-rain-active'), 200);
-    }
-    window.addEventListener('scroll', onUserScroll, { passive: true });
 
     function updateGradientTrend(deltaY) {
       if (!deltaY) return;
@@ -1543,14 +1291,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       gradientTarget = Math.max(0, Math.min(1, gradientTarget));
     }
 
-    function hash32(x){
-      x |= 0; x = (x ^ 61) ^ (x >>> 16); x = x + (x << 3);
-      x = x ^ (x >>> 4); x = Math.imul(x, 0x27d4eb2d); x = x ^ (x >>> 15);
-      return x >>> 0;
-    }
-
     function tick() {
-      const nowTs = now();
+      const nowTs = performance.now();
       if (nowTs - lastFrameTime < FRAME_INTERVAL) {
         requestAnimationFrame(tick);
         return;
@@ -1567,7 +1309,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       }
       pausedForVisibility = false;
 
-      const nowY = window.scrollY || window.pageYOffset || 0;
+      const nowY = window.scrollY;
       const dy = nowY - lastY;
       lastY = nowY;
       updateGradientTrend(dy);
@@ -1600,7 +1342,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 
       //Clear and draw every frame so digits change even when idle
       ctx.clearRect(0, 0, w, h);
-      const scrollFactor = Math.max(0, Math.min(1, nowY / REVEAL_SCROLL_RANGE));
+      const scrollFactor = Math.max(0, Math.min(1, nowY / revealScrollRange));
       const ramp = Math.pow(scrollFactor, RAIN_RAMP_EXPONENT);
       const visibleTopY = Math.floor((1 - ramp) * h);
       if (ramp <= 0) {
@@ -1611,24 +1353,19 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 
       ctx.font = Math.floor(step * 1.3) + 'px monospace';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
-      const greenGlow = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
+      ctx.fillStyle = RAIN_FILL;
+      const greenGlow = RAIN_GLOW;
       const greenBlur = Math.round(step * 1.4); // ambient green haze around each glyph
       const whiteGlow = 'rgba(200, 255, 220, 0.95)';
       const whiteBlur = Math.round(step * 2.6); // CRT-style bloom on leading char
       ctx.shadowColor = greenGlow;
       ctx.shadowBlur = greenBlur;
 
-      // Advance glyph phase on a slower timer so values change less frequently
       const tnow = nowTs;
-      if (tnow - lastChange >= changeInterval) {
-        glyphPhase = (glyphPhase + 1) | 0;
-        lastChange = tnow;
-      }
 
       // Detect per-cell phase transitions so chars within a column stagger.
-      // Driven by continuous time (not the global glyphPhase counter) so the
-      // per-row offsets shift WHEN each cell ticks, not just its starting value.
+      // Driven by continuous time so the per-row offsets shift WHEN each cell
+      // ticks, not just its starting value.
       const baseUnit = tnow / changeInterval;
       for (let c = 0; c < cols; c++) {
         const rate = colRates[c] || 1;
@@ -1652,7 +1389,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       const jitterPx  = Math.round(10 * step);
       const effectiveGradient = gradientMix;
 
-      const baseFill = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
+      const baseFill = RAIN_FILL;
       const whiteFill = 'rgba(225, 255, 235, 0.98)';
 
       for (let c = 0; c < cols; c++) {
@@ -1790,30 +1527,17 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     let cellTransitionAt = []; // timestamp of last flip per cell
     const COLUMN_DENSITY = 0.7; // fraction of columns that render rain streams
     const FRAME_INTERVAL = 1000 / 30; // limit to 30fps (matches header rain)
-    let lastFrameTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-    let lastTick = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    let lastFrameTime = performance.now();
+    let lastTick = performance.now();
     // Idle fall tuning: speed is in "rows per millisecond" per column.
     const FALL_BASE = 0.0035;       // ~1 row every ~285ms baseline
     const FALL_VARIANCE = 0.55;     // multiplier range: 2^(-0.55) .. 2^(0.55) ≈ 0.68x..1.46x
     const GLYPH_FLIPS_PER_CELL_PER_SEC = 0.25; // each cell randomly re-rolls ~once every 4s on average
     const GLYPH_FADE_MS = 200; // crossfade window when a cell changes glyph
-    let lastScrollY = window.scrollY || window.pageYOffset || 0;
+    let lastScrollY = window.scrollY;
     let pausedForDark = false;
-
-    function cssVar(name, fallback) {
-      const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return val || fallback;
-    }
-
-    function hash32(x) {
-      x |= 0;
-      x = (x ^ 61) ^ (x >>> 16);
-      x = x + (x << 3);
-      x = x ^ (x >>> 4);
-      x = Math.imul(x, 0x27d4eb2d);
-      x = x ^ (x >>> 15);
-      return x >>> 0;
-    }
+    const RAIN_FILL = cssVar('--sidebar-rain-color', 'rgba(0,255,140,0.55)');
+    const RAIN_GLOW = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.40)');
 
     function resize() {
       const rect = sidebar.getBoundingClientRect();
@@ -1872,7 +1596,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         return;
       }
 
-      const frameNow = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const frameNow = performance.now();
       if (frameNow - lastFrameTime < FRAME_INTERVAL) {
         requestAnimationFrame(tick);
         return;
@@ -1889,13 +1613,13 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       }
       pausedForDark = false;
 
-      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const now = performance.now();
       let dt = now - lastTick;
       lastTick = now;
       if (dt < 0) dt = 0;
       else if (dt > 100) dt = 100; // clamp after tab-restore so fall doesn't jump
 
-      const nowScrollY = window.scrollY || window.pageYOffset || 0;
+      const nowScrollY = window.scrollY;
       const dy = nowScrollY - lastScrollY;
       lastScrollY = nowScrollY;
 
@@ -1948,18 +1672,14 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         setGlyph(rc, rr, (Math.random() * RAIN_ASCII_GLYPHS.length) | 0);
       }
 
-      const activation = 1;
-
       ctx.clearRect(0, 0, w, h);
 
       ctx.font = Math.floor(step * 0.9) + 'px monospace';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = cssVar('--sidebar-rain-color', 'rgba(0,255,140,0.55)');
-      ctx.shadowColor = cssVar('--sidebar-rain-glow', 'rgba(0,255,140,0.40)');
+      ctx.fillStyle = RAIN_FILL;
+      ctx.shadowColor = RAIN_GLOW;
       const rainBlur = Math.round(step * 1.2); // green haze, applied only to bright chain tips
       ctx.shadowBlur = 0;
-
-      const minVisibleRow = Math.max(0, Math.floor((1 - activation) * rows));
 
       for (let c = 0; c < cols; c++) {
         if (!colActive[c]) continue;
@@ -1967,7 +1687,6 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         const chainLen = 6 + (c % 5);
         for (let i = 0; i < chainLen; i++) {
           const row = (head + i) % rows;
-          if (row < minVisibleRow) continue;
           const y = row * step;
           if (y > h) continue;
 
@@ -1977,7 +1696,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
           const gradientIndex = (chainLen - 1) - i;
           const baseAlpha = gradientIndex <= 0.01 ? 0.9 : Math.max(0.25, 0.8 - gradientIndex * 0.08);
           const fade = Math.max(0.6, 1 - (y / Math.max(1, h)) * 0.22);
-          const drawAlpha = baseAlpha * fade * activation;
+          const drawAlpha = baseAlpha * fade;
           if (drawAlpha <= 0.02) continue;
 
           // Glow only on the bright leading glyphs of the chain; trailing glyphs flat.
@@ -2006,14 +1725,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     }
 
     resize();
-    if (typeof ResizeObserver !== 'undefined') {
-
-      const ro = new ResizeObserver(() => resize());
-      ro.observe(sidebar);
-    } else {
-      window.addEventListener('resize', resize);
-      window.addEventListener('load', resize);
-    }
+    new ResizeObserver(resize).observe(sidebar);
 
     requestAnimationFrame(tick);
   }
@@ -2025,7 +1737,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
   }
 })();
 
-// Content gutter rain (dark-mode only, mirrors header rain but lighter density)
+// Content gutter rain (dark mode only, mirrors header rain but lighter density).
+// The animation loop only runs while dark mode is on.
 
 (() => {
   function initContentRain() {
@@ -2040,27 +1753,13 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
     const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
     const FRAME_INTERVAL = 1000 / 30; // limit to 30fps (matches header rain)
-    let lastFrameTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
-
-    const hash32 = (x) => {
-      x |= 0;
-      x = (x ^ 61) ^ (x >>> 16);
-      x = x + (x << 3);
-      x = x ^ (x >>> 4);
-      x = Math.imul(x, 0x27d4eb2d);
-      x = x ^ (x >>> 15);
-      return x >>> 0;
-    };
-
-    const cssVar = (name, fallback) => {
-      const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return val || fallback;
-    };
+    let lastFrameTime = performance.now();
+    const RAIN_FILL = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
+    const RAIN_GLOW = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
 
     const createState = (canvas) => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
-      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
       return {
         canvas,
         ctx,
@@ -2083,15 +1782,11 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         cellPhases: [],
         cellPrevPhases: [],
         cellTransitionAt: [],
-        glyphPhase: 0,
-        lastGlyphChange: now,
         changeInterval: 260 + Math.random() * 140,
-        lastScrollY: window.scrollY || window.pageYOffset || 0,
-        accum: 0,
+        lastScrollY: window.scrollY,
         gradientMomentum: 0,
         gradientTarget: 0.5,
         gradientMix: 0.5,
-        paused: false,
         jitterSeed: Math.floor(Math.random() * 0x7fffffff),
         pendingResize: null
       };
@@ -2226,24 +1921,27 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       });
     };
 
-    let resizeObserver;
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => resizeAll());
-      resizeObserver.observe(wrapper);
-      states.forEach((state) => resizeObserver.observe(state.canvas));
-    }
+    const resizeObserver = new ResizeObserver(resizeAll);
+    resizeObserver.observe(wrapper);
+    states.forEach((state) => resizeObserver.observe(state.canvas));
     window.addEventListener('resize', resizeAll, { passive: true });
     resizeAll();
 
+    let running = false;
+
     const tick = () => {
-      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (!document.body.classList.contains('dark-mode')) {
+        states.forEach((state) => state.ctx.clearRect(0, 0, state.width, state.height));
+        running = false;
+        return;
+      }
+      const now = performance.now();
       if (now - lastFrameTime < FRAME_INTERVAL) {
         requestAnimationFrame(tick);
         return;
       }
       lastFrameTime = now;
-      const isDark = document.body.classList.contains('dark-mode');
-      const globalScroll = window.scrollY || window.pageYOffset || 0;
+      const globalScroll = window.scrollY;
 
       states.forEach((state) => {
         if (state.pendingResize) {
@@ -2253,15 +1951,6 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         }
 
         if (!state.cols || !state.rows || !state.width || !state.height) return;
-
-        if (!isDark) {
-          if (!state.paused) {
-            state.ctx.clearRect(0, 0, state.width, state.height);
-            state.paused = true;
-          }
-          return;
-        }
-        state.paused = false;
 
         const dy = globalScroll - state.lastScrollY;
         state.lastScrollY = globalScroll;
@@ -2296,11 +1985,6 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
           }
         }
 
-        if (now - state.lastGlyphChange >= state.changeInterval) {
-          state.glyphPhase = (state.glyphPhase + 1) | 0;
-          state.lastGlyphChange = now;
-        }
-
         // Detect per-cell glyph-phase transitions so chars within a column stagger.
         // Driven by continuous time so the per-row offsets shift WHEN each cell
         // ticks, not just its starting value.
@@ -2326,8 +2010,8 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
         ctx.clearRect(0, 0, state.width, state.height);
         ctx.font = Math.floor(state.step * 1.3) + 'px monospace';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
-        ctx.shadowColor = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
+        ctx.fillStyle = RAIN_FILL;
+        ctx.shadowColor = RAIN_GLOW;
         const rainBlur = Math.round(state.step * 1.4); // green haze, applied only to bright chain tips
         ctx.shadowBlur = 0;
 
@@ -2410,7 +2094,13 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
       requestAnimationFrame(tick);
     };
 
-    requestAnimationFrame(tick);
+    const start = () => {
+      if (running || !document.body.classList.contains('dark-mode')) return;
+      running = true;
+      requestAnimationFrame(tick);
+    };
+    new MutationObserver(start).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    start();
   }
 
   if (document.readyState === 'loading') {
@@ -2421,6 +2111,7 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
 })();
 
 
+/* Interactive terminal disabled — remove this comment block to re-enable
 // Header Interactive Terminal
 // Tab autocompletes commands, arrow keys recall history
 
@@ -3246,3 +2937,4 @@ const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRST
     initHeaderTerminal();
   }
 })();
+*/
