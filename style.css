@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Design tokens
-   ========================================================================== */
+/* Variables */
 :root {
   --primary: #534368;
   --light: #eff1f3;
@@ -9,18 +7,18 @@
   --link-blue: #3c70bc;
   --light-bg: #ffffff;
 
-  /* Work history job accent colours — change these to match each company logo */
+  /* Job accent colours */
   --job-1-accent: #9966db; /* Ericsson */
-  --job-2-accent: #44766b; /* City of Ottawa – Traffic */
-  --job-3-accent: #44766b; /* City of Ottawa – Graffiti */
+  --job-2-accent: #44766b; /* City of Ottawa - Traffic */
+  --job-3-accent: #44766b; /* City of Ottawa - Graffiti */
   --job-4-accent: #bbb24b; /* Mountain Bike Kids */
   --job-5-accent: #2c7ec0; /* PedalHeads */
 
-  /* Corner radius scale — pick from these rather than inventing new values */
-  --radius-sm: 6px;     /* buttons, links, small controls */
-  --radius-md: 8px;     /* cards, images, panels */
-  --radius-lg: 12px;    /* large surfaces: project cards, media viewer */
-  --radius-pill: 999px; /* switches, tags, round icon buttons */
+  /* Border radius */
+  --radius-sm: 6px;     /* buttons, links */
+  --radius-md: 8px;     /* cards, images */
+  --radius-lg: 12px;    /* project cards, modal */
+  --radius-pill: 999px; /* pills, toggles */
 
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
@@ -32,7 +30,7 @@
 
   --scrollbar-color: var(--primary);
 
-  /* Header screen: warm off-white type and the beige haze glowing around it (RGB triplet for rgba()) */
+  /* Header text colour and glow */
   --header-text: #f6f2eb;
   --header-haze: 238, 222, 199;
 }
@@ -49,7 +47,7 @@ body.fr {
   --job-5-accent: #32617d;
 }
 
-/* Dark mode is toggled by the (currently disabled) header terminal */
+/* Dark mode (terminal command) */
 body.dark-mode {
   --primary:   #d8cdf3;
   --light:     #0c1324;
@@ -78,9 +76,7 @@ body.fr.dark-mode {
   --job-5-accent: #d3edff;
 }
 
-/* ==========================================================================
-   Base
-   ========================================================================== */
+/* Base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -99,9 +95,7 @@ body {
   font-size: 1.1rem;
 }
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
+/* Header */
 .header-flex {
   display: flex;
   flex-direction: row;
@@ -155,23 +149,22 @@ body {
 
 /* Header Monitor Look */
 header.header-flex {
-  /* Unlit tube glass is never pure black; the centre sits a little brighter */
+  /* Slightly lighter in the centre */
   background: radial-gradient(ellipse 80% 70% at 50% 45%, #1f2022 0%, #111214 55%, #050506 100%);
   position: relative;
-  isolation: isolate; /* keep the header's z-index layers to itself */
-  overflow: hidden; /* clip the rain and CRT layers */
+  isolation: isolate;
+  overflow: hidden;
   color: var(--header-text);
   padding-top: 5rem;
   padding-bottom: 5rem;
   padding-left: max(1rem, calc((100% - 800px) / 2 + 1rem));
   padding-right: max(1rem, calc((100% - 800px) / 2 + 1rem));
   min-height: 100vh;
-  min-height: 100dvh; /* modern browsers: dynamic viewport on mobile */
-  min-height: 100svh; /* small viewport height to avoid URL bar issues */
+  min-height: 100dvh; /* mobile */
+  min-height: 100svh; /* avoid URL bar jump */
 }
 
-/* Static screen structure: scanlines (3px pitch) over an aperture-grille RGB triad.
-   This and .crt-fx are background layers: the photo, text and links sit above them. */
+/* Scanlines and RGB grille */
 header.header-flex::after {
   content: '';
   position: absolute;
@@ -192,7 +185,7 @@ header.header-flex::after {
   z-index: 1;
 }
 
-/* Live CRT layers (markup: .crt-fx inside the header) */
+/* CRT effects */
 header .crt-fx {
   position: absolute;
   inset: 0;
@@ -201,7 +194,7 @@ header .crt-fx {
   overflow: hidden;
 }
 
-/* Mains flicker: a faint dark veil whose opacity stutters irregularly */
+/* Flicker */
 header .crt-fx::before {
   content: '';
   position: absolute;
@@ -211,7 +204,7 @@ header .crt-fx::before {
   animation: crt-flicker 5.3s steps(1, end) infinite;
 }
 
-/* Tube curvature: barrel vignette, dark bezel falloff, and a soft glass reflection */
+/* Screen curvature and vignette */
 header .crt-fx::after {
   content: '';
   position: absolute;
@@ -224,7 +217,7 @@ header .crt-fx::after {
     inset 0 0 18px rgba(0, 0, 0, 0.6);
 }
 
-/* Signal grain: oversized noise tile jumped around with transforms (compositor only) */
+/* Grain */
 header .crt-fx__grain {
   position: absolute;
   inset: -50%;
@@ -259,7 +252,7 @@ header .crt-fx__grain {
   87%  { transform: translate(-5%, -6%); }
 }
 
-/* Stop the live layers while the header is scrolled away, and in lite / reduced-motion mode */
+/* Pause effects when off screen or in lite mode */
 header.crt-offscreen .crt-fx::before,
 header.crt-offscreen .crt-fx__grain {
   animation-play-state: paused;
@@ -304,10 +297,7 @@ header.crt-offscreen .crt-fx__grain {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   scrollbar-gutter: stable both-edges;
-  /* 'auto' (not 'contain') so that when the terminal is at its scroll boundary
-     the leftover wheel scroll chains through to the page. With 'contain' the
-     terminal — which is pinned to its bottom and covers most of the header —
-     became a dead zone where scrolling down at the top never reached the page. */
+  /* auto so scrolling passes through to the page */
   overscroll-behavior: auto;
   scroll-padding-top: 1.55rem;
 }
@@ -343,9 +333,7 @@ header.crt-offscreen .crt-fx__grain {
   opacity: 1;
 }
 
-/* CRT scanlines on terminal text only (clipped to glyphs, leaves background untouched).
-   Applied to leaf text spans only — never to the .term-line parent, otherwise the
-   parent's clipped gradient paints over child spans like .typed and washes them out. */
+/* Scanlines on terminal text (leaf spans only) */
 #headerTerminal .prompt,
 #headerTerminal .typed,
 #headerTerminal .term-output,
@@ -362,16 +350,14 @@ header.crt-offscreen .crt-fx__grain {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  /* CRT-style hue around each glyph, tinted by the element's own text color */
+  /* Glow around text */
   text-shadow:
     0 0 6px color-mix(in srgb, currentColor 22%, transparent),
     0 0 14px color-mix(in srgb, currentColor 16%, transparent),
     0 0 24px color-mix(in srgb, currentColor 9%, transparent);
 }
 
-/* The blinking cursor is a solid block — paint a scanline gradient on it directly
-   (no background-clip:text since there's no text). The --cursor-col variable lets
-   the per-language overrides change the hue without redefining the gradient. */
+/* Scanlines on the cursor block */
 #headerTerminal .term-cursor-block {
   -webkit-text-fill-color: initial;
   background-color: transparent;
@@ -467,7 +453,7 @@ body.fr #headerTerminalHint .term-hint-keyword {
   display: inline;
   width: auto;
   min-width: 1ch;
-  /* Scanlines via mask (background-clip:text doesn't render reliably on <input>) */
+  /* Scanlines on input (background-clip:text doesn't work here) */
   -webkit-mask-image: repeating-linear-gradient(
     to bottom,
     #000 0,
@@ -826,7 +812,7 @@ button.float-bigimg.video-thumb:focus-visible .video-thumb-play {
   margin-bottom: 0.2rem;
 }
 
-/* Keep the terminal responsive on smaller windows; hide the sidebar */
+/* Smaller windows: hide sidebar */
 @media (max-width: 1450px) {
   #headerTerminal {
     max-width: min(520px, 80vw);
@@ -906,7 +892,7 @@ header a.textBox:hover {
   display:block;
 }
 
-/* Scroll cue at the foot of the header (mobile only, see the 768px block) */
+/* Scroll cue (mobile only) */
 header.header-flex .scroll-cue {
   display: none;
   position: absolute;
@@ -949,7 +935,7 @@ header.header-flex .scroll-cue span {
   animation: none;
 }
 
-/* Projects intro: the touch wording replaces the hover wording on touch / narrow layouts */
+/* Show touch text on touch devices */
 .projects-hint--touch {
   display: none;
 }
@@ -1128,7 +1114,7 @@ figure.timeline {
   margin: 0;
   position: relative;
 }
-/* SVG timeline bar (replaces old ::before gradient) */
+/* Timeline bar SVG */
 .timeline-bar {
   position: absolute;
   left: 0;
@@ -1199,17 +1185,16 @@ figure.timeline {
   line-height: 1.4;
 }
 
-/* Sidebar positioning: the track spans from under the header to the end of the page
-   (top/height set in JS) and the sidebar sticks inside it, so the browser handles the
-   hand-off from scrolling with the page to staying on screen. */
+/* Sidebar track (sized in JS), sidebar is sticky inside it */
 #sidebarTrack {
   position: absolute;
   top: 0;
   left: 20px;
   z-index: 1000;
-  pointer-events: none; /* the track is tall; only the sidebar itself should catch clicks */
+  pointer-events: none;
 }
 
+/* Sidebar CRT look (same as header) */
 #sidebar {
   position: sticky;
   top: 100px;
@@ -1220,7 +1205,7 @@ figure.timeline {
   padding: 1rem;
   border-radius: var(--radius-md);
   overflow: hidden;
-  /* Prevent flash-of-unpositioned sidebar before JS positions it */
+  /* Hidden until positioned */
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.2s ease, width 0.2s ease;
@@ -1272,6 +1257,7 @@ figure.timeline {
   outline-offset: 2px;
 }
 
+/* Projects dropdown */
 .sidebar-dropdown {
   display: block;
   background: #2a2a2a;
@@ -1367,7 +1353,7 @@ body.fr .sidebar-dropdown a:focus-visible {
 }
 
 .more-jobs.is-settled {
-  overflow: visible; /* let hovered jobs slide right without clipping */
+  overflow: visible; /* don't clip hover shift */
 }
 
 .more-jobs > li {
@@ -1416,7 +1402,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   margin: 0.75rem 0 0.5rem;
 }
 
-/* Quiet outlined button; the chevron carries the open/closed state */
+/* See more button */
 .jobs-toggle {
   display: inline-flex;
   align-items: center;
@@ -1658,7 +1644,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   clear: both;
 }
 
-/* Buttons: solid (report / video) and outlined (code, mobile "See more") share one shape */
+/* Buttons */
 .project-card .btn-report,
 .project-card .btn-video,
 .project-card .btn-code,
@@ -1730,14 +1716,12 @@ body.fr .sidebar-dropdown a:focus-visible {
   outline-offset: 2px;
 }
 
-/* The per-card "See more" toggle only exists on touch / narrow layouts */
+/* See more only on touch */
 .project-see-more {
   display: none;
 }
 
-/* Touch and narrow layouts: nothing is hidden behind hover. Projects open with their
-   "See more" button (script.js uses the same query), the about photos show their caption
-   under the image, and hover lifts are dropped so a tap can't leave a card stuck mid-hover. */
+/* Touch / narrow screens: no hover effects, projects open with See more */
 @media (max-width: 768px), (pointer: coarse) {
   .projects-hint--pointer {
     display: none;
@@ -1772,7 +1756,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     transform: none;
   }
 
-  /* About photos: plain image with the caption underneath */
+  /* About photos */
   .about-highlight-grid {
     gap: 1.25rem;
   }
@@ -1862,8 +1846,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     font-size: 1.15rem;
   }
 
-  /* Header: a full-screen CRT so the scroll-driven rain has a screen to fill
-     (script.js scales the reveal to the header height on this layout) */
+  /* Full screen header */
   header.header-flex {
     min-height: 100vh;
     min-height: 100svh;
@@ -1899,7 +1882,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     text-align: center;
   }
 
-  /* A dark halo under the glow keeps the type readable with rain running behind it */
+  /* Dark outline for readability */
   .header-info h1 {
     font-size: clamp(2rem, 9.6vw, 2.6rem);
     line-height: 1.1;
@@ -1928,7 +1911,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     margin-top: -0.5rem;
   }
 
-  /* Equal-width, thumb-sized link buttons */
+  /* Link buttons */
   header a.textBox {
     width: min(100%, 17.5rem);
     min-height: 46px;
@@ -2009,8 +1992,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     word-break: break-word;
   }
 
-  /* Projects: compact summary with the title and tech beside a small square thumbnail
-     and the full-width "See more" underneath */
+  /* Projects */
   .project-stack {
     gap: 1.1rem;
   }
@@ -2022,8 +2004,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   .project-card-summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    /* The flexible middle row soaks up the thumbnail's extra height, so a one-line
-       title keeps its tech pills right underneath it */
+    /* Keep tech pills under the title */
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
       "title thumb"
@@ -2102,7 +2083,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     margin: 0 auto 1rem;
   }
 
-  /* Inside an open project, media runs the full card width */
+  /* Full width media */
   .project-card .float-img,
   .project-card .float-bigimg,
   .project-card button.float-bigimg.video-thumb {
@@ -2112,8 +2093,7 @@ body.fr .sidebar-dropdown a:focus-visible {
     float: none;
   }
 
-  /* Work history: tighter rail so the cards get the width.
-     Icon centre stays at x = 34px, where script.js draws the timeline bar. */
+  /* Work history (icon centre at 34px for the timeline bar) */
   .timeline li {
     margin: 2rem 0;
     padding-left: 62px;
@@ -2134,7 +2114,7 @@ body.fr .sidebar-dropdown a:focus-visible {
   }
 }
 
-/* Inline media viewer */
+/* Media modal */
 .media-modal[hidden] {
   display: none !important;
 }
@@ -2250,7 +2230,7 @@ body.media-modal-open {
 
 }
 
-/* Custom scrollbar: the native one is hidden and #scrollbarOverlay (script.js) draws its own */
+/* Custom scrollbar */
 html { scrollbar-width: none; }
 ::-webkit-scrollbar { width: 0; height: 0; }
 
@@ -2288,14 +2268,13 @@ html { scrollbar-width: none; }
   cursor: grabbing;
 }
 
-/* On small screens/touch, slim scrollbar and add small right padding to header */
+/* Slim scrollbar on touch / small screens */
 @media (max-width: 768px), (pointer: coarse) {
   #scrollbarOverlay { width: 6px; }
   .header-flex { padding-right: 12px; }
 }
 
-/* Header stacking: rain (0) < scanlines + live CRT layers (1) < photo, text, links (2) < language toggle.
-   .header-info stays static so the language toggle positions against the header. */
+/* Header layer order */
 .header-flex > * {
   position: relative;
   z-index: 2;
@@ -2315,7 +2294,7 @@ header.header-flex .header-info {
   pointer-events: none;
 }
 
-/* Dark mode overrides triggered via terminal command */
+/* Dark mode */
 body.dark-mode {
   background-color: var(--light);
   color: var(--dark);

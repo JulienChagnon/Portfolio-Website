@@ -3,7 +3,7 @@
 (() => {
   const btn = document.getElementById('toggleJobs');
   const moreJobs = document.querySelector('.more-jobs');
-  if (!btn || !moreJobs) return; // gracefully skip if not present
+  if (!btn || !moreJobs) return;
   const labelSpan = btn.querySelector('.lang-text') || btn;
   const updateToggleLabel = (isOpen) => {
     const lang = document.body.classList.contains('fr') ? 'fr' : 'en';
@@ -16,8 +16,7 @@
     btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   };
 
-  // Animate the real height (max-height tricks make the timing uneven), scaling the
-  // duration with the distance so short and long lists feel the same speed.
+  // Animate the actual height, duration scales with distance
   const COLLAPSED_HEIGHT = moreJobs.getBoundingClientRect().height;
   const EXPAND_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
   const COLLAPSE_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
@@ -29,7 +28,7 @@
   const settle = () => {
     stopAnchoring();
     if (moreJobs.classList.contains('show')) {
-      moreJobs.style.height = 'auto'; // follow content changes (language switch, resize)
+      moreJobs.style.height = 'auto'; // let it resize with content
       moreJobs.classList.add('is-settled');
     } else {
       moreJobs.style.height = '';
@@ -40,8 +39,7 @@
     if (event.target === moreJobs && event.propertyName === 'height') settle();
   });
 
-  // When collapsing from inside the hidden jobs, hold the button still on screen so the
-  // page doesn't yank the reader upward; any manual scroll hands control back.
+  // Keep the button in place while collapsing, unless the user scrolls
   const anchorButton = () => {
     const anchorTop = btn.getBoundingClientRect().top;
     const keep = () => {
@@ -76,7 +74,7 @@
     }
     moreJobs.style.transitionDuration = durationFor(Math.abs(to - from)) + 'ms';
     moreJobs.style.transitionTimingFunction = open ? EXPAND_EASE : COLLAPSE_EASE;
-    void moreJobs.offsetHeight; // commit the start height before animating
+    void moreJobs.offsetHeight; // force reflow
     moreJobs.style.height = to + 'px';
   };
 
@@ -89,7 +87,7 @@
   });
 })();
 
-// Timeline vertical bar – SVG with smooth hover deviation
+// Timeline bar (SVG)
 (() => {
   const ul = document.querySelector('.timeline ul');
   if (!ul) return;
@@ -102,7 +100,7 @@
   const DX  = 10;
   const NS  = 'http://www.w3.org/2000/svg';
 
-  /* ---- build SVG ---- */
+  // Build SVG
   const svg = document.createElementNS(NS, 'svg');
   svg.classList.add('timeline-bar');
   svg.setAttribute('aria-hidden', 'true');
@@ -111,7 +109,7 @@
   const defs = document.createElementNS(NS, 'defs');
   svg.appendChild(defs);
 
-  /* Fade-out mask for collapsed state */
+  // Fade mask when collapsed
   const mask = document.createElementNS(NS, 'mask');
   mask.id = 'tl-mask';
   mask.setAttribute('maskUnits', 'userSpaceOnUse');
@@ -139,7 +137,7 @@
     return p;
   }
 
-  /* ---- create segments (one per consecutive pair, no cap) ---- */
+  // One segment between each pair of jobs
   const segs = [];
   for (let i = 0; i < jobs.length - 1; i++) {
     const g = document.createElementNS(NS, 'linearGradient');
@@ -157,7 +155,7 @@
     segs.push({ el, from: i, to: i + 1, g, s0, s1 });
   }
 
-  /* ---- helpers ---- */
+  // Helpers
   function offsetTo(el, ancestor) {
     let y = 0;
     while (el && el !== ancestor) { y += el.offsetTop; el = el.offsetParent; }
@@ -174,7 +172,7 @@
     return jobs.map((_, i) => s.getPropertyValue(`--job-${i + 1}-accent`).trim());
   }
 
-  // always C so CSS d-transitions interpolate; asymmetric CPs for tight deviation
+  // always use C so the CSS transition on d works
   function curve(x1, y1, x2, y2) {
     const dy = y2 - y1;
     if (x1 === x2) {
@@ -192,7 +190,7 @@
     return `path("M ${x1} ${y1} C ${x1} ${cp1y}, ${x2} ${cp2y}, ${x2} ${y2}")`;
   }
 
-  /* ---- render ---- */
+  // Render
   let hov = -1;
 
   function render() {
@@ -215,11 +213,11 @@
       seg.s1.setAttribute('stop-color', cs[to]   || '#999');
     });
 
-    // Fade-out mask when collapsed — bar fades through the .more-jobs area
+    // Fade the bar out over the hidden jobs
     if (collapsed && moreEl) {
       const mTop = offsetTo(moreEl, ul);
-      const fadeEnd = mTop;                  // bar disappears exactly at the more-jobs boundary
-      const fadeStart = Math.max(0, mTop - 145); // fade begins 120px above the cutoff
+      const fadeEnd = mTop;
+      const fadeStart = Math.max(0, mTop - 145);
       const pct = fadeEnd > 0 ? (fadeStart / fadeEnd * 100).toFixed(1) : '80';
 
       fadeGrad.setAttribute('x1', '0');  fadeGrad.setAttribute('y1', '0');
@@ -241,9 +239,8 @@
     }
   }
 
-  /* ---- events ---- */
-  // Touch screens fire mouseenter on tap with no matching leave, which would leave the
-  // bar bent, so the hover deviation is only wired up where real hover exists.
+  // Events
+  // Only on devices with hover (taps leave it stuck)
   if (window.matchMedia('(hover: hover)').matches) {
     jobs.forEach((li, i) => {
       li.addEventListener('mouseenter', () => { hov = i; render(); });
@@ -259,8 +256,7 @@
   render();
 })();
 
-// Performance preferences: "lite mode" (reduced motion, data saver, or ?lite=1) turns off
-// the heavier effects. ?lite=0 forces it off.
+// Lite mode: reduced motion, data saver or ?lite=1 (?lite=0 to force off)
 (() => {
   const root = document.documentElement;
   const liteParam = new URLSearchParams(window.location.search).get('lite');
@@ -276,7 +272,7 @@
   motionQuery.addEventListener('change', (event) => setLite(event.matches || saveData));
 })();
 
-// Default lazy loading for non-critical images
+// Lazy load images
 (() => {
   const isCriticalImage = (img) => img.classList.contains('headshot');
   const applyLazyDefaults = () => {
@@ -305,7 +301,7 @@
   if (!cards.length) return;
   const collapseBtn = document.getElementById('collapseProjects');
   const isMobileProjects = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
-  // Track baseline scroll so collapsing multiple cards without scrolling returns to the same spot
+  // Remember scroll position so closing cards returns to it
   let hasOpenCards = false;
   let openSessionScrollY = null;
   let scrolledDuringOpen = false;
@@ -346,10 +342,9 @@
     });
   };
 
-  // Skip scroll-locking while the user is actively scrolling to avoid jitter
+  // Don't lock scroll while the user is scrolling
   const SCROLL_SETTLE_DELAY = 220;
-  // Allow some buffer before we lock scroll when a card has drifted above the viewport
-  const ANCHOR_TOP_BUFFER = 220; // px above the viewport a card can travel before anchoring the next card
+  const ANCHOR_TOP_BUFFER = 220; // px
   let recentlyScrolled = false;
   let scrollTimer = null;
   const markScroll = () => {
@@ -421,15 +416,14 @@
     if (!skipScrollCompensation && !preserveInitialScroll) {
       if (singleOpenCard) {
         const rect = singleOpenCard.getBoundingClientRect();
-        // Only anchor to the single card if its top is still near the viewport.
-        // If it has scrolled past ANCHOR_TOP_BUFFER above, fall through to find the next visible card.
+        // Only anchor to this card if it's still near the viewport
         if (rect.top > -ANCHOR_TOP_BUFFER) {
           anchor = singleOpenCard;
           anchorTopBefore = rect.top;
         }
       }
 
-      // 1) Find the lowest open project in DOM order
+      // Find lowest open project
       if (!anchor) {
         let lowestOpenIndex = -1;
         cards.forEach((card, index) => {
@@ -444,7 +438,7 @@
           const lowestTop = lowestRect.top;
           const lowestBottom = lowestRect.bottom;
 
-          // 2) If the *next unopened* project is visible, anchor on its top border
+          // If the next closed project is visible, anchor to it
           const nextCard = cards[lowestOpenIndex + 1];
           if (nextCard && !nextCard.classList.contains('is-open')) {
             const nextRect = nextCard.getBoundingClientRect();
@@ -454,7 +448,7 @@
             }
           }
 
-          // 3) Otherwise, anchor on the lowest open project (if it intersects viewport)
+          // Otherwise anchor to the lowest open one
           if (!anchor && lowestBottom > 0 && lowestTop < viewportHeight) {
             anchor = lowestOpenCard;
             anchorTopBefore = lowestTop;
@@ -462,7 +456,7 @@
         }
       }
 
-      // 4) Fallback: original heuristic (highest visible top or spanning card)
+      // Fallback
       if (!anchor) {
         for (let i = 0; i < cards.length; i += 1) {
           const rect = cards[i].getBoundingClientRect();
@@ -493,7 +487,7 @@
     collapseNow();
     if (skipScrollCompensation) return;
 
-    // Continuously adjust scroll to keep the chosen anchor's top border fixed
+    // Keep anchor in place while cards animate
     const htmlEl = document.documentElement;
     const originalScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = 'auto';
@@ -653,12 +647,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('header.header-flex');
   if (!sidebar || !track || !header) return;
 
-  // The sidebar is position: sticky inside #sidebarTrack (see style.css), so the browser
-  // moves it on the compositor with no scroll-event lag. JS only sizes the track: it starts
-  // just under the header and ends at the bottom of the page content.
+  // Sidebar is sticky inside #sidebarTrack, JS just sizes the track
   const updateTrack = () => {
     const scrollY = window.scrollY;
-    const trackTop = header.getBoundingClientRect().bottom + scrollY + 10; // 10px margin under header
+    const trackTop = header.getBoundingClientRect().bottom + scrollY + 10; // 10px gap
     const pageBottom = document.body.getBoundingClientRect().bottom + scrollY;
     track.style.top = trackTop + 'px';
     track.style.height = Math.max(0, Math.floor(pageBottom - trackTop)) + 'px';
@@ -668,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
   sidebar.style.visibility = 'visible';
   sidebar.style.opacity = '1';
 
-  // Body height excludes the absolutely positioned track, so observing it can't feed back.
+  // Resize track when page height changes
   const ro = new ResizeObserver(updateTrack);
   ro.observe(header);
   ro.observe(document.body);
@@ -676,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Header CRT - pause the live layers while the header is off screen
+// Pause header CRT effects when off screen
 (() => {
   const header = document.querySelector('header.header-flex');
   if (!header) return;
@@ -685,7 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }).observe(header);
 })();
 
-// Inline media modal (videos + PDFs)
+// Media modal (videos, PDFs)
 (() => {
   const modal = document.getElementById('mediaModal');
   const dialog = modal ? modal.querySelector('.media-modal__dialog') : null;
@@ -754,8 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
       autoPlayIfVideo(node);
     }
     setOpenState(true);
-    // Focus the video so keyboard controls work. Never focus the PDF iframe: key presses inside
-    // it don't reach this document, so Escape would stop closing the viewer.
+    // Focus video for keyboard controls (not the PDF, Escape stops working)
     requestAnimationFrame(() => {
       const focusTarget = content.querySelector('video') || dialog.querySelector('.media-modal__close');
       focusTarget.focus();
@@ -852,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Sidebar projects dropdown
 (() => {
-  // Short sidebar labels, keyed by project card id. Cards without an entry use their title.
+  // Shorter names for the sidebar
   const PROJECT_LINK_LABELS = {
     'road-learning-tool':        { en: 'Road Learning Tool', fr: 'Outil d\'apprentissage des routes' },
     'project-cpu-risc':          { en: '32-Bit RISC Processor Design', fr: 'Conception d\'un processeur RISC 32 bits' },
@@ -897,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         dropdown.classList.remove('open');
         dropdown.setAttribute('aria-hidden', 'true');
-        // Hide once the close transition has finished
+        // Hide after transition
         closeTimer = setTimeout(() => {
           if (!dropdown.classList.contains('open')) dropdown.hidden = true;
         }, 360);
@@ -993,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
       el.textContent = el.getAttribute(`data-${langCode}`);
     });
 
-    // Keep the choice in the URL (?lang=fr) so shared links open in the same language
+    // Save language in URL
     const url = new URL(window.location.href);
     if (isFr) url.searchParams.set('lang', 'fr');
     else url.searchParams.delete('lang');
@@ -1018,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const COLOR_LIGHT = [255, 255, 255];
   const COLOR_DARK = [150, 150, 150];
   const COLOR_DARK_MODE = 'rgb(245, 245, 245)';
-  const TRANSITION_RANGE = 220; // px window around the header bottom
+  const TRANSITION_RANGE = 220; // px
 
   const mix = (t) => `rgb(${COLOR_LIGHT.map((c, i) => Math.round(c + (COLOR_DARK[i] - c) * t)).join(', ')})`;
 
@@ -1038,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateScrollbarColor();
 })();
 
-// Overlay scrollbar: draws a draggable thumb over the page (the native one is hidden in CSS)
+// Custom scrollbar
 (() => {
   const docEl = document.documentElement;
   const overlay = document.createElement('div');
@@ -1074,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
     thumb.style.transform = `translateY(${Math.round(maxThumbTop * t)}px)`;
   };
 
-  // Track scrolling immediately; layout-driven changes (cards opening) keep the eased transition
+  // No transition while scrolling
   const onScroll = () => {
     if (dragging) return;
     thumb.classList.add('is-scrolling');
@@ -1122,16 +1113,15 @@ document.addEventListener('DOMContentLoaded', () => {
   overlay.addEventListener('touchstart', startDrag, { passive: false });
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', updateOverlay);
-  // Page height changes (cards opening, work history expanding) resize the thumb
+  // Update thumb when page height changes
   new ResizeObserver(updateOverlay).observe(document.body);
   updateOverlay();
 })();
 
-// Shared glyph set for all digital rain (header, sidebar, content gutters).
-// Printable ASCII excluding space so columns stay visually dense.
+// Glyphs used by all the rain effects
 const RAIN_ASCII_GLYPHS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
-// Integer hash used by the rain effects for stable per-column / per-cell randomness
+// Simple int hash for per column randomness
 const hash32 = (x) => {
   x |= 0;
   x = (x ^ 61) ^ (x >>> 16);
@@ -1183,10 +1173,7 @@ const cssVar = (name, fallback) => (
     let isHeaderVisible = true;
     let pausedForVisibility = false;
 
-    // Scroll distance over which the rain climbs from the bottom of the header to the top.
-    // On the mobile layout the header is one screen tall, so a fixed 1100px would finish
-    // the reveal after the header has already left the screen; there it tracks the header
-    // height instead, so the rain fills the part of the header still in view.
+    // Scroll distance for the rain to fill the header (header height on mobile)
     const compactQuery = window.matchMedia('(max-width: 768px)');
     let revealScrollRange = 1100;
     let sizedFor = '';
@@ -1498,7 +1485,7 @@ const cssVar = (name, fallback) => (
   }
 })();
 
-// Sidebar binary rain overlay
+// Sidebar digital rain + selected link effect
 
 (() => {
 
@@ -1737,8 +1724,7 @@ const cssVar = (name, fallback) => (
   }
 })();
 
-// Content gutter rain (dark mode only, mirrors header rain but lighter density).
-// The animation loop only runs while dark mode is on.
+// Content gutter rain (dark mode only)
 
 (() => {
   function initContentRain() {
@@ -1747,12 +1733,12 @@ const cssVar = (name, fallback) => (
     const canvases = wrapper.querySelectorAll('.content-rain-canvas');
     if (!canvases.length) return;
     const contentArea = wrapper.querySelector('main');
-    const GUTTER_BUFFER = 18; // keep a small gap between rain and readable content
+    const GUTTER_BUFFER = 18; // gap from content
     const COLUMN_RATE_VARIANCE = 0.7;
-    const COLUMN_RATE_SHIFT = 0.45; // bias all column rates slower (in 2^stops); lowers cap and floor together
-    const COLUMN_SPEED_VARIANCE = 0.5; // ±50% scroll-speed variation per column
-    const GLYPH_FADE_MS = 180; // crossfade window when a column's glyph phase ticks
-    const FRAME_INTERVAL = 1000 / 30; // limit to 30fps (matches header rain)
+    const COLUMN_RATE_SHIFT = 0.45; // slows all columns
+    const COLUMN_SPEED_VARIANCE = 0.5; // speed variation per column
+    const GLYPH_FADE_MS = 180; // glyph crossfade
+    const FRAME_INTERVAL = 1000 / 30; // limit to 30fps
     let lastFrameTime = performance.now();
     const RAIN_FILL = cssVar('--rain-color', 'rgba(0,255,140,0.75)');
     const RAIN_GLOW = cssVar('--rain-glow', 'rgba(0,255,140,0.45)');
@@ -1963,7 +1949,6 @@ const cssVar = (name, fallback) => (
         if (state.gradientMix < 0) state.gradientMix = 0;
         else if (state.gradientMix > 1) state.gradientMix = 1;
 
-        // Per-column scroll response so strands move at slightly different speeds.
         if (dy !== 0) {
           for (let c = 0; c < state.cols; c++) {
             state.colScrollAccums[c] += (dy / 25) * (state.colSpeeds[c] || 1);
@@ -1985,9 +1970,7 @@ const cssVar = (name, fallback) => (
           }
         }
 
-        // Detect per-cell glyph-phase transitions so chars within a column stagger.
-        // Driven by continuous time so the per-row offsets shift WHEN each cell
-        // ticks, not just its starting value.
+        // Check which cells changed glyph
         const baseUnit = now / state.changeInterval;
         for (let c = 0; c < state.cols; c++) {
           const rate = state.colRates[c] || 1;
@@ -2012,7 +1995,7 @@ const cssVar = (name, fallback) => (
         ctx.textBaseline = 'top';
         ctx.fillStyle = RAIN_FILL;
         ctx.shadowColor = RAIN_GLOW;
-        const rainBlur = Math.round(state.step * 1.4); // green haze, applied only to bright chain tips
+        const rainBlur = Math.round(state.step * 1.4); // green glow
         ctx.shadowBlur = 0;
 
         const featherPx = Math.round(6 * state.step);
@@ -2073,7 +2056,7 @@ const cssVar = (name, fallback) => (
             }
             const drawAlpha = baseAlpha * colAlpha;
             if (drawAlpha <= 0.02) continue;
-            // Glow only on the bright leading glyphs; dim trailing glyphs draw flat (no blur).
+            // Only blur the bright glyphs
             ctx.shadowBlur = Math.abs(i - leadingPos) < 1.5 ? rainBlur : 0;
             if (tBlend < 1 && prevCh !== ch) {
               ctx.globalAlpha = drawAlpha * (1 - tBlend);
@@ -2111,7 +2094,7 @@ const cssVar = (name, fallback) => (
 })();
 
 
-/* Interactive terminal disabled — remove this comment block to re-enable
+/* Terminal disabled for now
 // Header Interactive Terminal
 // Tab autocompletes commands, arrow keys recall history
 
@@ -2414,7 +2397,7 @@ const cssVar = (name, fallback) => (
       wrapper.appendChild(term);
     }
 
-    // Remove any legacy inline hint nodes from previous builds
+    // Remove old hint
     term.querySelectorAll('.term-hint').forEach(node => node.remove());
 
     let hintOverlay = wrapper.querySelector('#headerTerminalHint');
@@ -2677,7 +2660,7 @@ const cssVar = (name, fallback) => (
       }
 
       if (commands[cmd]) {
-        // Special handling for fortune command - pick random fortune
+        // Random fortune
         if (cmd === 'fortune' && commands[cmd].jokes) {
           const jokes = commands[cmd].jokes;
           const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
@@ -2905,7 +2888,7 @@ const cssVar = (name, fallback) => (
           try {
             await pendingAutoCommand;
           } catch (_) {
-            // errors already logged in runAutoStatusCommand
+            // already logged
           }
         }
         activeLang = lang;
