@@ -25,8 +25,6 @@
   /* Digital rain */
   --rain-color: rgba(0, 255, 140, 0.75);
   --rain-glow: rgba(0, 255, 140, 0.45);
-  --sidebar-rain-color: rgba(0, 255, 140, 0.5);
-  --sidebar-rain-glow: rgba(0, 255, 140, 0.40);
 
   --scrollbar-color: var(--primary);
 
@@ -1200,15 +1198,38 @@ figure.timeline {
   top: 100px;
   width: 180px;
   pointer-events: auto;
-  background: #1f1f1f;
+  isolation: isolate;
+  background: radial-gradient(ellipse 120% 80% at 50% 40%, #1f2022 0%, #111214 60%, #08080a 100%);
   color: #ffffff;
   padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-md);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   /* Hidden until positioned */
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+/* Scanlines and vignette */
+#sidebar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#sidebarRainCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 #sidebar nav {
@@ -1222,34 +1243,81 @@ figure.timeline {
   text-decoration: none;
   margin-bottom: 0.75rem;
   font-weight: bold;
-  transition: opacity 0.2s;
+  /* Dark outline for readability */
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.8);
+  transition: color 0.25s ease, text-shadow 0.25s ease, transform 0.25s ease;
+}
+
+#sidebar nav > a:last-child {
+  margin-bottom: 0;
+}
+
+/* Selected link */
+#sidebar nav a.is-selected,
+body.dark-mode #sidebar nav a.is-selected {
+  color: #d9ffe9;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(0, 255, 140, 0.6),
+    0 0 18px rgba(0, 255, 140, 0.25);
+  transform: translateX(3px);
+}
+
+#sidebar .rain-decode__glyph {
+  color: rgba(0, 255, 140, 0.85);
+}
+
+#sidebar .rain-decode__tip {
+  color: #f2fff7;
+  text-shadow: 0 0 6px rgba(200, 255, 220, 0.95), 0 0 12px rgba(0, 255, 140, 0.6);
 }
 
 .sidebar-item {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.15rem;
-  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
 }
 
-.sidebar-item > a {
+#sidebar .sidebar-item > a {
   flex: none;
-  display: inline-block;
   margin-bottom: 0;
-  padding-right: 0.2rem;
 }
 
 .sidebar-toggle {
   appearance: none;
   background: none;
   border: none;
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-  padding: 0.35rem 0.4rem;
-  margin: -0.35rem -0.4rem;
-  transition: transform 0.2s ease, color 0.2s ease;
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  margin: 0;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s ease;
+}
+
+/* Chevron */
+.sidebar-toggle::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.1rem) rotate(45deg);
+  transition: transform 0.25s ease;
+}
+
+.sidebar-toggle.open::before {
+  transform: translateY(0.1rem) rotate(225deg);
+}
+
+.sidebar-toggle:hover,
+.sidebar-toggle.open {
+  color: #9dffcb;
 }
 
 .sidebar-toggle:focus-visible {
@@ -1260,34 +1328,25 @@ figure.timeline {
 /* Projects dropdown */
 .sidebar-dropdown {
   display: block;
-  background: #2a2a2a;
-  border: 1px solid rgba(223, 212, 241, 0.18);
-  border-radius: var(--radius-sm);
-  padding: 0 0.75rem;
   margin: 0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   max-height: 0;
   opacity: 0;
-  transform: translateY(-6px);
   overflow: hidden;
   pointer-events: none;
   transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.26s ease,
-              transform 0.3s ease,
-              padding 0.3s ease,
-              margin 0.3s ease,
-              border-color 0.3s ease,
-              box-shadow 0.3s ease;
-  will-change: max-height, opacity, transform;
+              margin 0.3s ease;
+}
+
+.sidebar-dropdown[hidden] {
+  display: none;
 }
 
 .sidebar-dropdown.open {
   max-height: 420px;
   opacity: 1;
   pointer-events: auto;
-  padding: 0.75rem;
-  margin: 0.35rem 0 0.1rem;
-  transform: translateY(0);
+  margin: -0.4rem 0 0.75rem;
 }
 
 .sidebar-dropdown ul {
@@ -1296,22 +1355,63 @@ figure.timeline {
   padding: 0;
 }
 
-.sidebar-dropdown a {
-  display: block;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 0.25rem 0.35rem;
-  border-radius: var(--radius-sm);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.01em;
-  transition: background 0.2s ease, color 0.2s ease;
+.sidebar-dropdown li {
+  position: relative;
+  padding-left: 1rem;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.25s ease;
 }
 
-.sidebar-dropdown a:hover,
-.sidebar-dropdown a:focus-visible {
-  background: rgba(223, 212, 241, 0.2);
-  color: #ffffff;
+.sidebar-dropdown.open li {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 28ms + 60ms);
+}
+
+/* Tree lines */
+.sidebar-dropdown li::before,
+.sidebar-dropdown li::after {
+  content: '';
+  position: absolute;
+  left: 0.3rem;
+  border: 0 solid rgba(0, 255, 140, 0.35);
+}
+
+.sidebar-dropdown li::before {
+  top: 0;
+  bottom: 0;
+  border-left-width: 1px;
+}
+
+.sidebar-dropdown li:last-child::before {
+  bottom: auto;
+  height: 0.58rem;
+}
+
+.sidebar-dropdown li::after {
+  top: 0.58rem;
+  width: 0.45rem;
+  border-top-width: 1px;
+}
+
+#sidebar .sidebar-dropdown a {
+  margin: 0;
+  padding: 0.14rem 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+/* Selected project: hazy beige-green */
+#sidebar .sidebar-dropdown a.is-selected,
+body.dark-mode #sidebar .sidebar-dropdown a.is-selected {
+  color: #dfe6c4;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(214, 226, 180, 0.35);
 }
 
 #sidebar.sidebar-expanded {
@@ -1326,25 +1426,7 @@ body.fr #sidebar.sidebar-expanded {
   width: 265px;
 }
 
-body.fr .sidebar-dropdown a:hover,
-body.fr .sidebar-dropdown a:focus-visible {
-  background: rgba(204, 228, 255, 0.2);
-}
-#sidebar nav a:hover {
-  opacity: 0.8;
-}
-
-#sidebarRainCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Work history reveal: collapsed shows a blurred peek of the next job.
-   JS animates the real height (see script.js); CSS handles the peek and the stagger. */
+/* Work history reveal */
 .more-jobs {
   height: 120px;
   overflow: hidden;
@@ -2429,8 +2511,4 @@ body.dark-mode #sidebar nav a {
 
 body.dark-mode .sidebar-toggle {
   color: #f4f7ff;
-}
-
-body.dark-mode #sidebarRainCanvas {
-  display: none;
 }
