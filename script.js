@@ -841,6 +841,75 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
+// Quick scroll to an element (faster than native smooth scroll)
+// Re-aims every frame so it lands right even if the layout shifts mid-scroll
+function quickScrollTo(el, { duration = 450, hold = 0, onArrive } = {}) {
+  const html = document.documentElement;
+  const targetY = () => {
+    const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+    const max = html.scrollHeight - window.innerHeight;
+    return Math.min(max, Math.max(0, el.getBoundingClientRect().top + window.scrollY - margin));
+  };
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.scrollTo({ top: targetY(), behavior: 'instant' });
+    onArrive?.();
+    return;
+  }
+
+  cancelAnimationFrame(quickScrollTo.frame);
+  quickScrollTo.stop?.();
+
+  const startY = window.scrollY;
+  const start = performance.now();
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2);
+  let arrived = false;
+
+  // Let the user take over by scrolling
+  const stop = () => {
+    cancelAnimationFrame(quickScrollTo.frame);
+    window.removeEventListener('wheel', stop);
+    window.removeEventListener('touchstart', stop);
+    if (!arrived) onArrive?.();
+    arrived = true;
+  };
+  quickScrollTo.stop = stop;
+  window.addEventListener('wheel', stop, { passive: true });
+  window.addEventListener('touchstart', stop, { passive: true });
+
+  const step = (now) => {
+    const elapsed = now - start;
+    const t = Math.min(1, elapsed / duration);
+    const y = t < 1 ? startY + (targetY() - startY) * ease(t) : targetY();
+    window.scrollTo({ top: y, behavior: 'instant' });
+    if (t >= 1 && !arrived) {
+      arrived = true;
+      onArrive?.();
+    }
+    // Keep pinned while things above finish resizing
+    if (elapsed < duration + hold) {
+      quickScrollTo.frame = requestAnimationFrame(step);
+    } else {
+      stop();
+    }
+  };
+  quickScrollTo.frame = requestAnimationFrame(step);
+}
+
+// Sidebar section links
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#sidebar nav a[href^="#"]').forEach((link) => {
+    if (link.closest('.sidebar-dropdown')) return; // projects handle their own clicks
+    link.addEventListener('click', (event) => {
+      const section = document.getElementById(link.getAttribute('href').slice(1));
+      if (!section) return;
+      event.preventDefault();
+      history.pushState(null, '', link.getAttribute('href'));
+      quickScrollTo(section, { duration: 450 });
+    });
+  });
+});
+
 // Sidebar projects dropdown
 (() => {
   // Shorter names for the sidebar
@@ -901,13 +970,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (label) toggle.setAttribute('aria-label', label);
     };
 
-    // Collapse whatever is open, scroll to the card, then open it once the scroll has settled
+    // Close open cards and scroll to the project at the same time, then open it
+    // (hold keeps it pinned while the closed cards finish collapsing)
     const openProject = (card) => {
-      document.querySelectorAll('.project-card.is-open').forEach((open) => open.classList.remove('is-open'));
-      setTimeout(() => {
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(() => card.classList.add('is-open'), 500);
-      }, 700);
+      document.querySelectorAll('.project-card.is-open').forEach((open) => {
+        if (open !== card) open.classList.remove('is-open');
+      });
+      quickScrollTo(card, {
+        duration: 400,
+        hold: 350,
+        onArrive: () => card.classList.add('is-open'),
+      });
     };
 
     const buildList = () => {
@@ -932,7 +1005,8 @@ document.addEventListener('DOMContentLoaded', () => {
       event.preventDefault();
       const nextState = !isOpen();
       setOpen(nextState);
-      if (nextState) list.querySelector('a')?.focus();
+      // Only move focus for keyboard
+      if (nextState && event.detail === 0) list.querySelector('a')?.focus();
     });
 
     document.addEventListener('click', (event) => {
