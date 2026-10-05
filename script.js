@@ -565,12 +565,18 @@
       clearPending();
     };
 
+    // Only open on real pointer movement, not when the page scrolls under a still cursor.
+    // Moving the mouse opens right away, even while the smooth scroll is still settling.
+    const hoverOpen = (event) => {
+      if (!pointerActivates(event)) return;
+      const moved = event.type === 'pointermove' && (event.movementX || event.movementY);
+      if (recentlyScrolled && !moved) return;
+      if (!card.classList.contains('is-open')) markOpen();
+    };
+
     if (!isMobileProjects) {
-      card.addEventListener('mouseenter', markOpen);
-      card.addEventListener('pointerenter', (event) => {
-        if (!pointerActivates(event)) return;
-        markOpen();
-      });
+      card.addEventListener('pointerenter', hoverOpen);
+      card.addEventListener('pointermove', hoverOpen);
       card.addEventListener('focusin', markOpen);
     }
 
