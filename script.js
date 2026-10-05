@@ -1083,7 +1083,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
-// Scrollbar colour: white over the dark header, blending to grey over the light content
+// Smooth wheel scrolling (Lenis) so the speed is the same everywhere
+(() => {
+  if (typeof Lenis === 'undefined') return; // CDN failed, keep native
+  const lenis = new Lenis({
+    autoRaf: true,
+    lerp: 0.35,              // higher = snappier (less glide after the wheel stops)
+    wheelMultiplier: 0.8,     // a bit slower than native
+    allowNestedScroll: true,  // terminal etc. scroll on their own
+  });
+
+  // Clicks and keys take over (nav links, scrollbar drag, card collapse)
+  window.addEventListener('pointerdown', () => lenis.reset(), { capture: true, passive: true });
+  window.addEventListener('keydown', () => lenis.reset(), { capture: true });
+
+  // Pause while the media modal is open
+  window.addEventListener('portfolio:media-modal', (event) => {
+    if (event.detail && event.detail.open) lenis.stop();
+    else lenis.start();
+  });
+})();
+
+// Scrollbar colour (white on header, grey on content)
 (() => {
   const header = document.querySelector('header.header-flex');
   if (!header) return;
