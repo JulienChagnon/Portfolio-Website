@@ -706,7 +706,7 @@ button.float-bigimg.video-thumb:focus-visible .video-thumb-play {
   image-rendering: auto;
   image-rendering: -webkit-optimize-contrast;
   backface-visibility: hidden;
-  transition: transform 0.45s ease, filter 0.35s ease;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
   z-index: 0;
 }
 
@@ -720,61 +720,47 @@ button.float-bigimg.video-thumb:focus-visible .video-thumb-play {
   opacity: 0.4;
 }
 
-.hover-card-prompt {
+.hover-card-panel {
   position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 2;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 1rem 1.5rem 1.5rem;
+  background: linear-gradient(180deg, rgba(10, 10, 16, 0) 0%, rgba(10, 10, 16, 0.85) 30%, rgba(10, 10, 16, 0.95) 100%);
+  transform: translateY(calc(100% - 3.1rem));
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hover-card-label {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  padding: 0.6rem 1.1rem;
-  margin: 0;
-  left: 1rem;
-  bottom: 1rem;
-  background: transparent;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  font-size: 0.9rem;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.hover-card-hint {
-  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  height: 1.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.hover-card-hint::after {
+.hover-card-label::before {
   content: "";
-  display: inline-block;
-  border: 6px solid transparent;
-  border-left-color: currentColor;
-}
-
-.hover-card-subhint {
-  letter-spacing: 0.03em;
-  font-weight: 600;
-  font-size: 0.8rem;
-  line-height: 1.2;
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .hover-card-text {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: left;
-  z-index: 2;
-  margin: 0;
-  padding: 1.75rem;
-  font-size: 1.05rem;
+  margin: 0.6rem 0 0;
+  font-size: 1rem;
   line-height: 1.55;
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.35s ease 0.1s;
 }
 
 .about-highlight-card:hover,
@@ -785,26 +771,23 @@ button.float-bigimg.video-thumb:focus-visible .video-thumb-play {
 
 .about-highlight-card:hover img,
 .about-highlight-card:focus img {
-  transform: scale(1.02);
-  filter: brightness(0.65);
+  transform: scale(1.06) translateY(-4%);
+  filter: brightness(0.8);
 }
 
-.about-highlight-card:hover::before,
-.about-highlight-card:focus::before {
-  opacity: 1;
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.55) 0%, rgba(6, 6, 10, 0.9) 100%);
+.about-highlight-card:hover .hover-card-panel,
+.about-highlight-card:focus .hover-card-panel {
+  transform: translateY(0);
+}
+
+.about-highlight-card:hover .hover-card-label::before,
+.about-highlight-card:focus .hover-card-label::before {
+  width: 3rem;
 }
 
 .about-highlight-card:hover .hover-card-text,
 .about-highlight-card:focus .hover-card-text {
   opacity: 1;
-  transform: translateY(0);
-}
-
-.about-highlight-card:hover .hover-card-prompt,
-.about-highlight-card:focus .hover-card-prompt {
-  opacity: 0;
-  transform: translateY(-6px);
 }
 
 .about-highlight-card:focus-visible {
@@ -1889,36 +1872,30 @@ body.fr #sidebar.sidebar-expanded {
     filter: none;
   }
 
-  .hover-card-prompt,
-  .about-highlight-card:hover .hover-card-prompt,
-  .about-highlight-card:focus .hover-card-prompt {
+  .hover-card-panel,
+  .about-highlight-card:hover .hover-card-panel,
+  .about-highlight-card:focus .hover-card-panel {
     position: static;
-    padding: 0.95rem 1.15rem 0;
-    color: var(--accent);
-    opacity: 1;
+    padding: 0.95rem 1.15rem 1.2rem;
+    max-height: none;
+    overflow: visible;
+    background: none;
     transform: none;
   }
 
-  .hover-card-hint {
-    display: none;
+  .hover-card-label {
+    height: auto;
+    color: var(--accent);
   }
 
-  .hover-card-subhint {
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .hover-card-label::before {
+    content: none;
   }
 
   .hover-card-text {
-    position: static;
-    display: block;
-    width: auto;
-    height: auto;
-    padding: 0.35rem 1.15rem 1.2rem;
+    margin-top: 0.35rem;
     font-size: 1rem;
-    line-height: 1.55;
     opacity: 1;
-    transform: none;
   }
 }
 
