@@ -95,9 +95,7 @@
   if (jobs.length < 2) return;
 
   const moreEl = ul.querySelector('.more-jobs');
-  const VIS = 3;
-  const BX  = 34;
-  const DX  = 10;
+  const DX  = 10; // matches the li hover shift in style.css
   const NS  = 'http://www.w3.org/2000/svg';
 
   // Build SVG
@@ -167,6 +165,12 @@
     return offsetTo(ic, ul) + ic.offsetHeight / 2;
   }
 
+  // Centre of the logos (offsetLeft ignores the hover transform)
+  function barX() {
+    const ic = jobs[0].querySelector('.icon');
+    return jobs[0].offsetLeft + ic.offsetLeft + ic.offsetWidth / 2;
+  }
+
   function jobColors() {
     const s = getComputedStyle(document.body);
     return jobs.map((_, i) => s.getPropertyValue(`--job-${i + 1}-accent`).trim());
@@ -197,6 +201,7 @@
     const ys = jobs.map(yOf);
     const cs = jobColors();
     const collapsed = moreEl ? !moreEl.classList.contains('show') : false;
+    const BX = barX();
 
     svg.setAttribute('width', ul.offsetWidth);
     svg.setAttribute('height', ys[ys.length - 1] + 40);

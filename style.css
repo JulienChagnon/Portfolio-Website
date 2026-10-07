@@ -2169,7 +2169,7 @@ body.fr #sidebar.sidebar-expanded {
     float: none;
   }
 
-  /* Work history (icon centre at 34px for the timeline bar) */
+  /* Work history: tighter rail so the cards get the width */
   .timeline li {
     margin: 2rem 0;
     padding-left: 62px;
